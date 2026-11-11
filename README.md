@@ -56,6 +56,8 @@ The same dynamic simulator selection and test command used by CI is available lo
 bash scripts/ci-ios.sh
 ```
 
+For the canonical SSD checkout, project-local Xcode GUI DerivedData, and the difference between GUI and CLI build subfolders, see [Local Development](docs/LOCAL_DEVELOPMENT.md).
+
 These are contributor instructions, not a claim that the current revision's final test run or hosted CI has passed. See [Device Acceptance](docs/DEVICE_ACCEPTANCE.md) for the manual checks and their current evidence.
 
 ### Install on your own iPhone

@@ -8,9 +8,10 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
 
 ## Verified orientation
 
-- Working checkout: `stiint-community`, branch `feature/community-revival`.
+- Working checkout: `/Volumes/Felix-SSD-1/Cursor Projects/Elaren/products/minutide`, branch `feature/community-revival`, tracking `origin/main`. The SSD test run used source revision `607d5b3164545177777ed22f45bed8187d9887a9`; later handoff changes are documentation only.
 - Starting source: upstream commit `a6f10f2d6637e9b3b330c56b818fb537357329b0` from `Liam1506/Stiint`.
 - Verified remote state: `upstream` points to `https://github.com/Liam1506/Stiint.git`; `origin` points to `https://github.com/elaren-studio/minutide.git`. Local branch `feature/community-revival` tracks `origin/main`.
+- The canonical checkout is on the verified external APFS volume. Migration receipt: `build/history/pre-ssd/migration-verification.json`. All 788 retained project, build, and result files (74,358,536 bytes) matched their SHA-256 manifest. The copied Git object store has no alternates; refs were validated from `build/history/pre-ssd/git-state.bundle` (SHA-256 `259dea147df577983bef1c8d37ad52788162d29ad259ff67bc9b17504a3e6580`).
 - App, Live Activity extension, and test targets use iOS 26.1. The internal app target is `Stiint`; display name is `Minutide` and extension display name is `Minutide Live Activity`.
 - Bundle identifiers are `com.elaren.minutide`, `com.elaren.minutide.liveactivity`, `com.elaren.minutide.tests`, and `com.elaren.minutide.uitests`. Apple registration and signing are not part of source publication. The new identifier uses a separate container from prior local community builds; no cross-container migration is implemented.
 - SwiftData explicitly uses `cloudKitDatabase: .none`. Activity logs can hold optional precise start/end coordinates; CSV export can contain them.
@@ -35,13 +36,21 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
 - At 17:13 UTC, `xcrun devicectl list devices` returned no physical devices. Physical-device acceptance is still open.
 - Renamed-source validation passed at 18:43:10 UTC: **20 passed, 0 failed, 0 skipped** (17 unit and 3 UI), iPhone 17 / iOS 26.5. Command: `env SWIFTBUILD_LAUNCH_IN_PROCESS=1 bash scripts/ci-ios.sh`; result bundle `build/TestResults.xcresult` independently verified with `xcresulttool`. Log: `/private/tmp/minutide-inprocess-ci.log`. Two ordinary shell/MCP attempts stalled before compilation in a build-service output-reader issue and were explicitly canceled; they are not passes. The environment workaround applied to this invocation only. Built plists confirm both Minutide display names and identifiers. Only this task's regenerable compiler/index/intermediate caches were cleared after low disk space blocked a documentation write; sources, products, and all result bundles remain intact.
 - Published and read back [elaren-studio/minutide](https://github.com/elaren-studio/minutide), repository ID 1454368023, public, active, default branch `main`, fork parent `Liam1506/Stiint`. Source commit `265a94e657143669e22eb09ce9c12de28a3ff1e8` contains the renamed, locally tested app. The original MIT notice and upstream history remain intact. Issues and private vulnerability reporting are enabled and verified. GitHub account `fdtorres1` has active admin membership in `elaren-studio` (ID 308134048).
-- The first [hosted CI run](https://github.com/elaren-studio/minutide/actions/runs/43081500718) was manually dispatched on that source commit and is queued as last observed on 2026-11-11. No hosted pass is claimed. There is no signed iPhone distribution or App Store release. See [PUBLICATION.md](PUBLICATION.md).
+- The first [hosted CI run](https://github.com/elaren-studio/minutide/actions/runs/43081500718) was manually dispatched on that source commit and failed before any job step because hosted macOS ARM64 capacity was unavailable. An unchanged retry was requested at 22:13 UTC and was queued as last observed. No hosted pass is claimed. There is no signed iPhone distribution or App Store release. See [PUBLICATION.md](PUBLICATION.md).
+
+### SSD migration and build storage
+
+- The local GUI workspace settings resolve build/intermediate paths under `build/DerivedData/Stiint/Build`; `MODULE_CACHE_DIR` and `COMPILATION_CACHE_CAS_PATH` are under `build/DerivedData`. GUI package checkouts are at `build/DerivedData/Stiint/SourcePackages/checkouts`; CLI checkouts are at `build/DerivedData/SourcePackages/checkouts`. The system `CACHE_ROOT` remains under `/var/folders/...`. See [LOCAL_DEVELOPMENT.md](LOCAL_DEVELOPMENT.md).
+- The fresh SSD CI run completed at 22:32:30.882 UTC on 2026-11-11: `env SWIFTBUILD_LAUNCH_IN_PROCESS=1 bash scripts/ci-ios.sh` exited 0. `build/TestResults.xcresult` independently reports 20 passed (17 unit, 3 UI), 0 failed, 0 skipped on iPhone 17 / iOS 26.5. Log: `build/minutide-ssd-ci.log`. The built app and extension plists confirm the Minutide names and identifiers.
+- The archived `build/history/pre-ssd/DerivedData` is retained for history. Its 25 GB compiler CAS was excluded from the copy because it is regenerable. The original internal source, shared Git directory, and preview copies remain intact. Automatic approval review rejected irreversible removal without explicit deletion approval; the final retention audit passed but no deletion command ran. Receipt: `build/history/pre-ssd/internal-retirement.json` has `internal_retired: false`.
+- Hosted run 43081500718 failed before any job step because hosted macOS ARM64 capacity was unavailable. An unchanged rerun was requested at 22:13 UTC and was queued as last observed. This is not a hosted test pass.
 
 ## Next work
 
-1. Source publication and local rename validation are complete. Check the live outcome of the first hosted CI run and investigate any failure before treating hosted validation as passed. Fetch/fast-forward the local worktree to `origin/main` before new edits; the publication handoff was recorded through the GitHub API when local disk space was exhausted.
-2. Validate on the iOS 26.1 minimum runtime and perform the remaining Simulator and physical-device checks in `DEVICE_ACCEPTANCE.md`.
-3. Private reporting is verified at the repository's Security tab. Keep personal support addresses and response-time commitments unset unless explicitly chosen. Physical acceptance and signed distribution remain separate future work.
+1. Continue development only from the SSD checkout. Retiring the internal rollback copies is prepared and awaits explicit deletion approval; do not bypass the automatic review rejection or repeat deletion without that approval.
+2. Check the live outcome of the unchanged hosted CI rerun and investigate any failure before treating hosted validation as passed.
+3. Validate on the iOS 26.1 minimum runtime and perform the remaining Simulator and physical-device checks in `DEVICE_ACCEPTANCE.md`. Physical acceptance and signed distribution remain separate future work.
+4. Private reporting is verified at the repository's Security tab. Keep personal support addresses and response-time commitments unset unless explicitly chosen.
 
 ## Handoff rules
 

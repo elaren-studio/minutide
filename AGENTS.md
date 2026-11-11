@@ -3,6 +3,7 @@
 ## Source of truth
 
 - Confirm the repository root, branch, remote URLs, and dirty files before substantial work. Preserve other workers' and contributors' changes.
+- On Felix's workstation, the canonical checkout is `/Volumes/Felix-SSD-1/Cursor Projects/Elaren/products/minutide`. The external volume must be mounted before working there. See `docs/LOCAL_DEVELOPMENT.md` for the project-local Xcode workspace settings and build paths; do not change global Xcode preferences for this project.
 - Read `docs/ACTIVE_CONTEXT.md`, `docs/ROADMAP.md`, and relevant entries in `docs/DECISIONS.md` before implementation. Keep `ACTIVE_CONTEXT` current after a substantial handoff and append outcomes to `WORKLOG`; do not rewrite old worklog entries.
 - Inspect the project settings, `Package.resolved`, and relevant source before describing behavior. Mark plans, source observations, build results, simulator checks, physical-device checks, and releases as distinct evidence states.
 - The project is an Xcode iOS app using SwiftUI, SwiftData, App Intents, and pinned Swift Package Manager dependencies. Use the `Stiint` scheme and an iOS Simulator for routine checks. Consult `CONTRIBUTING.md` for the documented commands.

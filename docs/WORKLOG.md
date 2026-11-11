@@ -68,3 +68,25 @@ Append dated entries. Record what changed and what evidence was actually collect
 - Set the project description and enabled issues. Enabled private vulnerability reporting and read back enabled=true; updated SECURITY.md to the verified GitHub flow without publishing personal contact details or support commitments.
 - Workflow iOS is active. Dispatched hosted run 43081500718 on the tested source commit; it is queued as last checked on 2026-11-11. No hosted pass, hardware acceptance, or signed distribution is claimed.
 - Local disk space again fell to about 100 MiB after task-cache cleanup. Final publication documentation was prepared from the exact published files and committed via GitHub API with [skip ci]; this avoids source/test/workflow changes and redundant testing. Verify local synchronization with origin/main before further work.
+
+## 2026-11-11 — SSD migration and development handoff
+
+- The canonical checkout is now `/Volumes/Felix-SSD-1/Cursor Projects/Elaren/products/minutide` on the verified external APFS volume. Local branch `feature/community-revival` is at `607d5b3164545177777ed22f45bed8187d9887a9`, tracks `origin/main`, and retains the original `upstream` remote.
+- Migration verification retained all 788 project, build, and result files (74,358,536 bytes) with matching SHA-256 hashes. The SSD Git object store is independent, has no alternates, and its refs passed validation from portable bundle `build/history/pre-ssd/git-state.bundle` (SHA-256 `259dea147df577983bef1c8d37ad52788162d29ad259ff67bc9b17504a3e6580`). Receipt: `build/history/pre-ssd/migration-verification.json`.
+- Historical preview artifacts and the old DerivedData snapshot are retained under `build/history/pre-ssd/`. The 25 GB regenerable compiler CAS was excluded from copying and is rebuilt fresh. The original internal source copy has not yet been retired.
+- Xcode GUI's local ignored workspace settings resolve build/intermediate paths, module caches, and Swift package checkouts under `build/DerivedData`; `CACHE_ROOT` remains in the system-managed `/var/folders/...` area. The CLI CI script uses the same repository-local DerivedData root with a different subfolder layout. See `LOCAL_DEVELOPMENT.md`.
+- Fresh SSD simulator validation is in progress: `env SWIFTBUILD_LAUNCH_IN_PROCESS=1 bash scripts/ci-ios.sh`, log `build/minutide-ssd-ci.log`. Result is pending; no SSD test pass is recorded here. Root should append the exact outcome after checking the result bundle.
+- Hosted run 43081500718 failed before any job step because hosted macOS ARM64 capacity was unavailable. An unchanged rerun was requested at 22:13 UTC and was queued as last observed. No hosted pass is claimed.
+- This handoff updates documentation only; no application, test, project, workflow, or license source was changed.
+
+## 2026-11-11 — Fresh SSD simulator validation
+
+- Root completed `env SWIFTBUILD_LAUNCH_IN_PROCESS=1 bash scripts/ci-ios.sh` on the canonical SSD checkout from 22:29:46.904 to 22:32:30.882 UTC; exit code 0.
+- `build/TestResults.xcresult` independently reports 20 passed (17 unit, 3 UI), 0 failed, 0 skipped on iPhone 17 / iOS 26.5. Full log: `build/minutide-ssd-ci.log`.
+- Built app and Live Activity extension plists confirm Minutide display names and the `com.elaren.minutide` identifiers. This confirms the fresh SSD simulator run; iOS 26.1 minimum-runtime and physical-device acceptance remain open.
+- The original internal source copy remains pending guarded retirement. Hosted run 43081500718's unchanged rerun was still queued as last observed; no hosted pass is claimed.
+
+## 2026-11-11 — Internal rollback copies retained
+
+- The final retention audit revalidated all 788 retained files, original source blobs in SSD Git, the portable all-refs bundle, and original results after archival/renaming; the fresh SSD result passed 20 tests with no failures/skips. Receipt: `build/history/pre-ssd/internal-retirement.json`.
+- Automatic approval review rejected the requested removal of the internal linked worktree, shared upstream Git directory, and preview artifacts because migration authorization did not explicitly cover irreversible deletion. The deletion command did not run. All originals remain intact; explicit deletion approval is the remaining cleanup gate. Continue development from the verified SSD checkout.

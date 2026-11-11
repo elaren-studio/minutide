@@ -2,11 +2,11 @@
 
 Durable choices for Minutide, the independent Stiint continuation. Add a dated entry when a decision changes; keep implementation status in `ACTIVE_CONTEXT.md` and `WORKLOG.md`.
 
-## 2026-11-11 — Independent community fork
+## 2026-11-11 — Independent community fork (initial name and identifiers)
 
-- Working product name: **Stiint Community**.
+- Initial working product name: **Stiint Community**. This name and the identifiers below were superseded by the later Minutide decision.
 - Keep the Xcode app target name `Stiint` for internal project continuity.
-- Current project bundle identifiers are `com.fdtorres.stiintcommunity`, `com.fdtorres.stiintcommunity.liveactivity`, `com.fdtorres.stiintcommunity.tests`, and `com.fdtorres.stiintcommunity.uitests`; verify them again before a signed release.
+- At that time, project bundle identifiers were `com.fdtorres.stiintcommunity`, `com.fdtorres.stiintcommunity.liveactivity`, `com.fdtorres.stiintcommunity.tests`, and `com.fdtorres.stiintcommunity.uitests`.
 - The fork is independent and must not imply affiliation with or endorsement by Liam Wittig.
 - Upstream provenance is `Liam1506/Stiint` at commit `a6f10f2d6637e9b3b330c56b818fb537357329b0`. The upstream archive reason is unknown.
 
@@ -28,7 +28,7 @@ Durable choices for Minutide, the independent Stiint continuation. Add a dated e
 
 - A source change, local compile, passing tests, Simulator run, physical-device acceptance, CI result, and published release are separate states.
 - Do not describe the fork as released or available in the App Store until that exact external release is verified.
-- Do not push until the community repository and remote target are verified; `upstream` points to the original repository and no `origin` remote currently exists.
+- At the time of this entry, the community repository was not yet verified and no `origin` remote existed. The later Minutide decision below records the verified public repository and remotes.
 
 ## 2026-11-11 — Preserve archived activity history
 
@@ -46,3 +46,11 @@ Durable choices for Minutide, the independent Stiint continuation. Add a dated e
 ## 2026-11-11 — Repository reporting route
 
 - Use GitHub private vulnerability reporting for Minutide. It was enabled and verified on the public Elaren repository; no personal email address or response-time promise is established.
+
+## 2026-11-11 — Project-local SSD development paths
+
+- On Felix's workstation, use `/Volumes/Felix-SSD-1/Cursor Projects/Elaren/products/minutide` as the canonical checkout while the external APFS volume is mounted.
+- Keep Xcode's GUI DerivedData project-relative using the local ignored workspace settings file. The verified values are `DerivedDataLocationStyle=WorkspaceRelativePath` and `DerivedDataCustomLocation=build/DerivedData`, with `BuildLocationStyle=UseAppPreferences` and `CustomBuildLocationType=RelativeToDerivedData`. Do not change global Xcode preferences.
+- GUI build/intermediate outputs, module caches, and Swift package checkouts resolve beneath the repository's `build/DerivedData`; `CACHE_ROOT` remains system-managed under `/var/folders/...`.
+- `scripts/ci-ios.sh` independently supplies `-derivedDataPath build/DerivedData`. GUI and CLI use that repository-local root with different build subfolder layouts. Keep optional archives under `build/Archives` only when a separate archive is authorized.
+- Retain pre-SSD migration evidence under `build/history/pre-ssd/`. The old DerivedData snapshot is historical; do not use it as the active cache. Fresh SSD validation and migration checks are complete, but removal of the original internal rollback copies requires explicit deletion approval after the automatic review rejection. Until then, retain those originals and use only the SSD checkout for development.

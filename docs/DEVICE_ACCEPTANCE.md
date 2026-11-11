@@ -55,4 +55,11 @@ The project currently targets iOS 26.1. Simulator checks help with layout and co
 - Earlier ordinary shell/MCP attempts stalled in a separate build-service output reader and were canceled. The successful per-command environment workaround did not change project or system settings.
 - The earlier manual screenshot predates the rename. This verifies automated flows under the new app identity, not hardware acceptance or cross-container migration.
 
+### 2026-11-11 — SSD checkout validation
+
+- Canonical checkout: `/Volumes/Felix-SSD-1/Cursor Projects/Elaren/products/minutide`, branch `feature/community-revival` at `607d5b3164545177777ed22f45bed8187d9887a9`.
+- Fresh SSD CI invocation: `env SWIFTBUILD_LAUNCH_IN_PROCESS=1 bash scripts/ci-ios.sh`, exit 0 from 22:29:46.904 to 22:32:30.882 UTC; output log `build/minutide-ssd-ci.log`.
+- Result: **20 passed, 0 failed, 0 skipped** (17 unit and 3 UI) on iPhone 17 / iOS 26.5. Result bundle `build/TestResults.xcresult` was independently checked. Built app and extension plists confirm Minutide display names and bundle identifiers.
+- Migration integrity is documented in `build/history/pre-ssd/migration-verification.json`; it is separate from app acceptance. No physical-device or minimum-runtime check is completed by the migration.
+
 All other rows remain not run unless explicitly marked partial or passed above. Do not generalize this smoke check to untested features or physical-device behavior.

@@ -30,6 +30,8 @@ Replace `SIMULATOR_ID` with an identifier from `-showdestinations`. The CI-equiv
 bash scripts/ci-ios.sh
 ```
 
+For the canonical SSD checkout and project-local Xcode GUI build locations, see [Local Development](docs/LOCAL_DEVELOPMENT.md). Those settings are per-user workspace data; the command-line CI script independently places its DerivedData under the repository's `build/DerivedData` directory.
+
 If you cannot run a check, say what you did run and include the relevant error without personal data. Do not describe a test as passing unless it ran successfully on the proposed revision. Physical-device behavior is tracked separately in [Device Acceptance](docs/DEVICE_ACCEPTANCE.md).
 
 ## Data and persistence changes

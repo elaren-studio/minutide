@@ -2,10 +2,10 @@
 
 This roadmap is for the community revival, not a release promise. A milestone is complete only when its evidence is recorded in `ACTIVE_CONTEXT.md` and `WORKLOG.md`.
 
-## 1. Establish a clear, free community fork — implementation present, review pending
+## 1. Establish a clear, free community fork — source published; hosted check pending
 
 - Subscription and paywall source paths are removed in the current worktree; verify the integrated diff and test behavior.
-- The user chose Minutide under Elaren Studio. Project settings use the Minutide display name and `com.elaren.minutide` app, extension, and test bundle identifiers; all targets currently use iOS 26.1. The internal app target remains `Stiint`. Renamed-source checks passed all 20 tests; the public fork is published at `elaren-studio/minutide`. The first hosted CI run remains queued as last checked.
+- The user chose Minutide under Elaren Studio. Project settings use the Minutide display name and `com.elaren.minutide` app, extension, and test bundle identifiers; all targets currently use iOS 26.1. The internal app target remains `Stiint`. The renamed source passed all 20 tests before and after SSD migration and is published at `elaren-studio/minutide`. The hosted run failed before job steps for runner capacity, and its unchanged rerun is queued as last observed.
 - The original MIT copyright is preserved. Exact pinned dependency notices are recorded and bundled in the app.
 - Upstream purchase and support links have been removed; confirm final visible copy in review.
 - Keep this work separate from an App Store release or an unverified public repository target.
@@ -23,10 +23,12 @@ This roadmap is for the community revival, not a release promise. A milestone is
 - Validate location opt-in and denied-permission behavior using synthetic data.
 - Run the physical-device matrix in [DEVICE_ACCEPTANCE.md](DEVICE_ACCEPTANCE.md), recording device and OS evidence.
 
-## 4. Prepare a maintainable public release — not yet ready
+## 4. Prepare a maintainable public release — source publication complete; distribution not ready
 
 - Review the full diff, tests, and CI results for the exact release revision.
 - Keep package license text aligned with each resolved revision and include the bundled notices.
-- Public source, remotes, issues, and private vulnerability reporting are verified at `elaren-studio/minutide`. Confirm the first hosted CI outcome. Keep personal support details and response-time commitments unset unless explicitly chosen.
+- Public source, remotes, issues, and private vulnerability reporting are verified at `elaren-studio/minutide`. Confirm the hosted rerun outcome. Keep personal support details and response-time commitments unset unless explicitly chosen.
 - Review privacy wording, accessibility, localization, versioning, screenshots, and release notes.
 - Treat TestFlight, App Store submission, and any signed public build as separate actions requiring a review of the concrete release artifact and destination.
+
+The canonical source checkout and fresh simulator validation are on the external SSD; see [ACTIVE_CONTEXT.md](ACTIVE_CONTEXT.md) and [Local Development](LOCAL_DEVELOPMENT.md). The original internal rollback copies remain intact pending explicit deletion approval after automatic review rejected their removal.

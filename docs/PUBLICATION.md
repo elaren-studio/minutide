@@ -34,9 +34,9 @@ The renamed Minutide source passed **20 tests, 0 failures, 0 skips** at 18:43:10
 - Published source commit: [`265a94e657143669e22eb09ce9c12de28a3ff1e8`](https://github.com/elaren-studio/minutide/commit/265a94e657143669e22eb09ce9c12de28a3ff1e8), read back from the public main ref after push. It preserves the original history and MIT notice.
 - `origin` is `https://github.com/elaren-studio/minutide.git`; `upstream` remains `https://github.com/Liam1506/Stiint.git`. Local branch `feature/community-revival` tracks `origin/main`.
 - Project description and issue tracker are configured; private vulnerability reporting is enabled and read back as true.
-- [First hosted CI run](https://github.com/elaren-studio/minutide/actions/runs/43081500718), workflow_dispatch on the published source commit: queued as last observed on 2026-11-11. This is not a hosted pass. Check the live run for its later outcome.
+- [First hosted CI run](https://github.com/elaren-studio/minutide/actions/runs/43081500718), workflow_dispatch on the published source commit, failed before any job step because hosted macOS ARM64 capacity was unavailable. An unchanged rerun was requested at 22:13 UTC and was queued as last observed. Neither state is a hosted test pass; check the live rerun outcome.
 
-The publication handoff is a documentation-only follow-up; no app, test, project, resource, or workflow source changes are included in it. It uses `[skip ci]` to avoid repeating the suite for this documentation update while the source-validation run remains queued.
+The local SSD checkout is a self-contained Git copy at `/Volumes/Felix-SSD-1/Cursor Projects/Elaren/products/minutide`, on `feature/community-revival` and tracking `origin/main`. The fresh SSD test run used source revision `607d5b3164545177777ed22f45bed8187d9887a9`. Its object store has no alternates; retained-file hashes and the portable Git bundle were verified during migration. The fresh SSD CI run passed 20 tests (17 unit, 3 UI; 0 failures, 0 skips) on iPhone 17 / iOS 26.5; see [ACTIVE_CONTEXT.md](ACTIVE_CONTEXT.md) and [LOCAL_DEVELOPMENT.md](LOCAL_DEVELOPMENT.md). The original internal rollback copies remain intact pending explicit deletion approval after automatic review rejected their removal.
 
 ## Distribution boundaries
 
