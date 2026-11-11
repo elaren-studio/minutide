@@ -24,13 +24,13 @@ public actor ActivityActor {
         let fetchDescriptor = FetchDescriptor<ActivityItem>(
             predicate: #Predicate { $0.id == activityId }
         )
-        let activity = try? modelContext.fetch(fetchDescriptor).first
+        guard let activity = try? modelContext.fetch(fetchDescriptor).first else { return }
 
-        activity?.name = newName
-        activity?.color = newColor ?? activity!.color
-        activity?.sfSymbolName = newIcon
-        activity?.weekdays = weekdays
-        activity?.storeLocation = storeLocation
+        activity.name = newName
+        activity.color = newColor ?? activity.color
+        activity.sfSymbolName = newIcon
+        activity.weekdays = weekdays
+        activity.storeLocation = storeLocation
 
         try? modelContext.save()
     }
@@ -84,8 +84,8 @@ public actor ActivityActor {
         let fetchDescriptor = FetchDescriptor<ActivityItem>(
             predicate: #Predicate { $0.id == activityId }
         )
-        let activity = try? modelContext.fetch(fetchDescriptor).first
-        activity!.deleted = true
+        guard let activity = try? modelContext.fetch(fetchDescriptor).first else { return }
+        activity.archived = true
 
         try? modelContext.save()
     }

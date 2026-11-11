@@ -74,8 +74,8 @@ struct OnboardingView3: View {
 
                     StepView(
                         number: 5,
-                        title: "Select the 'Start an Activity' intent",
-                        descriptions: ["Search for the action named 'Stiint' to find the correct shortcut and select it."],
+                        title: "Select the 'Start an activity' intent",
+                        descriptions: ["Search for 'Minutide', then select 'Start an activity'. The example images show the original Stiint name."],
                         buttonTitle: nil,
                         buttonAction: nil,
                         imageName: "startAnActivityIntent"

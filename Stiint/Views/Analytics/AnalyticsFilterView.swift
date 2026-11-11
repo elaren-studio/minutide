@@ -26,7 +26,7 @@ public struct FilterData: Equatable {
 
 struct AnalyticsFilterView: View {
     @Query(filter: #Predicate<ActivityItem> { activity in
-        activity.deleted == false || activity.deleted == nil
+        activity.archived == false || activity.archived == nil
     }, sort: \ActivityItem.createdDate) private var activities: [ActivityItem]
 
     @State private var selectedDateRange: DateRangeFilter = .last7Days

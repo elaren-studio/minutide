@@ -38,26 +38,21 @@ struct AnalyticsView: View {
                 }
                 .padding(.horizontal)
                 if let filter = currentFilter, let data = timeFrameData {
-                   
                     SankyDiagramView(data: data, filterData: filter).padding()
-                  
-                    PaywallGate(isPremium: SubscriptionManager.shared.isPro) {
-                        SubscriptionManager.shared.showPaywall()
-                    } content: {
-                        PieDiagramView(data: data, filterData: filter).padding()
-                    }
-                    PaywallGate(isPremium: SubscriptionManager.shared.isPro) {
-                        SubscriptionManager.shared.showPaywall()
-                    } content: {
-                        BarDiagramView(data: data).padding()
-                    }
+                        .accessibilityElement(children: .contain)
+                        .accessibilityIdentifier("analytics.chart.sankey")
+                    PieDiagramView(data: data, filterData: filter).padding()
+                        .accessibilityElement(children: .contain)
+                        .accessibilityIdentifier("analytics.chart.pie")
+                    BarDiagramView(data: data).padding()
+                        .accessibilityElement(children: .contain)
+                        .accessibilityIdentifier("analytics.chart.bar")
                     LineDiagramView(data: data).padding()
-                
-                    PaywallGate(isPremium: SubscriptionManager.shared.isPro) {
-                        SubscriptionManager.shared.showPaywall()
-                    } content: {
-                        AreaDiagramView(data: data).padding()
-                    }
+                        .accessibilityElement(children: .contain)
+                        .accessibilityIdentifier("analytics.chart.line")
+                    AreaDiagramView(data: data).padding()
+                        .accessibilityElement(children: .contain)
+                        .accessibilityIdentifier("analytics.chart.area")
                     
                 } else {
                     VStack {

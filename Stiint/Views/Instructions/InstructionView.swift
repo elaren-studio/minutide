@@ -90,7 +90,7 @@ private extension InstructionView {
 
         var body: some View {
             VStack(alignment: .leading, spacing: 10) {
-                Text("Integrate **Stiint** with Shortcuts.")
+                Text("Integrate **Minutide** with Shortcuts.")
                     .font(.title2)
                     .fontWeight(.bold)
 
@@ -156,8 +156,8 @@ private extension InstructionView {
                 // Step 3
                 InstructionStep(
                     step: 3,
-                    title: "Add Stiint Action",
-                    description: "Search for **Stiint**. Select an action like **'Start Activity'** or **'Stop Current Activity'**."
+                    title: "Add Minutide Action",
+                    description: "Search for **Minutide**. Select an action like **'Start an activity'** or **'Stop the current activity'**."
                 )
 
                 // Step 4

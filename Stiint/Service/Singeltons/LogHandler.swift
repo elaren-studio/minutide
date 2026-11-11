@@ -10,7 +10,7 @@ import os
 
 
 public extension Logger {
-    static let app = Logger(subsystem: Bundle.main.bundleIdentifier ?? "liwi.Stiint", category: "App")
-    static let outside = Logger(subsystem: Bundle.main.bundleIdentifier ?? "liwi.Stiint", category: "Outside")
+    static let app = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.elaren.minutide", category: "App")
+    static let outside = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.elaren.minutide", category: "Outside")
 }
  

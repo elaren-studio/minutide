@@ -8,24 +8,21 @@
 import XCTest
 
 final class StiintUITestsLaunchTests: XCTestCase {
-    override class var runsForEachTargetApplicationUIConfiguration: Bool {
-        true
-    }
-
     override func setUpWithError() throws {
         continueAfterFailure = false
     }
 
     @MainActor
-    func testLaunch() throws {
+    func testLaunchShowsWelcomeOrMainTabs() {
         let app = XCUIApplication()
         app.launch()
-
-        // Insert steps here to perform after app launch but before taking a screenshot,
-        // such as logging into a test account or navigating somewhere in the app
+        let mainTabs = app.tabBars.buttons["Timers"]
+        let welcome = app.buttons["Let's Start"]
+        XCTAssertTrue(mainTabs.waitForExistence(timeout: 5) || welcome.waitForExistence(timeout: 5),
+                      "Launch must show the app's main tabs or its onboarding welcome.")
 
         let attachment = XCTAttachment(screenshot: app.screenshot())
-        attachment.name = "Launch Screen"
+        attachment.name = "Minutide Launch"
         attachment.lifetime = .keepAlways
         add(attachment)
     }

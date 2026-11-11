@@ -1,55 +1,30 @@
-name: iOS Xcode 26 CI
-
+name: iOS
 on:
   push:
-    branches: ["main"]
+    branches: [main, feature/community-revival]
   pull_request:
-    branches: ["main"]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build & Test (only if iOS 26.1+ available)
-    runs-on: macos-latest
-
+  test:
+    runs-on: macos-26
+    timeout-minutes: 25
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Check Xcode Version
-        id: xcode
-        run: |
-          XCODE_VERSION=$(xcodebuild -version | head -n1 | awk '{print $2}')
-          echo "Xcode version: $XCODE_VERSION"
-          echo "version=$XCODE_VERSION" >> $GITHUB_OUTPUT
-
-      - name: Skip if Xcode < 26.1
-        if: ${{ !startsWith(steps.xcode.outputs.version, '26') && steps.xcode.outputs.version != '' }}
-        run: |
-          echo "⚠️ Xcode 26.x is not available on this runner."
-          echo "Skipping build/test."
-          exit 0
-
-      # Only runs if Xcode version *starts with* 26
-      - name: Build
-        if: ${{ startsWith(steps.xcode.outputs.version, '26') }}
-        env:
-          scheme: Stiint
-          platform: "iOS Simulator"
-        run: |
-          echo "➤ Running build on Xcode $XCODE_VERSION"
-          xcodebuild build-for-testing \
-            -scheme "$scheme" \
-            -project Stiint.xcodeproj \
-            -destination "platform=iOS Simulator,name=iPhone 15,OS=26.1"
-
-      - name: Test
-        if: ${{ startsWith(steps.xcode.outputs.version, '26') }}
-        env:
-          scheme: Stiint
-          platform: "iOS Simulator"
-        run: |
-          echo "➤ Running tests on Xcode $XCODE_VERSION"
-          xcodebuild test-without-building \
-            -scheme "$scheme" \
-            -project Stiint.xcodeproj \
-            -destination "platform=iOS Simulator,name=iPhone 15,OS=26.1"
+      - uses: actions/checkout@v4
+      - name: Build and test on an available iPhone simulator
+        run: bash scripts/ci-ios.sh
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-test-results
+          path: build/TestResults.xcresult
+          if-no-files-found: warn

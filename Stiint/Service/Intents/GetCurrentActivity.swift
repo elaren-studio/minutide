@@ -17,8 +17,9 @@ struct GetCurrentActivity: AppIntent {
         "Retrieves the activity that is currently running. If no activity is active, this will return nil."
     )
 
-    func perform() throws -> some IntentResult & ReturnsValue<ActivityEntity?>  {
-        if let activity = DtoManager.shared.activityDTO {
+    func perform() async throws -> some IntentResult & ReturnsValue<ActivityEntity?>  {
+        await RunningManager.shared.ensureReady()
+        if let activity = await DtoManager.shared.activityDTO {
             let result = ActivityEntity(id: activity.id, name: activity.name, startDate: activity.startTime)
 
             return .result(value: result)

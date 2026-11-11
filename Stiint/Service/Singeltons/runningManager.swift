@@ -1,175 +1,121 @@
 //
 //  runningManager.swift
-//  Pattrn
-//
-//  Created by Liam Wittig on 07.12.25.
+//  Stiint
 //
 
-import ActivityKit
 import Foundation
-import Observation
-import SwiftData
-import SwiftUI
 
 public actor RunningManager {
     private(set) var currentActivityLogId: UUID?
-    
-    private var setupTask: Task<Void, Never>?
-    
-    private func killDeadActvities() async{
-        try? await PersistenceManager.shared.activityLogActor
-            .killDeadActvities(knwonRunningid: currentActivityLogId)
-        
-    }
-    
-    
-    // Load active activity
-    public func ensureReady() async {
-        currentActivityLogId = await ActivityLogPreferences.getActivityLogId()
-        if let id = currentActivityLogId {
-            await DtoManager.shared
-                .setActivityDTO(
-                    await PersistenceManager.shared.activityLogActor
-                        .getActivtyLogDTO(activityLogId: id)
-                )
-            
-            guard await DtoManager.shared.activityDTO != nil else {
-                currentActivityLogId = nil
-                await ActivityLogPreferences.removeActivityLogId()
-                return
-            }
-        }
-    }
-    
-    
-    // Load active activity
-    public func setup() async {
-          
-        currentActivityLogId = await ActivityLogPreferences.getActivityLogId()
-                
-        await killDeadActvities()
-                
-        if let id = currentActivityLogId {
-            await DtoManager.shared
-                .setActivityDTO(
-                    await PersistenceManager.shared.activityLogActor
-                        .getActivtyLogDTO(activityLogId: id)
-                )
+    private var operationInProgress = false
+    private var waitingOperations: [CheckedContinuation<Void, Never>] = []
 
-            guard await DtoManager.shared.activityDTO != nil else {
-                currentActivityLogId = nil
-                await ActivityLogPreferences.removeActivityLogId()
-                return
-            }
-            
-            // Stats live activity
-            await LiveActivityManager.shared
-                .startLiveActivity(dto: await DtoManager.shared.activityDTO!)
-                        
-        }
-    }
-
-
-    public func stopSpecificAndStartPreviousActivity(activityId: UUID) async {
-        
-        await ensureReady()
-        
-        guard currentActivityLogId != nil else { return }
-
-        guard await DtoManager.shared.activityDTO?.id == activityId else {
+    // Actor methods may re-enter at an await. Keep complete timer operations,
+    // including their UI/preferences/Live Activity mirrors, in arrival order.
+    private func acquireOperation() async {
+        if !operationInProgress {
+            operationInProgress = true
             return
         }
+        await withCheckedContinuation { waitingOperations.append($0) }
+    }
 
-        if let previLogId = await PersistenceManager.shared.activityLogActor.getPreviousActivtyLogID(
-            activityLogId: currentActivityLogId!
-        ) {
-            if let previId = await PersistenceManager.shared.activityLogActor.getActivtyLogDTO(
-                activityLogId: previLogId
-            ) {
-                await startActivity(activityId: previId.id)
+    private func releaseOperation() {
+        if waitingOperations.isEmpty {
+            operationInProgress = false
+        } else {
+            waitingOperations.removeFirst().resume()
+        }
+    }
+
+    private func recover() async throws -> ActivityLogActor.RunningActivity? {
+        let preferred = await ActivityLogPreferences.getActivityLogId()
+        return try await PersistenceManager.shared.activityLogActor
+            .recoverRunningActivity(preferredLogId: preferred)
+    }
+
+    private func display(_ running: ActivityLogActor.RunningActivity?, updateLiveActivity: Bool = true) async {
+        currentActivityLogId = running?.logId
+        await DtoManager.shared.setActivityDTO(running?.activity)
+        if let running {
+            await ActivityLogPreferences.saveActivityLogId(id: running.logId)
+            if updateLiveActivity {
+                await LiveActivityManager.shared.startLiveActivity(dto: running.activity)
             }
         } else {
-            await stopActivity()
+            await ActivityLogPreferences.removeActivityLogId()
+            if updateLiveActivity {
+                await LiveActivityManager.shared.stopLiveActivity()
+            }
         }
     }
 
-    // If activiyt is smaller the 5 minutes away, it should be returend
-    // Currently not working, only by soft reset
-    /* private func checkResume(activityId: UUID) async-> Bool{
+    public func ensureReady() async {
+        await acquireOperation()
+        defer { releaseOperation() }
+        do { await display(try await recover(), updateLiveActivity: false) }
+        catch { print("Timer recovery failed: \(error)") }
+    }
 
-     guard activityDTO == nil else { return false }
+    public func setup() async {
+        await acquireOperation()
+        defer { releaseOperation() }
+        do { await display(try await recover()) }
+        catch { print("Timer recovery failed: \(error)") }
+    }
 
-     if let previLogId = await PersistenceManager.shared.activityLogActor.getPreviousActivtyLogID(activityLogId: currentActivityLogId!){
-     let oldActvityEndTime = await PersistenceManager.shared.activityLogActor.getActivtyLogDTO(activityLogId: previLogId)?.endTime
-
-     if oldActvityEndTime == nil { return false}
-
-     let fiveMinutes: TimeInterval = 5 * 60
-     let now = Date()
-
-     return now.timeIntervalSince(oldActvityEndTime!) <= fiveMinutes
-     && now.timeIntervalSince(oldActvityEndTime!) >= 0
-     }
-     return false
-     } */
+    @discardableResult
+    private func start(activityId: UUID) async throws -> Bool {
+        guard let running = try await PersistenceManager.shared.activityLogActor
+            .startOrSwitchActivity(activityId: activityId, preferredLogId: currentActivityLogId)
+        else { return false }
+        await display(running)
+        return true
+    }
 
     public func startActivity(activityId: UUID) async {
-        await ensureReady()
-        
-        let dto = await DtoManager.shared.activityDTO
-        guard dto?.id != activityId else {
-            return
-        }
-
-        var prevId: UUID? = nil
-
-        if dto != nil {
-            prevId = currentActivityLogId
-            await stopActivity()
-        }
-
-        currentActivityLogId = await PersistenceManager.shared.activityLogActor
-            .startActivity(activityId: activityId, previousAcvitiyLogId: prevId)
-        guard currentActivityLogId != nil else { return }
-
-        let activityDTO = await PersistenceManager.shared.activityLogActor.getActivtyLogDTO(
-            activityLogId: currentActivityLogId!
-        )
-        
-        await DtoManager.shared.setActivityDTO(activityDTO)
-
-        await ActivityLogPreferences
-            .saveActivityLogId(id: currentActivityLogId!)
-
-
-        await LiveActivityManager.shared.startLiveActivity(dto: activityDTO!)
-        
+        await acquireOperation()
+        defer { releaseOperation() }
+        do { try await start(activityId: activityId) }
+        catch { print("Starting timer failed: \(error)") }
     }
 
-    public func stopSpecificActivity(activityId: UUID) async {
-        await ensureReady()
-        guard  await DtoManager.shared.activityDTO?.id == activityId else {
-            return
+    private func stop(matchingActivityId: UUID? = nil) async throws {
+        let stopped = try await PersistenceManager.shared.activityLogActor
+            .stopRunningActivity(preferredLogId: currentActivityLogId, matchingActivityId: matchingActivityId)
+        if stopped || matchingActivityId == nil {
+            await display(try await recover())
         }
-
-        await stopActivity()
     }
 
     public func stopActivity() async {
-        await ensureReady()
-        if currentActivityLogId == nil { return }
-
-        await PersistenceManager.shared.activityLogActor
-            .stopActivity(activityLogId: currentActivityLogId!)
-
-        await ActivityLogPreferences.removeActivityLogId()
-
-        currentActivityLogId = nil
-        await DtoManager.shared.clear()
-
-        await LiveActivityManager.shared.stopLiveActivity()
+        await acquireOperation()
+        defer { releaseOperation() }
+        do { try await stop() }
+        catch { print("Stopping timer failed: \(error)") }
     }
-    
+
+    public func stopSpecificActivity(activityId: UUID) async {
+        await acquireOperation()
+        defer { releaseOperation() }
+        do { try await stop(matchingActivityId: activityId) }
+        catch { print("Stopping timer failed: \(error)") }
+    }
+
+    public func stopSpecificAndStartPreviousActivity(activityId: UUID) async {
+        await acquireOperation()
+        defer { releaseOperation() }
+        do {
+            guard let running = try await recover(), running.activity.id == activityId else { return }
+            let logs = await PersistenceManager.shared.activityLogActor
+            if let previousId = await logs.getPreviousActivtyLogID(activityLogId: running.logId),
+               let previous = await logs.getActivtyLogDTO(activityLogId: previousId),
+               try await start(activityId: previous.id) {
+                return
+            }
+            try await stop(matchingActivityId: activityId)
+        } catch { print("Returning to previous timer failed: \(error)") }
+    }
 }
 
 public extension RunningManager {

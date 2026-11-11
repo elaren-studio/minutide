@@ -54,9 +54,9 @@ struct OnboardingView4: View {
 
                     StepView(
                         number: 4,
-                        title: "Select the 'Stop any Activity' intent",
+                        title: "Select the 'Stop the current activity' intent",
                         descriptions: [
-                            "Search for the action named 'Stiint' to find the correct shortcut and select it.",
+                            "Search for 'Minutide', then select 'Stop the current activity'. The example images show the original Stiint name.",
                             "When this intent is triggered, any running activity will be stopped.",
                         ],
                         buttonTitle: nil,

@@ -1,45 +1,44 @@
-//
-//  LogDetailView.swift
-//  Stiint
-//
-//  Created by Wittig, Liam on 13.12.25.
-//
-
+import MapKit
 import SwiftData
 import SwiftUI
-import MapKit
 
 struct LogDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-
     @Bindable var log: ActivityLog
-
     @Query private var activities: [ActivityItem]
-
     @State private var showDeleteConfirmation = false
-
-    
+    @State private var saveError: String?
+    @State private var saving = false
     @State private var startTime: Date
     @State private var endTime: Date
-    
-    
-    @State private var maxEndtime: Date
-    
-    
-    @State private var activity: ActivityItem
-    
+    @State private var activity: ActivityItem?
+
     init(log: ActivityLog) {
         self.log = log
-        self.activity = log.activity!
-        self.startTime = log.startTime!
-        self.endTime = log.endTime ?? Date.now
-        
-        if let time = DtoManager.shared.activityDTO?.startTime {
-            self.maxEndtime = time
-        }else{
-            self.maxEndtime = Date.now
-        }
+        _activity = State(initialValue: log.activity)
+        let now = Date.now
+        _startTime = State(initialValue: Self.validDate(log.startTime) ?? now)
+        _endTime = State(initialValue: Self.validDate(log.endTime) ?? now)
+    }
+
+    private static func validDate(_ date: Date?) -> Date? {
+        guard let date, date.timeIntervalSinceReferenceDate.isFinite else { return nil }
+        return date
+    }
+
+    private var hasCompleteClosedDates: Bool {
+        Self.validDate(log.startTime) != nil && Self.validDate(log.endTime) != nil
+    }
+
+    private var canSave: Bool {
+        guard hasCompleteClosedDates, log.id != nil, activity != nil, !saving else { return false }
+        let latestEnd = DtoManager.shared.activityDTO?.startTime ?? Date.now
+        return endTime > startTime && endTime <= latestEnd
+    }
+
+    private var selectableActivities: [ActivityItem] {
+        activities.filter { $0.archived != true || $0.persistentModelID == log.activity?.persistentModelID }
     }
 
     var body: some View {
@@ -47,188 +46,114 @@ struct LogDetailView: View {
             Form {
                 Section("Activity") {
                     Picker("Activity", selection: $activity) {
-                        ForEach(activities) { activity in
-                            Text(activity.name ?? "Unnamed").tag(activity)
+                        Text("Choose an activity").tag(Optional<ActivityItem>.none)
+                        ForEach(selectableActivities) { item in
+                            Text(item.name ?? "Unnamed").tag(Optional(item))
                         }
                     }
-                }
-                
-                Section("Time"){
-                    DatePicker(
-                        "Start Time",
-                        selection: $startTime,
-                        in: ...endTime,
-                        displayedComponents: .hourAndMinute
-                    )
-                    if(log.endTime != nil){
-                        DatePicker(
-                            "End Time",
-                            selection: $endTime,
-                            in: startTime...maxEndtime,
-                            displayedComponents: .hourAndMinute
-                        )
+                    .disabled(!hasCompleteClosedDates || saving)
+                    if log.activity == nil {
+                        Text("This log's activity is unavailable. Choose an existing activity to restore its assignment. The saved log is preserved until you tap Done.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
                     }
                 }
-                /*
-                 Section("Time") {
-
-                 DatePicker("Start Time",
-                 selection: Binding(
-                 get: { log.startTime ?? Date.now },
-                 set: { newValue in
-                 log.startTime = newValue
-
-                 // Clear end time if it would create negative duration
-                 if let endTime = log.endTime, endTime <= newValue {
-                 log.endTime = nil
-                 }
-                 }
-                 ),
-                 in: ...Date.now,
-                 displayedComponents: [.hourAndMinute])
-
-                 if let endTime = log.endTime, let startTime = log.startTime {
-                 DatePicker("End Time",
-                 selection: Binding(
-                 get: { endTime },
-                 set: { newValue in
-
-                 if(newValue > startTime ){
-                 log.endTime = newValue
-                 }
-                 }
-                 ),
-                 in: startTime...maxEndTime(for: startTime),
-                 displayedComponents: [.hourAndMinute])
-                 }
-                 }
-                 */
-                Section("Duration") {
-                    let duration = Duration.seconds(
-                        endTime.timeIntervalSince(startTime)
-                    )
-                    Text(
-                        duration,
-                        format: .units(allowed: [.hours, .minutes])
-                    )
+                Section("Time") {
+                    if hasCompleteClosedDates {
+                        // Validate the pair below instead of constructing a
+                        // potentially reversed DatePicker range from saved data.
+                        DatePicker("Start Time", selection: $startTime, displayedComponents: [.date, .hourAndMinute])
+                        DatePicker("End Time", selection: $endTime, displayedComponents: [.date, .hourAndMinute])
+                        if endTime <= startTime {
+                            Text("End time must be after start time.").foregroundStyle(.red)
+                        } else if endTime > (DtoManager.shared.activityDTO?.startTime ?? Date.now) {
+                            Text("End time must be before the current timer starts, or before now when no timer is running.")
+                                .foregroundStyle(.red)
+                        }
+                    } else {
+                        Text(log.endTime == nil
+                            ? "Stop this activity before editing its log."
+                            : "This log has incomplete or invalid dates. It is preserved and can still be exported.")
+                            .foregroundStyle(.secondary)
+                    }
                 }
-                
-                
-                if let startLatitude = log.startLatitude, let startLongitude = log.startLongitude, let endLatitude = log.endLatitude, let endLongitude = log.endLongitude {
-                    
-                   
+                .disabled(saving)
+
+                if hasCompleteClosedDates, endTime >= startTime {
+                    Section("Duration") {
+                        Text(Duration.seconds(endTime.timeIntervalSince(startTime)),
+                             format: .units(allowed: [.hours, .minutes]))
+                    }
+                }
+
+                if let startLatitude = log.startLatitude, let startLongitude = log.startLongitude,
+                   let endLatitude = log.endLatitude, let endLongitude = log.endLongitude,
+                   CLLocationCoordinate2DIsValid(CLLocationCoordinate2D(latitude: startLatitude, longitude: startLongitude)),
+                   CLLocationCoordinate2DIsValid(CLLocationCoordinate2D(latitude: endLatitude, longitude: endLongitude)) {
+                    let start = CLLocationCoordinate2D(latitude: startLatitude, longitude: startLongitude)
+                    let end = CLLocationCoordinate2D(latitude: endLatitude, longitude: endLongitude)
                     Section("Location") {
-                        Text(
-                            LocationHandler()
-                                .formatDistance(
-                                    startLat: startLatitude,
-                                    startLon: startLongitude,
-                                    endLat: endLatitude,
-                                    endLon: endLongitude
-                                )
-                        )
+                        Text(LocationHandler().formatDistance(startLat: startLatitude, startLon: startLongitude,
+                                                              endLat: endLatitude, endLon: endLongitude))
                     }
                     Map {
-                                
-                        Marker(
-                            "Start location",
-                            coordinate: CLLocationCoordinate2D(
-                                latitude: startLatitude,
-                                longitude: startLongitude
-                            )
-                        )
-                        .tint(.orange)
-                            
-                            
-                                
-                        Marker(
-                            "End location",
-                            coordinate: CLLocationCoordinate2D(
-                                latitude: endLatitude,
-                                longitude: endLongitude
-                            )
-                        )
-                        .tint(.blue)
-                        MapPolyline(
-                            coordinates: [
-                                CLLocationCoordinate2D(
-                                    latitude: startLatitude,
-                                    longitude: startLongitude
-                                ),
-                                CLLocationCoordinate2D(latitude: endLatitude, longitude: endLongitude)
-                            ]
-                        )
-                        .stroke(.blue, lineWidth: 3)
+                        Marker("Start location", coordinate: start).tint(.orange)
+                        Marker("End location", coordinate: end).tint(.blue)
+                        MapPolyline(coordinates: [start, end]).stroke(.blue, lineWidth: 3)
                     }
-                    
-                
                     .listRowInsets(EdgeInsets())
-                        
-                        
                     .frame(height: 400)
-                    
                 }
+
                 Section {
-                    Button(role: .destructive, action: {
-                        showDeleteConfirmation = true
-                    }) {
-                        HStack {
-                            Spacer()
-                            Text("Delete Log")
-                            Spacer()
-                        }
-                    }
+                    Button("Delete Log", role: .destructive) { showDeleteConfirmation = true }
+                        .disabled(log.endTime == nil || saving)
                 }
             }
             .navigationTitle("Edit Log")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
-                        
-                        guard endTime > startTime else {
-                            return
-                        }
-                        guard log.endTime != nil else {
-                            return
-                        }
-                        Task{
-                            
-                            do {
-                                let startCurrentActivity = DtoManager.shared.activityDTO?.startTime
-                                try await PersistenceManager.shared.activityLogActor
-                                    .clearTimeFrame(
-                                        startDate: startTime,
-                                        endDate: endTime,
-                                        logId: log.id!,
-                                        currentActivityStartDate: startCurrentActivity
-                                    )
-                                
-                                log.endTime = endTime
-                                log.startTime = startTime
-                                log.activity = activity
-                                
-                                try modelContext.save()
-                                dismiss()
-                            } catch{
-                                    
-                                print("Error saving: \(error)")
-                            }
-                        }
-                    }
+                    Button("Done") { save() }.disabled(!canSave)
                 }
             }
             .alert("Delete Log", isPresented: $showDeleteConfirmation) {
                 Button("Cancel", role: .cancel) {}
                 Button("Delete", role: .destructive) {
                     modelContext.delete(log)
-                    try? modelContext.save()
-                    dismiss()
+                    do { try modelContext.save(); dismiss() }
+                    catch { modelContext.rollback(); saveError = error.localizedDescription }
                 }
             } message: {
-                Text(
-                    "Are you sure you want to delete this log? This action cannot be undone."
+                Text("Are you sure you want to delete this log? This action cannot be undone.")
+            }
+            .alert("Unable to save log", isPresented: Binding(
+                get: { saveError != nil }, set: { if !$0 { saveError = nil } }
+            )) {
+                Button("OK") { saveError = nil }
+            } message: { Text(saveError ?? "") }
+        }
+    }
+
+    private func save() {
+        guard canSave, let activity, let id = log.id else { return }
+        saving = true
+        Task {
+            defer { saving = false }
+            do {
+                try await PersistenceManager.shared.activityLogActor.clearTimeFrame(
+                    startDate: startTime, endDate: endTime, logId: id,
+                    currentActivityStartDate: DtoManager.shared.activityDTO?.startTime
                 )
+                log.endTime = endTime
+                log.startTime = startTime
+                log.activity = activity
+                try modelContext.save()
+                dismiss()
+            } catch {
+                modelContext.rollback()
+                saveError = error.localizedDescription
             }
         }
     }

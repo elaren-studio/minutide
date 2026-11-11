@@ -1,68 +1,53 @@
-//
-//  CsvHandler.swift
-//  Stiint
-//
-//  Created by Liam Wittig on 11.01.26.
-//
-
 import Foundation
 
 final class CsvHandler {
-    func exportDataAsCsv(logs: [ActivityLog]) async throws -> URL {
-  
-
+    func exportDataAsCsv(logs: [ActivityLog], destinationURL: URL? = nil) async throws -> URL {
         let headers = ["Activity", "Start Date", "End Date", "Duration", "Start Latitude", "Start Longitude", "End Latitude", "End Longitude"]
-        var csvFile = headers.joined(separator: ",") + "\n"
-
         let dateFormatter = ISO8601DateFormatter()
+        var rows = [headers.joined(separator: ",")]
 
         for log in logs {
-            guard
-                let activity = log.activity,
-                let name = activity.name,
-                let startTime = log.startTime,
-                let endTime = log.endTime
-            else { continue }
-
-            let duration = endTime.timeIntervalSince(startTime)
-
-            let row = [
-                escape(name),
-                escape(dateFormatter.string(from: startTime)),
-                escape(dateFormatter.string(from: endTime)),
-                String(duration),
-                escape(log.startLatitude),
-                escape(log.startLongitude),
-                escape(log.endLatitude),
-                escape(log.endLongitude),
+            let start = validDate(log.startTime)
+            let end = validDate(log.endTime)
+            let duration: String
+            if let start, let end, end >= start {
+                duration = String(end.timeIntervalSince(start))
+            } else {
+                duration = ""
+            }
+            let fields = [
+                log.activity?.name ?? "Unknown activity",
+                start.map { dateFormatter.string(from: $0) } ?? "",
+                end.map { dateFormatter.string(from: $0) } ?? "",
+                duration,
+                coordinate(log.startLatitude),
+                coordinate(log.startLongitude),
+                coordinate(log.endLatitude),
+                coordinate(log.endLongitude),
             ]
-
-            csvFile += row.joined(separator: ",") + "\n"
+            rows.append(fields.map(escape).joined(separator: ","))
         }
 
-        return try save(csvFile)
-    }
-
-    // MARK: - Helpers
-
-    private func escape(_ value: Any?) -> String {
-        guard let value else { return "\"\"" }  // empty CSV cell
-        let escaped = String(describing: value)
-            .replacingOccurrences(of: "\"", with: "\"\"")
-        return "\"\(escaped)\""
-    }
-    
-    private func save(_ csv: String) throws -> URL {
-        let fileName = "activity_logs.csv"
-
-        let documentsURL = FileManager.default.urls(
-            for: .documentDirectory,
-            in: .userDomainMask
-        ).first!
-
-        let fileURL = documentsURL.appendingPathComponent(fileName)
-
+        // A missing end is an unfinished log, never an invented stop time.
+        // Every supplied row is retained, even if its relationship/dates are missing.
+        let csv = rows.joined(separator: "\n") + "\n"
+        let fileURL = destinationURL ?? FileManager.default.temporaryDirectory
+            .appendingPathComponent("activity_logs-\(UUID().uuidString).csv")
         try csv.write(to: fileURL, atomically: true, encoding: .utf8)
         return fileURL
+    }
+
+    private func validDate(_ date: Date?) -> Date? {
+        guard let date, date.timeIntervalSinceReferenceDate.isFinite else { return nil }
+        return date
+    }
+
+    private func coordinate(_ value: Double?) -> String {
+        guard let value, value.isFinite else { return "" }
+        return String(value)
+    }
+
+    private func escape(_ value: String) -> String {
+        "\"" + value.replacingOccurrences(of: "\"", with: "\"\"") + "\""
     }
 }

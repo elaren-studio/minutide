@@ -30,18 +30,23 @@ struct ActivityQuery: EntityQuery {
     func entities(for identifiers: [UUID]) async throws -> [ActivityEntity] {
         let activities = await PersistenceManager.shared.activityActor.getAllAvaibleActivitys()
         return activities
-            .filter { identifiers.contains($0.id!) }
-            .map { ActivityEntity(id: $0.id!, name: $0.name!) }
+            .compactMap { activity in
+                guard activity.archived != true, let id = activity.id,
+                      let name = activity.name, identifiers.contains(id) else { return nil }
+                return ActivityEntity(id: id, name: name)
+            }
     }
 
     func suggestedEntities() async throws -> [ActivityEntity] {
         let activities = await PersistenceManager.shared.activityActor.getAllAvaibleActivitys()
-        return activities.map { ActivityEntity(id: $0.id!, name: $0.name!) }
+        return activities.compactMap { activity in
+            guard activity.archived != true, let id = activity.id,
+                  let name = activity.name else { return nil }
+            return ActivityEntity(id: id, name: name)
+        }
     }
 
     func defaultResult() async -> ActivityEntity? {
-        let activities = await PersistenceManager.shared.activityActor.getAllAvaibleActivitys()
-        guard let first = activities.first else { return nil }
-        return ActivityEntity(id: first.id!, name: first.name!)
+        try? await suggestedEntities().first
     }
 }

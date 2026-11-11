@@ -16,7 +16,8 @@ public final class ActivityItem {
     public var name: String?
     public var colorHex: String?
     public var sfSymbolName: String?
-    public var deleted: Bool?
+    @Attribute(originalName: "deleted")
+    public var archived: Bool?
     public var weekdays: Set<Weekday>?
     public var storeLocation: Bool?
 
@@ -36,7 +37,7 @@ public final class ActivityItem {
         self.name = name
         colorHex = color?.toHex()
         self.sfSymbolName = sfSymbolName
-        self.deleted = deleted
+        self.archived = deleted
         self.weekdays = weekdays
         self.storeLocation = storeLocation
     }

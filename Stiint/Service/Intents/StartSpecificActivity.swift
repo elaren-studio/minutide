@@ -24,8 +24,10 @@ struct StartSpecificActivity: LiveActivityIntent {
             return .result()
         }
 
-        let weekdays = await PersistenceManager.shared.activityActor.getActivityById(from: activity.id)!.weekdays ?? []
-        
+        guard let savedActivity = await PersistenceManager.shared.activityActor.getActivityById(from: activity.id),
+              savedActivity.archived != true else { return .result() }
+        let weekdays = savedActivity.weekdays ?? []
+
         if await weekdays.contains(.today) {
             await RunningManager.shared.startActivity(activityId: activity.id)
         }

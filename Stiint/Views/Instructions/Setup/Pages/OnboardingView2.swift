@@ -22,8 +22,8 @@ struct OnboardingView2: View {
                 .multilineTextAlignment(.leading)
             // Description
             Text(
-                "Stiint doesn’t track your sleep automatically.\n\n" +
-                    "You’ll create a simple Apple Shortcut Automation that tells Stiint when you go to sleep and wake up.\n\n" +
+                "Minutide doesn’t track your sleep automatically.\n\n" +
+                    "You’ll create a simple Apple Shortcut Automation that tells Minutide when you go to sleep and wake up.\n\n" +
                     "We’ll guide you step by step. It only takes a minute."
             )
             .font(.body)
@@ -50,7 +50,7 @@ struct OnboardingView2: View {
                 }
 
                 // Optional trust line
-                Text("No health permissions required. Data tracked using this App will never leave your device or iCloud.")
+                Text("No health permissions required. You choose when to start and stop tracking.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .frame(height: 50)

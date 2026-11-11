@@ -8,6 +8,7 @@
 import Foundation
 
 @Observable
+@MainActor
 public class DtoManager{
     
     private(set) var activityDTO: ActivityDTO?

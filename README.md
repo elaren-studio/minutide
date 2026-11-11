@@ -1,85 +1,77 @@
-# Stiint — Know Your Time
+# Minutide
 
-Stiint is an iOS time-tracking app built around iOS Shortcuts automations. Define activities, wire them up to Shortcuts triggers once, and Stiint records your day automatically — no manual input required. Review your timeline and analyze how you spend your time across any date range.
+Minutide is a free, open-source iPhone time tracker maintained by [Elaren Studio](https://github.com/elaren-studio), continued from Liam Wittig's archived Stiint project. Create activities, start and stop them with iOS Shortcuts, review a day-by-day timeline, and explore time-use charts.
 
-[Download on the App Store](https://apps.apple.com/de/app/stiint-know-your-time/id6756229335)
+This repository is in community-revival work. It is source code for development and review; it does not announce an App Store release or a downloadable community build. The fork is independent and is not affiliated with or endorsed by the original author.
 
-## Screenshots
+## What it does
 
-<p float="left">
-  <img src="docs/images/Pasted 28-10-2026 at 14.52.26.png" width="19%" />
-  <img src="docs/images/Pasted 28-10-2026 at 14.53.53.png" width="19%" />
-  <img src="docs/images/Pasted 28-10-2026 at 14.53.17.png" width="19%" />
-  <img src="docs/images/Pasted 28-10-2026 at 14.53.10.png" width="19%" />
-</p>
+- Create named activities with colors, icons, and optional weekday rules.
+- Start, stop, query, and resume activities from the app or Shortcuts actions.
+- Review and edit logged activity on a daily timeline.
+- Explore time-use charts, including Sankey, pie, bar, line, and area diagrams.
+- Show the current activity in an iOS Live Activity.
+- Export activity logs as CSV.
+- Optionally record start and end location for selected activities.
+- Use all app features without a subscription or paid tier.
 
-## How It Works
+The project uses SwiftUI, SwiftData, App Intents, and Swift Package Manager. The current app deployment target is iOS 26.1. Check the Xcode project settings if you work from a later revision.
 
-1. **Create activities** — define activities like Sleep, University, Learning, or Gym, each with a color and SF Symbol icon.
-2. **Automate with Shortcuts** — use iOS Shortcuts to start and stop activities automatically. Triggers can be alarms, location arrival, app opens, time of day, or anything else Shortcuts supports.
-3. **Review your timeline** — the home screen shows a scrollable calendar-style timeline. Swipe between days going back up to 2000 days.
-4. **Analyze trends** — the Insights screen visualizes your data with Sankey, pie, bar, line, and area charts across a custom date range.
+## Screenshot
 
-## App Intents (Shortcuts Actions)
+![Live Activity on the iPhone lock screen during the community revival](docs/images/community-lock-screen.jpg)
 
-Stiint exposes the following actions to iOS Shortcuts and Automations:
+This screenshot predates the Minutide rename. The original Stiint screenshots used in the Shortcuts setup guide also retain their original branding.
 
-| Action | Description |
-|---|---|
-| Start an activity | Starts a specific activity. Respects weekday filters and tracking pause state. |
-| Stop a specific activity | Stops a specific activity; other running activities are unaffected. |
-| Stop activity and resume previous | Stops the current activity and resumes the one it interrupted, if available. |
-| Get current activity | Returns the currently running activity, or nil if none is active. |
-| Get all activities | Returns a list of all activities. |
-| Is activity running | Returns whether a specific activity is currently active. |
-| Stop activity | Stops whatever activity is currently running. |
-| Export as CSV | Exports all activity logs as a CSV file. |
+## Build and run in the iOS Simulator
 
-## Features
+You need Xcode with an iOS 26.1 SDK or newer. No Apple signing account is needed to build and run in the Simulator.
 
-- **Shortcuts-driven** — all core tracking happens via App Intents; no background polling.
-- **Weekday filters** — activities can be restricted to specific days of the week.
-- **Location logging** — optionally records GPS coordinates at activity start and end.
-- **Live Activity** — shows the current activity and elapsed time in the Dynamic Island and on the lock screen.
-- **Swipeable timeline** — horizontal paging between days with lazy rendering for performance.
-- **Analytics** — Sankey, pie, bar, line, and area diagrams with activity and date range filters.
-- **CSV export** — full activity log export via Shortcuts.
-- **Fully on-device** — all data stored locally with SwiftData; nothing sent externally.
-- **Pro subscription** — pie, bar, and area charts are gated behind a StoreKit subscription.
+1. Open `Stiint.xcodeproj` in Xcode.
+2. Allow Xcode to resolve the Swift packages listed in `Package.resolved`.
+3. Select the `Stiint` scheme and an iOS Simulator destination.
+4. Choose **Product → Run**.
 
-## Usage
+The internal project, target, and scheme retain the name `Stiint` for source continuity. The installed app is **Minutide**, with bundle identifier `com.elaren.minutide` and Live Activity extension identifier `com.elaren.minutide.liveactivity`. The repository is [elaren-studio/minutide](https://github.com/elaren-studio/minutide). No signing team or Apple identifier registration is included in the source publication.
 
-### 1. Create an activity
+For a terminal build, first list available simulator destinations and then choose one by its identifier:
 
-Open Stiint, tap **+** on the Start Activity screen, and give the activity a name, color, and icon. Optionally restrict it to specific weekdays.
+```sh
+xcodebuild -resolvePackageDependencies -project Stiint.xcodeproj
+xcodebuild -showdestinations -project Stiint.xcodeproj -scheme Stiint
+xcodebuild build -project Stiint.xcodeproj -scheme Stiint \
+  -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO
+```
 
-### 2. Set up a Shortcuts automation
+To run the test scheme on a simulator, replace `SIMULATOR_ID` with an identifier printed by `-showdestinations`:
 
-Open the **Shortcuts** app → **Automation** → **+** → **Create Personal Automation**. Choose a trigger:
+```sh
+xcodebuild test -project Stiint.xcodeproj -scheme Stiint \
+  -destination 'platform=iOS Simulator,id=SIMULATOR_ID' CODE_SIGNING_ALLOWED=NO
+```
 
-| Trigger | Example |
-|---|---|
-| App opened | Start "Work" when Slack opens |
-| App closed | Stop "Social" when Instagram closes |
-| Arrive at location | Start "Gym" when you arrive at the gym |
-| Leave location | Stop "Work" when you leave the office |
-| Alarm stopped | Start "University" when your alarm fires |
-| Time of day | Start "Sleep" at 10:30 PM |
+The same dynamic simulator selection and test command used by CI is available locally:
 
-Add a Stiint action (e.g. **Start an activity** or **Stop current activity**), set it to **Run Immediately**, and tap **Done**.
+```sh
+bash scripts/ci-ios.sh
+```
 
-### 3. Review your timeline
+These are contributor instructions, not a claim that the current revision's final test run or hosted CI has passed. See [Device Acceptance](docs/DEVICE_ACCEPTANCE.md) for the manual checks and their current evidence.
 
-The home screen shows a scrollable daily timeline. Swipe left/right to move between days or tap the date to jump to a specific day.
+### Install on your own iPhone
 
-### 4. Analyze your time
+Physical-device installation requires signing with an Apple Developer team you control. In Xcode, select the app target, open **Signing & Capabilities**, choose your own Team, and let Xcode manage provisioning. If the community bundle identifier is unavailable to your team, use a unique personal identifier for local development and apply it consistently to the app and its extensions. Simulator use does not require signing. Do not use another person's signing credentials or provisioning profile.
 
-Go to **Insights**, pick a date range and activities, and explore the Sankey flow diagram, pie chart, bar chart, line graph, and area chart.
+## Privacy and data
 
-## Building from Source
+Activity names and start/end times are stored in the app's on-device SwiftData store. Location is optional per activity; when enabled, the app can save precise latitude and longitude at activity start and end. CSV export includes activity names, timestamps, duration, and any saved coordinates. Treat exported files as sensitive and choose their destination deliberately.
 
-Clone the repo and open `Stiint.xcodeproj` in Xcode. The paywall is MIT-licensed along with the rest of the code — you are free to remove or bypass it. The subscription check lives in `SubscriptionManager.shared.isPro` (`Stiint/Service/Singeltons/subscriptionManager.swift`); the paywall gate wraps charts in `AnalyticsView` and settings in `SettingsView`.
+The app stores records in an on-device SwiftData store with CloudKit disabled and has no project account or server-sync service. The acknowledgements screen loads the pinned dependency licenses bundled with the app; it does not need to fetch those notices from GitHub. App network traffic has not been independently audited. Shortcuts, iOS Location Services, and system share/export flows are controlled by Apple and by the choices you make on your device. This description summarizes the app source; it is not an independent privacy or security audit. See [SECURITY.md](SECURITY.md) for reporting guidance.
 
-## License
+## Contributing and project status
 
-MIT © 2026 Liam Wittig. See [LICENSE](LICENSE).
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a change. The current priorities and unfinished validation gates are in [docs/ROADMAP.md](docs/ROADMAP.md), with live handoff status in [docs/ACTIVE_CONTEXT.md](docs/ACTIVE_CONTEXT.md).
+
+## Origin and license
+
+This fork continues [Liam1506/Stiint](https://github.com/Liam1506/Stiint), based on upstream commit `a6f10f2d6637e9b3b330c56b818fb537357329b0`. The original app source remains under the MIT License; the copyright notice for Liam Wittig is preserved in [LICENSE](LICENSE). Third-party package details and bundled license resources are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

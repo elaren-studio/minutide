@@ -8,27 +8,15 @@
 import SwiftUI
 
 struct TimerRunningView: View {
-    /*
-      Show the timer itself with teh actiovity.
-     Singe button to end task -> Should change state other page should be shown
-        */
-    init() {
-        // print(RunningManager.shared.currentActivityLogId!)
-    }
-
-    @State private var activityLog: ActivityLog?
-
     var body: some View {
-        if DtoManager.shared.activityDTO == nil {
-            Text("Awaiting activityDTO")
-        }
- else {
+        if let activity = DtoManager.shared.activityDTO {
             NavigationView {
                 VStack(spacing: 40) {
-                    Text(DtoManager.shared.activityDTO!.startTime, style: .timer)
+                    Text(activity.startTime, style: .timer)
                         .font(.system(size: 80, weight: .light, design: .monospaced))
                         .frame(maxWidth: .infinity)
                         .multilineTextAlignment(.center)
+                        .accessibilityIdentifier("timer.running.elapsed")
 
                     Button(action: {
                         Task {
@@ -42,10 +30,21 @@ struct TimerRunningView: View {
                             .padding(.horizontal)
                             .glassEffect()
                     }
-
-                    .navigationTitle(DtoManager.shared.activityDTO!.name)
+                    .accessibilityLabel("Stop \(activity.name)")
+                    .accessibilityIdentifier("timer.running.stop")
+                }
+                .navigationTitle(activity.name)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .principal) {
+                        Text(activity.name)
+                            .font(.headline)
+                            .accessibilityIdentifier("timer.running.name")
+                    }
                 }
             }
+        } else {
+            Text("Awaiting activityDTO")
         }
     }
 }

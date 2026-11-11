@@ -9,7 +9,6 @@ import SwiftData
 import SwiftUI
 
 struct ContentView: View {
-    @State private var subscriptionManager = SubscriptionManager.shared
     @AppStorage("pauseTracking") private var pauseTracking: Bool = false
  
     @State private var showAccessory = false
@@ -50,9 +49,6 @@ struct ContentView: View {
         .tabViewBottomAccessory(isEnabled: DtoManager.shared.activityDTO != nil, content: {
             TimerStatusView()
         })
-            .sheet(isPresented: $subscriptionManager.displayPaywall) {
-            PaywallView()
-        }
     }
 }
 

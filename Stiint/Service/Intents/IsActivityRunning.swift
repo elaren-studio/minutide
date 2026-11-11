@@ -17,11 +17,9 @@ struct IsActivityRunning: AppIntent {
     @Parameter(title: "Activity")
     var activity: ActivityEntity
 
-    func perform() throws -> some IntentResult & ReturnsValue<Bool> {
-        guard DtoManager.shared.activityDTO?.id != nil else {
-            return .result(value: false)
-        }
-
-        return .result(value: DtoManager.shared.activityDTO?.id == activity.id)
+    func perform() async throws -> some IntentResult & ReturnsValue<Bool> {
+        await RunningManager.shared.ensureReady()
+        let currentID = await DtoManager.shared.activityDTO?.id
+        return .result(value: currentID == activity.id)
     }
 }

@@ -27,7 +27,7 @@ struct OnboardingView1: View {
                 .multilineTextAlignment(.center)
 
             // Description
-            Text("Thanks for downloading Stiint! We'll help you track your activities, hand off tasks efficiently, and make the most of your day.")
+            Text("Welcome to Minutide. Track your activities, explore your time in Insights, and create automations with Shortcuts.")
                 .font(.body)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -35,7 +35,7 @@ struct OnboardingView1: View {
 
             Spacer()
 
-            // Action + legal
+            // Continue and explain the community edition.
             VStack(spacing: 16) {
                 Button(action: {
                     index += 1
@@ -50,22 +50,14 @@ struct OnboardingView1: View {
                         .shadow(radius: 5)
                 }
 
-                // Privacy / Terms text with tappable links
                 VStack(spacing: 4) {
-                    Text("By continuing, you agree to our")
+                    Text("All features are free. No account or subscription required.")
                         .font(.footnote)
                         .foregroundColor(.secondary)
-
-                    HStack(spacing: 4) {
-                        Link("Privacy Policy", destination: URL(string: PRIVCY_POLICY_LINK)!)
-                        Text("and")
-                            .foregroundColor(.secondary)
-                        Link("Terms of Service", destination: URL(string: TERMS_OF_SERVICE_LINK)!)
-                    }
-                    .font(.footnote)
+                    Text("Based on Stiint by Liam Wittig, under the MIT License.")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
                 }
-
-                .frame(height: 50)
                 .multilineTextAlignment(.center)
             }
             .padding(.horizontal)

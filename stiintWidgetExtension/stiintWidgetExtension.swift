@@ -1,145 +1,80 @@
 //
-//  stiintWidgetExtension.swift
-//  stiintWidgetExtension
+// Original Stiint by Liam Wittig. Adaptive community Live Activity layout.
 //
-//  Created by Wittig, Liam on 17.12.25.
-//
-
 import ActivityKit
 import SwiftUI
 import WidgetKit
 
 struct stiintWidgetExtension: Widget {
-    let kind: String = "stiintWidgetExtension"
-
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: LiveActivityDTO.self) { context in
-            // Lock screen / banner view
             HStack(spacing: 12) {
-                Image(systemName: context.attributes.icon)
-                    .font(.system(size: 22, weight: .semibold))
-                    .frame(width: 28, alignment: .center)
-                    .foregroundColor(Color(hex: context.attributes.color))
-
-                VStack(alignment: .leading, spacing: 0) {
+                activityIcon(context.attributes)
+                    .font(.title2)
+                    .frame(width: 28)
+                VStack(alignment: .leading, spacing: 4) {
                     Text(context.attributes.name)
                         .font(.headline)
                         .lineLimit(1)
-
-                    Text(context.attributes.startTime, style: .timer)
+                    elapsed(context.attributes.startTime)
                         .font(.subheadline)
-                        .fontWeight(.light)
-                        .monospaced()
                         .foregroundStyle(.secondary)
                 }
-
-                Spacer()
+                Spacer(minLength: 0)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(16)
         } dynamicIsland: { context in
             DynamicIsland {
-                // Expanded regions
                 DynamicIslandExpandedRegion(.leading) {
-                    // Image(systemName: context.attributes.icon).foregroundStyle(Color(hex:  context.attributes.color))
-                    HStack{
-                        VStack {
-                            Spacer()
-                            Image(systemName: context.attributes.icon)
-                                .font(.system(size: 30))
-                                .foregroundColor(
-                                    Color(hex: context.attributes.color)
-                                )
-                                .multilineTextAlignment(.center)
-                            Spacer()
-                        }
-                        VStack{
-                            Spacer()
-                            Text(context.attributes.name)
-                                .font(.headline)
-                                .padding(.bottom, 14)
-                                .lineLimit(1)
-                                .frame(maxWidth: 200, alignment: .leading)
-                                
-                        }
-                    }.frame(width: 200, height: 60)
+                    activityIcon(context.attributes).font(.title2)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    VStack {
-                        Spacer()
-
-                        Text(context.attributes.startTime, style: .timer)
-                            .font(
-                                .system(
-                                    size: 100,
-                                    weight: .light,
-                                
-                                    design: .monospaced
-                                )
-                            )
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.1)
-                            .multilineTextAlignment(.center)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .fixedSize(horizontal: false, vertical: true)
-
-                        Spacer()
-                    }
-                    .frame(height: 60)
-                
-
-                     
-                    /*
-                     Text(context.attributes.startTime, style: .timer)
-                     .font(.system(size: 100, weight: .light, design: .monospaced))
-                     .lineLimit(1)
-                     .minimumScaleFactor(0.01)
-                     .frame(width: 100, height: 50, alignment: .center)
-                    
-                     .frame(maxHeight: .infinity, alignment: .center)
-                     */
+                    Text(context.attributes.name)
+                        .font(.headline)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
                 }
-                /*DynamicIslandExpandedRegion(.center) {
-                 Text(context.attributes.name)
-                 .font(.headline)
-                 .lineLimit(1)
-                 .minimumScaleFactor(0.7)
-                 // This frame aligns the text within the center block
-                 // without forcing the whole Island to expand.
-                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
-                 .padding(.leading, 12)
-                 .padding(.bottom, 4)
-                 .background(.green)
-                 }*/
-                /*DynamicIslandExpandedRegion(.center,priority: 2) {
-                 VStack (alignment: .leading){
-                        
-                        
-                 HStack(alignment: .bottom) {
-                 Text(context.attributes.name)
-                 .font(.headline)
-                 .lineLimit(1)                   // single line
-                 .truncationMode(.tail)          // end with "..."
-                 .frame( alignment: .leading)
-                 .minimumScaleFactor(0.01)       // scales down if needed
-                 .padding(.leading, 20)
-                 Spacer()
-                            
-                 }
-                 }
-                 .background(.green)
-                 }*/
+                DynamicIslandExpandedRegion(.bottom) {
+                    elapsed(context.attributes.startTime)
+                        .font(.system(size: 28, weight: .light, design: .rounded))
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.vertical, 4)
+                }
             } compactLeading: {
-                Image(systemName: context.attributes.icon)
-                    .foregroundStyle(Color(hex: context.attributes.color))
-                    .font(.system(size: 17))
+                activityIcon(context.attributes)
             } compactTrailing: {
-                EmptyView()
+                elapsed(context.attributes.startTime)
+                    .font(.caption2)
+                    .frame(width: 58)
             } minimal: {
-                Image(systemName: context.attributes.icon)
-                    .foregroundStyle(Color(hex: context.attributes.color))
-                    .font(.system(size: 17))
+                activityIcon(context.attributes)
             }
         }
     }
+
+    private func activityIcon(_ attributes: LiveActivityDTO) -> some View {
+        Image(systemName: attributes.icon)
+            .foregroundStyle(Color(hex: attributes.color))
+            .accessibilityLabel(attributes.name)
+    }
+
+    private func elapsed(_ startTime: Date) -> some View {
+        Text(startTime, style: .timer)
+            .monospacedDigit()
+            .lineLimit(1)
+            .minimumScaleFactor(0.75)
+            .multilineTextAlignment(.center)
+            .accessibilityLabel("Elapsed time")
+    }
 }
+
+#if DEBUG
+#Preview("Over an hour", as: .dynamicIsland(.expanded), using: LiveActivityDTO(
+    id: UUID(), name: "A longer activity name", startTime: .now.addingTimeInterval(-3661),
+    icon: "book.fill", color: "#007AFF"
+)) {
+    stiintWidgetExtension()
+} contentStates: {
+    LiveActivityDTO.ContentState(isActive: true)
+}
+#endif

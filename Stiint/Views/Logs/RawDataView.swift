@@ -1,111 +1,94 @@
-//
-//  RawDataView.swift
-//  Stiint
-//
-//  Created by Liam Wittig on 25.01.26.
-//
-
 import SwiftUI
 
 struct RawDataView: View {
-
     let dateFormatter = ISO8601DateFormatter()
     let logs: [ActivityLog]
-    
-    @State private var serachTerm: String = ""
-    
-    var searchedLog: [ActivityLog] {
-        guard serachTerm != "" else { return logs }
-        return logs.filter { log in
-            log.activity?.name?.lowercased().contains(serachTerm.lowercased()) ?? false
+    @State private var searchTerm = ""
+    @State private var csvURL: URL?
+    @State private var exportFailed = false
+    @State private var selectedLog: ActivityLog?
+
+    private var searchedLogs: [ActivityLog] {
+        guard !searchTerm.isEmpty else { return logs }
+        return logs.filter {
+            ($0.activity?.name ?? "Unknown activity").localizedCaseInsensitiveContains(searchTerm)
         }
     }
 
-    @State private var csvURL: URL?
-    
-    @State private var selectedLog: ActivityLog?
+    private func dateText(_ date: Date?) -> String {
+        guard let date, date.timeIntervalSinceReferenceDate.isFinite else { return "Missing date" }
+        return dateFormatter.string(from: date)
+    }
+
+    private func durationText(_ log: ActivityLog) -> String {
+        guard let start = log.startTime, let end = log.endTime,
+              start.timeIntervalSinceReferenceDate.isFinite,
+              end.timeIntervalSinceReferenceDate.isFinite, end >= start else { return "—" }
+        return "\(end.timeIntervalSince(start))s"
+    }
 
     var body: some View {
-        if(searchedLog.isEmpty){
-            
-            ContentUnavailableView("No logs found", systemImage: "questionmark.app")
-        }
-        List(searchedLog) { log in
-            if let endTime = log.endTime,
-               let startTime = log.startTime {
+        List(searchedLogs) { log in
+            VStack(alignment: .leading) {
+                HStack {
+                    Text(log.activity?.name ?? "Unknown activity")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text(durationText(log)).font(.footnote)
+                }
+                HStack {
+                    Text(dateText(log.startTime))
+                    Spacer()
+                    Text(log.endTime == nil ? "Unfinished" : dateText(log.endTime))
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
 
-                VStack(alignment: .leading) {
-
+                if let startLat = log.startLatitude, let startLon = log.startLongitude,
+                   let endLat = log.endLatitude, let endLon = log.endLongitude,
+                   [startLat, startLon, endLat, endLon].allSatisfy(\.isFinite) {
                     HStack {
-                        Text(log.activity?.name ?? "No name")
-                            .frame(maxWidth: .infinity, alignment: .leading)
-
-                        Text("\(endTime.timeIntervalSince(startTime))s")
-                            .font(.footnote)
-                    }
-
-                    HStack {
-                        Text(dateFormatter.string(from: startTime))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        Text("\(abs(startLat), specifier: "%.4f")° \(startLat >= 0 ? "N" : "S"), \(abs(startLon), specifier: "%.4f")° \(startLon >= 0 ? "E" : "W")")
                         Spacer()
-                        Text(dateFormatter.string(from: endTime))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        Text("\(abs(endLat), specifier: "%.4f")° \(endLat >= 0 ? "N" : "S"), \(abs(endLon), specifier: "%.4f")° \(endLon >= 0 ? "E" : "W")")
                     }
-                    
-                    if let startLat = log.startLatitude, let startLon = log.startLongitude, let endLat = log.endLatitude, let endLon = log.endLongitude {
-                        
-                        
-                        HStack {
-                                // Start coordinates
-                                Text("\(startLat, specifier: "%.4f")° \(startLat >= 0 ? "N" : "S"), \(startLon, specifier: "%.4f")° \(startLon >= 0 ? "E" : "W")")
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                                   Spacer()
-                                // End coordinates
-                                Text("\(endLat, specifier: "%.4f")° \(endLat >= 0 ? "N" : "S"), \(endLon, specifier: "%.4f")° \(endLon >= 0 ? "E" : "W")")
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                            }
-                    }
-                }
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    selectedLog = log
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
                 }
             }
-        }.searchable(text: $serachTerm)
-        .sheet(item: $selectedLog) { log in
-            NavigationStack {
-                LogDetailView(log: log)
+            .contentShape(Rectangle())
+            .onTapGesture { selectedLog = log }
+        }
+        .overlay {
+            if searchedLogs.isEmpty {
+                ContentUnavailableView("No logs found", systemImage: "questionmark.app")
             }
         }
-        .onAppear {
-            Task {
-                csvURL = try? await CsvHandler()
-                    .exportDataAsCsv(logs: logs)
-            }
+        .searchable(text: $searchTerm)
+        .sheet(item: $selectedLog) { log in LogDetailView(log: log) }
+        .task { await prepareExport() }
+        .onChange(of: selectedLog == nil) { _, dismissed in
+            if dismissed { Task { await prepareExport() } }
         }
         .navigationTitle("Raw Data")
         .toolbar {
             ToolbarItem {
-                if let csvURL = csvURL {
-                    ShareLink(
-                        item: csvURL,
-                        preview: SharePreview(
-                            "Data Export",
-                            image: Image(systemName: "tablecells")
-                        )
-                    )
+                if let csvURL {
+                    ShareLink(item: csvURL, preview: SharePreview("Data Export", image: Image(systemName: "tablecells")))
+                } else if exportFailed {
+                    Button("Retry export", systemImage: "arrow.clockwise") {
+                        Task { await prepareExport() }
+                    }
                 } else {
                     ProgressView()
                 }
             }
         }
     }
-}
 
-#Preview {
-    RawDataView(logs: [ActivityLog()])
+    private func prepareExport() async {
+        csvURL = nil
+        exportFailed = false
+        do { csvURL = try await CsvHandler().exportDataAsCsv(logs: logs) }
+        catch { exportFailed = true }
+    }
 }
