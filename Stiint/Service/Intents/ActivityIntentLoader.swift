@@ -27,8 +27,18 @@ struct ActivityEntity: AppEntity {
 
 // Query to provide dynamic entities
 struct ActivityQuery: EntityQuery {
+    private let activityActor: ActivityActor
+
+    init() {
+        activityActor = PersistenceManager.shared.activityActor
+    }
+
+    init(activityActor: ActivityActor) {
+        self.activityActor = activityActor
+    }
+
     func entities(for identifiers: [UUID]) async throws -> [ActivityEntity] {
-        let activities = await PersistenceManager.shared.activityActor.getAllAvaibleActivitys()
+        let activities = await activityActor.getAllAvaibleActivitys()
         return activities
             .compactMap { activity in
                 guard activity.archived != true, let id = activity.id,
@@ -38,7 +48,7 @@ struct ActivityQuery: EntityQuery {
     }
 
     func suggestedEntities() async throws -> [ActivityEntity] {
-        let activities = await PersistenceManager.shared.activityActor.getAllAvaibleActivitys()
+        let activities = await activityActor.getAllAvaibleActivitys()
         return activities.compactMap { activity in
             guard activity.archived != true, let id = activity.id,
                   let name = activity.name else { return nil }

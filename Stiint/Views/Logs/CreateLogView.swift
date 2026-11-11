@@ -9,8 +9,9 @@ import SwiftUI
 import SwiftData
 
 struct CreateLogView: View {
-    @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @State private var saving = false
+    @State private var saveError: String?
 
     
     @State private var defaultDate: Date
@@ -112,7 +113,7 @@ struct CreateLogView: View {
                 
                 Section("Activity") {
                     Picker("Activity", selection: $activity) {
-                        ForEach(activities) { activity in
+                        ForEach(activities.filter { $0.archived != true }) { activity in
                             Text(activity.name ?? "Unnamed")
                                 .tag(activity as ActivityItem?)
                         }
@@ -152,8 +153,8 @@ struct CreateLogView: View {
                         format: .units(allowed: [.hours, .minutes])
                     )
                 }
-            }.onAppear(){
-                activity = activities.first
+            }.disabled(saving).onAppear(){
+                activity = activities.first { $0.archived != true }
             }        .navigationTitle("Create Log")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
@@ -169,44 +170,35 @@ struct CreateLogView: View {
                                 return
                             }
                             
-                            Task{
-                                if let activityId = activity!.id {
-                                    
-                                    Task{
-                                        
-                                        do {
-                                            
-                                            let startCurrentActivity = DtoManager.shared.activityDTO?.startTime
-                                            try await PersistenceManager.shared.activityLogActor
-                                                .clearTimeFrame(
-                                                    startDate: startTime,
-                                                    endDate: endTime,
-                                                    logId: UUID(),
-                                                    currentActivityStartDate: startCurrentActivity
-                                                    
-                                                )
-                                            
-                                            await PersistenceManager.shared.activityLogActor
-                                                .insertActivityLog(
-                                                    activityId: activityId,
-                                                    startTime: startTime,
-                                                    endTime: endTime
-                                                )
-                                            
-                                            
-                                            try modelContext.save()
-                                            dismiss()
-                                        } catch{
-                                            
-                                            print("Error saving: \(error)")
-                                        }
-                                    }
-                                }
-                                
-                            }
+                            saveLog()
                         }
+                        .disabled(saving || activity?.id == nil || activity?.archived == true || endTime <= startTime)
                     }
                 }
+                .interactiveDismissDisabled(saving)
+                .alert("Unable to create log", isPresented: Binding(
+                    get: { saveError != nil }, set: { if !$0 { saveError = nil } }
+                )) {
+                    Button("OK") { saveError = nil }
+                } message: { Text(saveError ?? "") }
+        }
+    }
+
+    private func saveLog() {
+        guard !saving, let activityId = activity?.id else { return }
+        saving = true
+        let start = startTime
+        let end = endTime
+        Task {
+            defer { saving = false }
+            do {
+                try await PersistenceManager.shared.activityLogActor.saveCompletedLog(
+                    activityId: activityId, startTime: start, endTime: end
+                )
+                dismiss()
+            } catch {
+                saveError = error.localizedDescription
+            }
         }
     }
 }

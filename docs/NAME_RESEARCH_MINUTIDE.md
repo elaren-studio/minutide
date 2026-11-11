@@ -4,6 +4,10 @@ Checked 2026-11-11. This records a candidate-name screen, not a legal clearance,
 
 Subsequent decision: after reviewing this screen, the user chose Minutide and authorized source publication under Elaren. See `DECISIONS.md`. The observations below describe the state at the time of the screen; they are not current reservation or publication evidence.
 
+## Later App Store Connect check
+
+On 2026-11-11, App Store Connect rejected **Minutide** with “The app name you entered is already being used.” Public catalog searches did not establish reservation availability. The descriptive title **Minutide: Time Tracker** was then accepted for app record 6833697250, bundle `com.elaren.minutide`, and verified through Apple's API. The installed display name remains Minutide. This is account-record evidence, not an App Store release or trademark clearance.
+
 ## Assessment
 
 Minutide remains a promising candidate for the independent time-tracking app. No exact-name app or public GitHub project was identified in the checks below. Similar commercial names exist, particularly **Minitide** and **miniTide**. Their existence should remain visible in any later clearance review.

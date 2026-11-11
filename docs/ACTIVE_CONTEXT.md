@@ -8,15 +8,24 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
 
 ## Verified orientation
 
-- Working checkout: `/Volumes/Felix-SSD-1/Cursor Projects/Elaren/products/minutide`, branch `feature/community-revival`, tracking `origin/main`. The SSD test run used source revision `607d5b3164545177777ed22f45bed8187d9887a9`; later handoff changes are documentation only.
+- Working checkout: `/Volumes/Felix-SSD-1/Cursor Projects/Elaren/products/minutide`. The SSD baseline test run used source revision `607d5b3164545177777ed22f45bed8187d9887a9`; later release-readiness changes are in progress and are not covered by that baseline result.
 - Starting source: upstream commit `a6f10f2d6637e9b3b330c56b818fb537357329b0` from `Liam1506/Stiint`.
-- Verified remote state: `upstream` points to `https://github.com/Liam1506/Stiint.git`; `origin` points to `https://github.com/elaren-studio/minutide.git`. Local branch `feature/community-revival` tracks `origin/main`.
+- Verified remote state: `upstream` points to `https://github.com/Liam1506/Stiint.git`; `origin` points to `https://github.com/elaren-studio/minutide.git`. Current development branch: `feature/minutide-testflight`.
 - The canonical checkout is on the verified external APFS volume. Migration receipt: `build/history/pre-ssd/migration-verification.json`. All 788 retained project, build, and result files (74,358,536 bytes) matched their SHA-256 manifest. The copied Git object store has no alternates; refs were validated from `build/history/pre-ssd/git-state.bundle` (SHA-256 `259dea147df577983bef1c8d37ad52788162d29ad259ff67bc9b17504a3e6580`).
 - App, Live Activity extension, and test targets use iOS 26.1. The internal app target is `Stiint`; display name is `Minutide` and extension display name is `Minutide Live Activity`.
 - Bundle identifiers are `com.elaren.minutide`, `com.elaren.minutide.liveactivity`, `com.elaren.minutide.tests`, and `com.elaren.minutide.uitests`. Apple registration and signing are not part of source publication. The new identifier uses a separate container from prior local community builds; no cross-container migration is implemented.
 - SwiftData explicitly uses `cloudKitDatabase: .none`. Activity logs can hold optional precise start/end coordinates; CSV export can contain them.
 - The activity model renames `deleted` to `archived` in Swift while preserving the on-disk field mapping with `@Attribute(originalName: "deleted")`.
 - `Package.resolved` pins AcknowList 3.4.0 and Sankey 2.0.0. Their checkout revisions and complete license notices are verified, recorded in `THIRD_PARTY_NOTICES.md`, bundled in the app, and displayed from local resources.
+
+## Initial internal TestFlight milestone — preparation in progress
+
+- The user's goal is a fully free, open-source app that contributors can self-build from the public source, an eventual free App Store release, and an initial processed internal TestFlight build for the maintainer.
+- Analytics, project settings, privacy, and Shortcuts changes are integrated on the current branch. The manual-edit location-metadata race guard and actual running-log query regression are integrated; all 10 relevant manual/location cases passed at runtime.
+- The bundle-base override was read back for the app and Live Activity identifiers using `com.example.minutide` and `com.example.minutide.liveactivity`; the signing team remains blank in source and the current target family is iPhone-only.
+- The expanded simulator suite passed at 23:38:59.771 UTC: **39 tests (36 unit, 3 UI), 0 failures, 0 skips**, independently read back from `build/TestResults.xcresult`. Log: `build/minutide-testflight-ci.log`. This covers the stability changes; subsequent bundled-notice additions are packaging work. The first TestFlight build supports the maintainer's physical-device acceptance run.
+- The app and Live Activity identifiers are registered. After the maintainer signed in directly, App Store Connect app **6833697250** was created and read back through Apple's API: **Minutide: Time Tracker**, bundle `com.elaren.minutide`, SKU `minutide-ios`, primary language `en-US`, Limited Access with the account holder retained. Apple rejected the bare name Minutide as already in use; the installed display name remains Minutide. No legal agreement was accepted.
+- No signed Minutide archive, IPA, upload, Apple processing result, or internal tester availability has been verified. Public source and self-build procedures do not include signing credentials, private keys, a team identifier, or Apple account data. See [TESTFLIGHT.md](TESTFLIGHT.md) for the current status and commands.
 
 ## Evidence and status
 
@@ -47,10 +56,13 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
 
 ## Next work
 
-1. Continue development only from the SSD checkout. The source/build migration and explicitly approved internal-copy cleanup are complete; keep the SSD Git bundle, historical products/results, and migration receipts intact.
-2. Check the live outcome of the unchanged hosted CI rerun and investigate any failure before treating hosted validation as passed.
-3. Validate on the iOS 26.1 minimum runtime and perform the remaining Simulator and physical-device checks in `DEVICE_ACCEPTANCE.md`. Physical acceptance and signed distribution remain separate future work.
-4. Private reporting is verified at the repository's Security tab. Keep personal support addresses and response-time commitments unset unless explicitly chosen.
+1. Finish packaging review, including the full license notices for JavaScript embedded by Sankey. The stability suite passed all 39 tests; retain its result bundle and logs.
+2. Complete targeted simulator checks for timer edits, date-boundary behavior, Shortcuts, charts, CSV, and location denial; physical-device acceptance will be exercised on the first internal TestFlight build.
+3. After the simulator gates pass, prepare and inspect a signed archive and IPA for the already registered app and Live Activity identifiers.
+4. Upload the explicit IPA to the verified Minutide app record, read back Apple processing status, and verify availability to the intended internal tester. Do not infer availability from upload success. The Apple website displays an updated Developer Program agreement notice; acceptance remains a separate human decision if it gates delivery.
+5. Use TestFlight to perform physical Shortcuts, GPS permission, reboot/recovery, and minimum-runtime acceptance. Complete these before declaring stable public release readiness.
+6. Check the live outcome of the unchanged hosted CI rerun and investigate any failure before treating hosted validation as passed.
+7. Private reporting is verified at the repository's Security tab. Keep personal support addresses and response-time commitments unset unless explicitly chosen.
 
 ## Handoff rules
 

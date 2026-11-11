@@ -32,7 +32,8 @@ struct LogDetailView: View {
     }
 
     private var canSave: Bool {
-        guard hasCompleteClosedDates, log.id != nil, activity != nil, !saving else { return false }
+        guard hasCompleteClosedDates, log.id != nil, !saving,
+              activity != nil || log.activity == nil else { return false }
         let latestEnd = DtoManager.shared.activityDTO?.startTime ?? Date.now
         return endTime > startTime && endTime <= latestEnd
     }
@@ -53,7 +54,7 @@ struct LogDetailView: View {
                     }
                     .disabled(!hasCompleteClosedDates || saving)
                     if log.activity == nil {
-                        Text("This log's activity is unavailable. Choose an existing activity to restore its assignment. The saved log is preserved until you tap Done.")
+                        Text("This log's activity is unavailable. You can keep its missing assignment or choose an existing activity. The saved log is preserved until you tap Done.")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
@@ -113,7 +114,7 @@ struct LogDetailView: View {
             .navigationTitle("Edit Log")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(saving) }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { save() }.disabled(!canSave)
                 }
@@ -133,26 +134,24 @@ struct LogDetailView: View {
             )) {
                 Button("OK") { saveError = nil }
             } message: { Text(saveError ?? "") }
+            .interactiveDismissDisabled(saving)
         }
     }
 
     private func save() {
-        guard canSave, let activity, let id = log.id else { return }
+        guard canSave, let id = log.id else { return }
         saving = true
+        let selectedActivityId = activity?.id
+        let start = startTime
+        let end = endTime
         Task {
             defer { saving = false }
             do {
-                try await PersistenceManager.shared.activityLogActor.clearTimeFrame(
-                    startDate: startTime, endDate: endTime, logId: id,
-                    currentActivityStartDate: DtoManager.shared.activityDTO?.startTime
+                try await PersistenceManager.shared.activityLogActor.saveCompletedLog(
+                    logId: id, activityId: selectedActivityId, startTime: start, endTime: end
                 )
-                log.endTime = endTime
-                log.startTime = startTime
-                log.activity = activity
-                try modelContext.save()
                 dismiss()
             } catch {
-                modelContext.rollback()
                 saveError = error.localizedDescription
             }
         }

@@ -23,19 +23,28 @@ struct DataPoint: Identifiable, Equatable {
     let activity: ActivityItem
     var timeSpend: Double
     let filterData: FilterData
+    private let averagingDayCount: Int?
 
     var timeAvg: Double {
-        let calendar = Calendar.current
-        let days = calendar.dateComponents([.day], from: filterData.startDate, to: filterData.endDate).day ?? 1
-        let numberOfDays = max(days, 1)
-        return timeSpend / Double(numberOfDays)
+        guard let averagingDayCount else { return 0 }
+        return timeSpend / Double(averagingDayCount)
     }
 
-    init(activity: ActivityItem, timeSpend: Double, filterData: FilterData) {
+    init(
+        activity: ActivityItem,
+        timeSpend: Double,
+        filterData: FilterData,
+        calendar: Calendar = .current
+    ) {
         id = UUID()
         self.activity = activity
         self.timeSpend = timeSpend
         self.filterData = filterData
+        averagingDayCount = calendarDayCount(
+            from: filterData.startDate,
+            to: filterData.endDate,
+            calendar: calendar
+        )
     }
 }
 
@@ -59,6 +68,7 @@ class TimeFrameData {
     var dataPoints: [DataPoint]
     var dataSeries: [DataSeriesPoint]
     let filterData: FilterData
+    let calendar: Calendar
 
     var timeSpendOnActivities: Double {
         var timeSpend: Double = 0
@@ -69,88 +79,158 @@ class TimeFrameData {
     }
 
     var timeOverall: Double {
-        return filterData.endDate.timeIntervalSince(filterData.startDate)
+        guard isFiniteDate(filterData.startDate), isFiniteDate(filterData.endDate) else { return 0 }
+        let duration = filterData.endDate.timeIntervalSince(filterData.startDate)
+        return duration.isFinite && duration > 0 ? duration : 0
     }
 
     var timeSpendOnActivitiesAvg: Double {
-        let calendar = Calendar.current
-        let days = calendar.dateComponents([.day], from: filterData.startDate, to: filterData.endDate).day ?? 1
-        let numberOfDays = max(days, 1)
+        guard let numberOfDays = calendarDayCount(
+            from: filterData.startDate,
+            to: filterData.endDate,
+            calendar: calendar
+        ) else { return 0 }
         return timeSpendOnActivities / Double(numberOfDays)
     }
 
     var timeOverallAvg: Double {
-        let calendar = Calendar.current
-        let days = calendar.dateComponents([.day], from: filterData.startDate, to: filterData.endDate).day ?? 1
-        let numberOfDays = max(days, 1)
+        guard let numberOfDays = calendarDayCount(
+            from: filterData.startDate,
+            to: filterData.endDate,
+            calendar: calendar
+        ) else { return 0 }
         return timeOverall / Double(numberOfDays)
     }
 
-    init(filterData: FilterData, logs: [ActivityLog]) {
+    init(
+        filterData: FilterData,
+        logs: [ActivityLog],
+        calendar: Calendar = .current,
+        now: Date = .now
+    ) {
         self.filterData = filterData
+        self.calendar = calendar
         dataSeries = []
         dataPoints = []
 
         for log in logs {
-            insertLog(log: log)
-            insertSeries(log: log)
+            guard let interval = clippedInterval(
+                for: log,
+                filterData: filterData,
+                now: now
+            ),
+            let dailySlices = splitByCalendarDay(interval, calendar: calendar) else { continue }
+
+            insertLog(interval: interval)
+            for slice in dailySlices {
+                insertSeries(activity: interval.activity, slice: slice)
+            }
         }
     }
 
-    private func insertSeries(log: ActivityLog) {
-        guard let activity = log.activity else { return }
-
-        let calendar = Calendar.current
-
-        let startTime = log.startTime!
-        var endTime = log.endTime ?? Date.now
-
-        guard endTime > startTime else { return }
-
-        var dateToSave = calendar.startOfDay(for: startTime)
-        if dateToSave < filterData.startDate {
-            dateToSave = calendar.startOfDay(for: filterData.startDate)
-        }
-
-        if endTime > filterData.endDate {
-            endTime = filterData.endDate
-        }
-
+    private func insertSeries(activity: ActivityItem, slice: DailyActivitySlice) {
         if let index = dataSeries.firstIndex(where: { point in
-            point.date == dateToSave && point.activity == log.activity
+            point.date == slice.date && point.activity == activity
         }) {
-            // point found, do something with it
-            dataSeries[index].timeSpend += endTime.timeIntervalSince(startTime)
+            dataSeries[index].timeSpend += slice.duration
         } else {
-            dataSeries.append(DataSeriesPoint(activity: activity, timeSpend: endTime.timeIntervalSince(startTime), date: dateToSave))
+            dataSeries.append(
+                DataSeriesPoint(activity: activity, timeSpend: slice.duration, date: slice.date)
+            )
         }
     }
 
-    private func insertLog(log: ActivityLog) {
-        var startTime = log.startTime ?? filterData.startDate
-        var endTime = log.endTime ?? filterData.endDate
-
-        guard let activity = log.activity else { return }
-
-        if startTime < filterData.startDate {
-            startTime = filterData.startDate
-        }
-        if endTime > filterData.endDate {
-            endTime = filterData.endDate
-
-            print("new end")
-            print(endTime)
-        }
-
-        guard endTime > startTime else { return }
+    private func insertLog(interval: ClippedActivityInterval) {
+        let seconds = interval.duration
 
         if let index = dataPoints.firstIndex(where: { DataPoint in
-            DataPoint.activity == activity
+            DataPoint.activity == interval.activity
         }) {
-            dataPoints[index].timeSpend += endTime.timeIntervalSince(startTime)
+            dataPoints[index].timeSpend += seconds
 
         } else {
-            dataPoints.append(DataPoint(activity: activity, timeSpend: endTime.timeIntervalSince(startTime), filterData: filterData))
+            dataPoints.append(
+                DataPoint(
+                    activity: interval.activity,
+                    timeSpend: seconds,
+                    filterData: filterData,
+                    calendar: calendar
+                )
+            )
         }
     }
+}
+
+private struct ClippedActivityInterval {
+    let activity: ActivityItem
+    let start: Date
+    let end: Date
+
+    var duration: TimeInterval {
+        end.timeIntervalSince(start)
+    }
+}
+
+private struct DailyActivitySlice {
+    let date: Date
+    let duration: TimeInterval
+}
+
+private func clippedInterval(
+    for log: ActivityLog,
+    filterData: FilterData,
+    now: Date
+) -> ClippedActivityInterval? {
+    guard let activity = log.activity,
+          let originalStart = log.startTime,
+          isFiniteDate(originalStart),
+          isFiniteDate(filterData.startDate),
+          isFiniteDate(filterData.endDate),
+          filterData.endDate > filterData.startDate else { return nil }
+
+    let filterDuration = filterData.endDate.timeIntervalSince(filterData.startDate)
+    let originalEnd = log.endTime ?? now
+    guard filterDuration.isFinite, filterDuration > 0,
+          isFiniteDate(originalEnd), originalEnd > originalStart else { return nil }
+
+    let start = max(originalStart, filterData.startDate)
+    let end = min(originalEnd, filterData.endDate)
+    let duration = end.timeIntervalSince(start)
+    guard duration.isFinite, duration > 0 else { return nil }
+
+    return ClippedActivityInterval(activity: activity, start: start, end: end)
+}
+
+private func splitByCalendarDay(
+    _ interval: ClippedActivityInterval,
+    calendar: Calendar
+) -> [DailyActivitySlice]? {
+    var slices: [DailyActivitySlice] = []
+    var sliceStart = interval.start
+
+    while sliceStart < interval.end {
+        let dayStart = calendar.startOfDay(for: sliceStart)
+        guard isFiniteDate(dayStart), dayStart <= sliceStart,
+              let nextDayStart = calendar.date(byAdding: .day, value: 1, to: dayStart),
+              isFiniteDate(nextDayStart), nextDayStart > sliceStart else { return nil }
+
+        let sliceEnd = min(interval.end, nextDayStart)
+        let seconds = sliceEnd.timeIntervalSince(sliceStart)
+        guard seconds.isFinite, seconds > 0 else { return nil }
+
+        slices.append(DailyActivitySlice(date: dayStart, duration: seconds))
+        sliceStart = sliceEnd
+    }
+
+    return slices.isEmpty ? nil : slices
+}
+
+private func isFiniteDate(_ date: Date) -> Bool {
+    date.timeIntervalSinceReferenceDate.isFinite
+}
+
+private func calendarDayCount(from start: Date, to end: Date, calendar: Calendar) -> Int? {
+    guard isFiniteDate(start), isFiniteDate(end), end > start,
+          let days = calendar.dateComponents([.day], from: start, to: end).day else { return nil }
+    return max(days, 1)
 }
