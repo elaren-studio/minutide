@@ -4,9 +4,9 @@ Minutide activity records can reveal someone's routine. When location logging is
 
 ## Report a vulnerability privately
 
-Do not post exploit details, private records, or an attack recipe in a public issue. If private vulnerability reporting is enabled on the community repository, use its **Security → Report a vulnerability** flow. If that flow is not available, use a private contact published by the repository maintainers; do not send sensitive details through a public issue or discussion.
+Do not post exploit details, private records, or an attack recipe in a public issue. Use **Security → Report a vulnerability** in [elaren-studio/minutide](https://github.com/elaren-studio/minutide/security). GitHub private vulnerability reporting was enabled and verified on 2026-11-11. If that flow is unavailable, wait for a private contact published by the maintainers; do not send sensitive details through a public issue or discussion.
 
-No dedicated security email or verified private-reporting endpoint is published in this checkout. Enabling and verifying a private reporting route is a release-readiness task. Do not infer a contact address from the original author's website or from upstream app links.
+No dedicated security email is published. Do not infer a personal contact address from the original author's website or from upstream app links. No support or response-time commitment is made.
 
 When reporting, include the affected revision, iOS and device model, a concise impact description, reproduction steps, and whether the report depends on location permission, Shortcuts, device signing, or a CSV destination. Redact real activity data, coordinates, Apple IDs, tokens, and provisioning files.
 

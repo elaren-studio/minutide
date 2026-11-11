@@ -42,3 +42,7 @@ Durable choices for Minutide, the independent Stiint continuation. Add a dated e
 - Keep the internal Xcode project, target, module, folders, and scheme names to minimize unrelated churn. Keep Liam Wittig's attribution and original MIT notice intact.
 - Changing the bundle identifier creates a separate app container from prior local Stiint Community installs; no automatic cross-container data migration is implemented or claimed. The community build has not been publicly distributed.
 - The bounded name screen in `NAME_RESEARCH_MINUTIDE.md` is evidence for choosing the name, not comprehensive trademark clearance. Domain registration, App Store name reservation, signed builds, TestFlight, and App Store submission are separate actions.
+
+## 2026-11-11 — Repository reporting route
+
+- Use GitHub private vulnerability reporting for Minutide. It was enabled and verified on the public Elaren repository; no personal email address or response-time promise is established.

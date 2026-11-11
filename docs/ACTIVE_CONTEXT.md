@@ -10,7 +10,7 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
 
 - Working checkout: `stiint-community`, branch `feature/community-revival`.
 - Starting source: upstream commit `a6f10f2d6637e9b3b330c56b818fb537357329b0` from `Liam1506/Stiint`.
-- Current remote state before publication: `upstream` points to the original repository; there is no `origin` remote. The authorized destination is `elaren-studio/minutide`; verify the live destination before any push.
+- Verified remote state: `upstream` points to `https://github.com/Liam1506/Stiint.git`; `origin` points to `https://github.com/elaren-studio/minutide.git`. Local branch `feature/community-revival` tracks `origin/main`.
 - App, Live Activity extension, and test targets use iOS 26.1. The internal app target is `Stiint`; display name is `Minutide` and extension display name is `Minutide Live Activity`.
 - Bundle identifiers are `com.elaren.minutide`, `com.elaren.minutide.liveactivity`, `com.elaren.minutide.tests`, and `com.elaren.minutide.uitests`. Apple registration and signing are not part of source publication. The new identifier uses a separate container from prior local community builds; no cross-container migration is implemented.
 - SwiftData explicitly uses `cloudKitDatabase: .none`. Activity logs can hold optional precise start/end coordinates; CSV export can contain them.
@@ -34,13 +34,14 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
 - The final Release Simulator build also passed with 0 warnings and 0 errors in 23.7 seconds, after the history fix, at 2026-11-11 17:28:30 UTC. Log: `/Users/felixtorres/Library/Developer/XcodeBuildMCP/workspaces/are-there-ios-time-tracking-apps-d9a194e0d7d5/logs/build_sim_2026-11-11T17-28-30-825Z_pid42173_4a3fd94a.log`.
 - At 17:13 UTC, `xcrun devicectl list devices` returned no physical devices. Physical-device acceptance is still open.
 - Renamed-source validation passed at 18:43:10 UTC: **20 passed, 0 failed, 0 skipped** (17 unit and 3 UI), iPhone 17 / iOS 26.5. Command: `env SWIFTBUILD_LAUNCH_IN_PROCESS=1 bash scripts/ci-ios.sh`; result bundle `build/TestResults.xcresult` independently verified with `xcresulttool`. Log: `/private/tmp/minutide-inprocess-ci.log`. Two ordinary shell/MCP attempts stalled before compilation in a build-service output-reader issue and were explicitly canceled; they are not passes. The environment workaround applied to this invocation only. Built plists confirm both Minutide display names and identifiers. Only this task's regenerable compiler/index/intermediate caches were cleared after low disk space blocked a documentation write; sources, products, and all result bundles remain intact.
-- No hosted CI result, App Store release, or public Minutide repository is verified yet. GitHub CLI account `fdtorres1` and active admin membership in `elaren-studio` (ID 308134048) were verified; `elaren-studio/minutide` returned 404 before creation. The connector exposed no organization memberships, so the authenticated CLI supplies organization and publication evidence. See [PUBLICATION.md](PUBLICATION.md).
+- Published and read back [elaren-studio/minutide](https://github.com/elaren-studio/minutide), repository ID 1454368023, public, active, default branch `main`, fork parent `Liam1506/Stiint`. Source commit `265a94e657143669e22eb09ce9c12de28a3ff1e8` contains the renamed, locally tested app. The original MIT notice and upstream history remain intact. Issues and private vulnerability reporting are enabled and verified. GitHub account `fdtorres1` has active admin membership in `elaren-studio` (ID 308134048).
+- The first [hosted CI run](https://github.com/elaren-studio/minutide/actions/runs/43081500718) was manually dispatched on that source commit and is queued as last observed on 2026-11-11. No hosted pass is claimed. There is no signed iPhone distribution or App Store release. See [PUBLICATION.md](PUBLICATION.md).
 
 ## Next work
 
-1. Renamed-source checks pass. Publish the authorized public fork at `elaren-studio/minutide`, keeping original history and MIT attribution; record exact commit, remote, visibility, and CI evidence after publication. The old public-name/destination question is superseded by the user's explicit instruction.
+1. Source publication and local rename validation are complete. Check the live outcome of the first hosted CI run and investigate any failure before treating hosted validation as passed. Fetch/fast-forward the local worktree to `origin/main` before new edits; the publication handoff was recorded through the GitHub API when local disk space was exhausted.
 2. Validate on the iOS 26.1 minimum runtime and perform the remaining Simulator and physical-device checks in `DEVICE_ACCEPTANCE.md`.
-3. Establish and verify the private security-reporting route on the new repository. Do not infer a personal support address or promise a response time.
+3. Private reporting is verified at the repository's Security tab. Keep personal support addresses and response-time commitments unset unless explicitly chosen. Physical acceptance and signed distribution remain separate future work.
 
 ## Handoff rules
 

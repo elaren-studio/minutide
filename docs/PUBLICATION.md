@@ -12,7 +12,7 @@ Prepared 2026-11-11. The user explicitly authorized renaming the app to Minutide
 - Public branch: `main`. Preserve original Git history and Liam Wittig's MIT copyright, with the original repository as `upstream` and Minutide as `origin`.
 - Source bundle identifiers use `com.elaren.minutide`; internal Xcode project and scheme remain `Stiint`.
 
-## Source to publish
+## Published source
 
 The reviewed `feature/community-revival` worktree contains:
 
@@ -28,12 +28,20 @@ The reviewed `feature/community-revival` worktree contains:
 
 ## Verification and publication record
 
-The renamed Minutide source passed **20 tests, 0 failures, 0 skips** at 18:43:10 UTC on iPhone 17 / iOS 26.5. Command: `env SWIFTBUILD_LAUNCH_IN_PROCESS=1 bash scripts/ci-ios.sh`; independently verified result bundle: `build/TestResults.xcresult`. The temporary environment setting bypassed a local Xcode build-service stall and was not persisted in the project. Built plists confirm the app and extension display names and identifiers. No public Minutide commit or hosted CI result is claimed by this initial record. Update this section from live evidence after publication.
+The renamed Minutide source passed **20 tests, 0 failures, 0 skips** at 18:43:10 UTC on iPhone 17 / iOS 26.5. Command: `env SWIFTBUILD_LAUNCH_IN_PROCESS=1 bash scripts/ci-ios.sh`; independently verified result bundle: `build/TestResults.xcresult`. The temporary environment setting bypassed a local Xcode build-service stall and was not persisted in the project. Built plists confirm the app and extension display names and identifiers. Source publication is verified:
+
+- Public repository: [elaren-studio/minutide](https://github.com/elaren-studio/minutide), ID 1454368023, active and public, default branch `main`, fork parent `Liam1506/Stiint`.
+- Published source commit: [`265a94e657143669e22eb09ce9c12de28a3ff1e8`](https://github.com/elaren-studio/minutide/commit/265a94e657143669e22eb09ce9c12de28a3ff1e8), read back from the public main ref after push. It preserves the original history and MIT notice.
+- `origin` is `https://github.com/elaren-studio/minutide.git`; `upstream` remains `https://github.com/Liam1506/Stiint.git`. Local branch `feature/community-revival` tracks `origin/main`.
+- Project description and issue tracker are configured; private vulnerability reporting is enabled and read back as true.
+- [First hosted CI run](https://github.com/elaren-studio/minutide/actions/runs/43081500718), workflow_dispatch on the published source commit: queued as last observed on 2026-11-11. This is not a hosted pass. Check the live run for its later outcome.
+
+The publication handoff is a documentation-only follow-up; no app, test, project, resource, or workflow source changes are included in it. It uses `[skip ci]` to avoid repeating the suite for this documentation update while the source-validation run remains queued.
 
 ## Distribution boundaries
 
 This publishes source code. No domain registration, App Store name reservation, Apple identifier registration, signed iPhone build, TestFlight release, or App Store submission is included. Physical-device acceptance remains open. The bundle-identifier change creates a separate app container from earlier local builds; no automatic cross-container migration exists.
 
-No personal maintainer contact address or response-time promise is established. Verify a private security-reporting route on the new repository before documenting it as available.
+No personal maintainer contact address or response-time promise is established. GitHub's private vulnerability-reporting flow is verified at the repository's Security tab; see `SECURITY.md`.
 
 See [ACTIVE_CONTEXT.md](ACTIVE_CONTEXT.md), [WORKLOG.md](WORKLOG.md), and [DEVICE_ACCEPTANCE.md](DEVICE_ACCEPTANCE.md) for validation snapshots and remaining acceptance work.
