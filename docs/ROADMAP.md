@@ -31,4 +31,4 @@ This roadmap is for the community revival, not a release promise. A milestone is
 - Review privacy wording, accessibility, localization, versioning, screenshots, and release notes.
 - Treat TestFlight, App Store submission, and any signed public build as separate actions requiring a review of the concrete release artifact and destination.
 
-The canonical source checkout and fresh simulator validation are on the external SSD; see [ACTIVE_CONTEXT.md](ACTIVE_CONTEXT.md) and [Local Development](LOCAL_DEVELOPMENT.md). The original internal rollback copies remain intact pending explicit deletion approval after automatic review rejected their removal.
+The canonical source checkout and fresh simulator validation are on the external SSD; see [ACTIVE_CONTEXT.md](ACTIVE_CONTEXT.md) and [Local Development](LOCAL_DEVELOPMENT.md). The user explicitly approved removing the verified internal rollback copies, and that guarded cleanup is complete. The SSD Git backup and historical validation artifacts remain intact.

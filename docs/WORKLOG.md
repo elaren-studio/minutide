@@ -90,3 +90,11 @@ Append dated entries. Record what changed and what evidence was actually collect
 
 - The final retention audit revalidated all 788 retained files, original source blobs in SSD Git, the portable all-refs bundle, and original results after archival/renaming; the fresh SSD result passed 20 tests with no failures/skips. Receipt: `build/history/pre-ssd/internal-retirement.json`.
 - Automatic approval review rejected the requested removal of the internal linked worktree, shared upstream Git directory, and preview artifacts because migration authorization did not explicitly cover irreversible deletion. The deletion command did not run. All originals remain intact; explicit deletion approval is the remaining cleanup gate. Continue development from the verified SSD checkout.
+
+## 2026-11-11 — Explicitly approved internal-copy cleanup
+
+- The user selected **Delete verified internal copies**, explicitly approving removal of the internal `stiint-community`, `stiint-upstream`, and `artifacts` folders while retaining the verified SSD repository and Git backup.
+- Re-ran the guarded retention audit: actual SSD mount, independent Git object store, clean original checkouts, no stashes or unexpected linked worktrees, all 788 retained file hashes and the complete retained-file set, original source blobs/results, preview artifacts, portable Git bundle, and the fresh SSD test pass were verified before deletion.
+- Cleanup completed at 22:56:37.889 UTC. `build/history/pre-ssd/internal-retirement.json` records `internal_retired: true`. The three approved internal directories are absent; no other workspace folders were removed.
+- Rechecked SSD `git fsck --full` (exit 0) and the complete-history Git bundle after removal. The SSD worktree remained clean. Saved products/results and the 20-test SSD result remain intact. These documentation-only updates do not require rerunning unchanged application tests.
+- Internal disk free space was reported as about 13 GiB afterward; no exact amount of physically reclaimed storage is claimed.
