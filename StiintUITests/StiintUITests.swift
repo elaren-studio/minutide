@@ -123,9 +123,10 @@ final class StiintUITests: XCTestCase {
         stopActivity(named: task, in: app)
 
         app.tabBars.buttons["Reports"].tap()
-        selectReportValue(dimension: "organization", id: organizationID, in: app)
-        selectReportValue(dimension: "client", id: clientID, in: app)
-        selectReportValue(dimension: "project", id: projectID, in: app)
+        selectReportValue(dimension: "organization", id: organizationID,
+                          matchingName: organization, in: app)
+        selectReportValue(dimension: "client", id: clientID, matchingName: client, in: app)
+        selectReportValue(dimension: "project", id: projectID, matchingName: project, in: app)
         selectReportValue(dimension: "task", id: taskButtonID.replacingOccurrences(of: "activity.start.", with: ""),
                           matchingName: task, in: app)
         let row = app.descendants(matching: .any).matching(NSPredicate(
@@ -209,9 +210,9 @@ final class StiintUITests: XCTestCase {
                        "Saving a new task must return to the picker; the user starts it by tapping its row.")
 
         let firstChoice = startTimerChoice(named: firstTask, in: app)
+        attachScreenshot(named: "Task picker after inline task creation", in: app)
         XCTAssertTrue(firstChoice.waitForExistence(timeout: 10),
                       "The just-created task must remain visible even though its organization is outside Unassigned scope.")
-        attachScreenshot(named: "Task picker shows a newly created out-of-scope task", in: app)
         firstChoice.tap()
         assertRunningActivity(named: firstTask, in: app)
         attachScreenshot(named: "My Day shows the running timer", in: app)
@@ -263,7 +264,7 @@ final class StiintUITests: XCTestCase {
         let green = app.buttons["Green"]
         XCTAssertTrue(green.waitForExistence(timeout: 5))
         green.tap()
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        popAppearanceChooser("Color", backTo: "New Task", in: app)
 
         app.buttons["work.appearance.icon.mode"].tap()
         XCTAssertTrue(app.navigationBars["Icon"].waitForExistence(timeout: 10))
@@ -271,7 +272,7 @@ final class StiintUITests: XCTestCase {
         let readingIcon = app.buttons["work.appearance.icon.custom.book.fill"]
         XCTAssertTrue(readingIcon.waitForExistence(timeout: 5))
         readingIcon.tap()
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        popAppearanceChooser("Icon", backTo: "New Task", in: app)
         assertAppearance(named: "Custom", icon: "Custom", in: app)
 
         createTaskInNestedEditor(named: task, in: app)
@@ -284,7 +285,8 @@ final class StiintUITests: XCTestCase {
         app.buttons["work.manage"].tap()
         let row = app.buttons.matching(NSPredicate(
             format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "work.task.", task)).firstMatch
-        XCTAssertTrue(row.waitForExistence(timeout: 10), "The customized task should be saved in Work Management.")
+        scrollUntilHittable(row, in: app,
+                            message: "The customized task should be visible in Work Management.")
         row.tap()
         XCTAssertTrue(app.navigationBars["Edit Task"].waitForExistence(timeout: 10))
         assertAppearance(named: "Custom", icon: "Custom", in: app)
@@ -294,7 +296,7 @@ final class StiintUITests: XCTestCase {
         let useDefaultColor = app.buttons["work.appearance.color.source"]
         XCTAssertTrue(useDefaultColor.waitForExistence(timeout: 5))
         useDefaultColor.tap()
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        popAppearanceChooser("Color", backTo: "Edit Task", in: app)
         assertAppearance(named: "Minutide default", icon: "Custom", in: app)
 
         app.buttons["work.appearance.icon.mode"].tap()
@@ -302,14 +304,15 @@ final class StiintUITests: XCTestCase {
         let useDefaultIcon = app.buttons["work.appearance.icon.source"]
         XCTAssertTrue(useDefaultIcon.waitForExistence(timeout: 5))
         useDefaultIcon.tap()
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        popAppearanceChooser("Icon", backTo: "Edit Task", in: app)
         assertAppearance(named: "Minutide default", icon: "Minutide default", in: app)
         app.buttons["task.save"].tap()
         XCTAssertTrue(app.navigationBars["Manage Work"].waitForExistence(timeout: 10))
 
         let persistedRow = app.buttons.matching(NSPredicate(
             format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "work.task.", task)).firstMatch
-        XCTAssertTrue(persistedRow.waitForExistence(timeout: 10))
+        scrollUntilHittable(persistedRow, in: app,
+                            message: "The task with reset appearance should remain visible in Work Management.")
         persistedRow.tap()
         XCTAssertTrue(app.navigationBars["Edit Task"].waitForExistence(timeout: 10))
         assertAppearance(named: "Minutide default", icon: "Minutide default", in: app)
@@ -451,6 +454,26 @@ final class StiintUITests: XCTestCase {
         attachment.name = name
         attachment.lifetime = .keepAlways
         add(attachment)
+    }
+
+    @MainActor
+    private func popAppearanceChooser(_ chooser: String, backTo editor: String, in app: XCUIApplication) {
+        let back = app.navigationBars[chooser].buttons["BackButton"]
+        XCTAssertTrue(back.waitForExistence(timeout: 5), "Missing the Back button for the \(chooser) chooser.")
+        back.tap()
+        XCTAssertTrue(app.navigationBars[editor].waitForExistence(timeout: 10),
+                      "The \(chooser) chooser should return to \(editor).")
+    }
+
+    @MainActor
+    private func scrollUntilHittable(_ element: XCUIElement, in app: XCUIApplication,
+                                     message: String, maxSwipes: Int = 20) {
+        for _ in 0..<maxSwipes {
+            if element.exists && element.isHittable { return }
+            app.swipeUp()
+        }
+        XCTAssertTrue(element.exists, message)
+        XCTAssertTrue(element.isHittable, message)
     }
 
     @MainActor

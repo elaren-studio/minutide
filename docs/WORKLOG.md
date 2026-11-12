@@ -207,3 +207,25 @@ Append dated entries. Record what changed and what evidence was actually collect
 - Bounded native workers were requested as Luna/xhigh for appearance and UI
   regressions. Spawn metadata did not expose actual model routing; cost/routing
   is unverified. Root reviewed their diffs and owns integration and execution.
+
+## 2026-11-12 UTC — Long-list usability and UI test correction
+
+- The full dark-mode run on candidate `f282b9d` recorded **70 passed, three
+  failed, zero skipped** (65 unit and eight UI cases). Inline task creation
+  preserved log fields and persisted the selected task. Migration, timer
+  recovery, report engine, exports, and five UI cases passed.
+- Pinned the just-created task first in the timer chooser so it stays available
+  above accumulated tasks, including when its assignment is outside the local
+  scope. Reports and stored data are unchanged.
+- Corrected the UI test to search uniquely named organization/client/project
+  filter options, scroll to managed tasks in long lists, and tap the specific
+  chooser BackButton. The previous generic first toolbar button targeted an
+  underlying sheet's Cancel button, as the captured hierarchy confirms.
+- Retained the failed full bundle as `build/TestResults.xcresult`, log
+  `build/logs/ui-polish-full-1.log`, and exported attachments under
+  `build/UIReview-1-all`. After all tests ended, stopped only the optional
+  `simctl diagnose` child (ten-minute timeout) to finalize the result bundle.
+  The focused rerun disables verbose diagnostics; UI attachments remain enabled.
+- Reviewed dark-mode screenshots of the labeled palette and single scope
+  surface. The three affected UI cases are being rerun; no green/full or new
+  internal-delivery claim is made at this checkpoint.

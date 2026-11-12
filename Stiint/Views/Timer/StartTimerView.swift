@@ -34,13 +34,22 @@ struct StartTimerView: View {
     private var choices: [Choice] {
         _ = organizations.count + clients.count + projects.count
         let normalized = scope.normalized(in: organizations)
-        return tasks.compactMap { task in
+        let matches: [Choice] = tasks.compactMap { task in
             guard let id = task.id,
                   let snapshot = try? WorkHierarchy.resolve(task: task, in: modelContext, requireAvailable: true),
                   id == newTaskID || normalized.matches(task: task, snapshot: snapshot) else { return nil }
             let choice = Choice(id: id, snapshot: snapshot)
             guard search.isEmpty || "\(choice.name) \(choice.path)".localizedStandardContains(search) else { return nil }
             return choice
+        }
+        // A task created in this sheet should be ready to start immediately,
+        // rather than disappearing below a long alphabetical list.
+        return matches.sorted { lhs, rhs in
+            if (lhs.id == newTaskID) != (rhs.id == newTaskID) {
+                return lhs.id == newTaskID
+            }
+            let order = lhs.name.localizedStandardCompare(rhs.name)
+            return order == .orderedSame ? lhs.id.uuidString < rhs.id.uuidString : order == .orderedAscending
         }
     }
 

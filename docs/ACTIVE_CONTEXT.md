@@ -23,8 +23,12 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
   extension IDs and iOS 26.1 minimum are unchanged.
 - XcodeBuildMCP build/run succeeded without warnings at 03:10 UTC on
   2026-11-12 (iPhone 17 / iOS 26.5). The My Day screenshot shows the Start Timer
-  control above the timeline. Regression tests and delivery are still pending;
-  0.2.0 (2) remains the latest verified internal beta below.
+  control above the timeline. The full dark-mode run passed 70/73 (65 unit,
+  five UI), with three UI failures. Corrected the timer chooser to pin its newly
+  created task above long lists, and corrected test navigation/search for
+  offscreen report options and the chooser's actual Back button. A focused
+  three-case rerun is in progress. Delivery remains pending; 0.2.0 (2) is still
+  the latest verified internal beta below.
 
 - The maintainer confirms TestFlight **0.1.0 (1)** installs and launches on his
   iPhone. Its remaining physical acceptance matrix is separate.
