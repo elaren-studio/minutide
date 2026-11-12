@@ -8,6 +8,23 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
 
 ## Current internal beta — 0.2.2 (4) available in TestFlight
 
+### Resume and new identity follow-up — 0.2.3 (5), in validation
+
+- Added Resume Timer near the top of completed-entry details. It creates a new
+  interval with the saved snapshot, preserves the old entry and gap, blocks
+  unsaved edits/paused tracking/unavailable tasks, and confirms a running switch.
+  The actor transaction preserves one timer and fresh location policy; same-task
+  identical-snapshot repeats are idempotent. No stored-model change.
+- New flowing aqua M on midnight blue is saved on the SSD and selected by the
+  app's `MinutideIcon` asset catalog and welcome image. Built-in image-generation
+  prompt and original/1024px asset paths are recorded in `BRANDING.md`.
+- XcodeBuildMCP build/run passed without warnings on iPhone 17 / iOS 26.5.
+  The compiled Info.plist selects `MinutideIcon`. Final focused run
+  `ResumeBrandFocused-2.xcresult` passed 87 unit tests plus the Resume UI case,
+  zero failures/skips, with `content_size=accessibility-medium`. The prior run
+  passed 86 units and Resume at normal text size, before the final fresh-reader
+  regression. Exact-source hosted CI, signing and build-5 delivery remain pending.
+
 ### Day views and tracking details
 
 - Maintainer screenshots showed oversized/top tracking controls, a bottom timer

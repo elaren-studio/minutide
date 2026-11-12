@@ -19,7 +19,8 @@ struct OnboardingView1: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 120, height: 120)
-                .foregroundStyle(.blue.gradient)
+                .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+                .accessibilityLabel("Minutide")
 
             // Title
             Text("Start Tracking Your Time")

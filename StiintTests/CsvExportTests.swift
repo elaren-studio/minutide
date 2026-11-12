@@ -102,6 +102,64 @@ struct CsvExportTests {
         #expect(values["Assignment Version"] == "1")
     }
 
+    @Test func warmedExportAndAnalyticsReadsRefetchCompletedIntervalsAfterResumeSwitchAndStop() async throws {
+        let container = try WorkStore.makeContainer(inMemory: true)
+        let work = WorkHierarchyActor(modelContainer: container)
+        let logs = ActivityLogActor(modelContainer: container)
+        let organization = try await work.saveOrganization(name: "Captured studio", colorHex: "#112233")
+        let task = try await work.saveTask(name: "Captured task", parent: .organization(organization))
+        let other = try await work.saveTask(name: "Other task", parent: nil)
+        let start = Date(timeIntervalSince1970: 0), end = Date(timeIntervalSince1970: 60)
+        let sourceID = try await logs.saveCompletedLog(activityId: task, startTime: start, endTime: end)
+        let prior = try #require(try await logs.startOrSwitchActivity(activityId: other))
+        let filter = FilterData(startDate: start, endDate: .now.addingTimeInterval(3_600),
+                                showFreeTime: false, selectedActivityIds: [task, other])
+        let warmed = await logs.getAllActivityLogs()
+        let original = try #require(warmed.first { $0.id == sourceID })
+        let snapshot = original.workSnapshot
+        #expect(warmed.first { $0.id == prior.logId }?.endTime == nil)
+        _ = await logs.getActivityLogsForTimeFrame(filterData: filter)
+        #expect(await logs.getPreviousActivtyLogID(activityLogId: prior.logId) == nil)
+
+        _ = try await work.saveTask(id: task, name: "Moved task", parent: nil, colorHex: "#FFFFFF")
+        let resumed = try await logs.resumeCompletedLog(logId: sourceID)
+        let resumedRead = await logs.getAllActivityLogs()
+        #expect(resumedRead.first { $0.id == resumed.logId }?.endTime == nil)
+        _ = await logs.getActivityLogsForTimeFrame(filterData: filter)
+        #expect(await logs.getPreviousActivtyLogID(activityLogId: resumed.logId) == prior.logId)
+        let switched = try #require(try await logs.startOrSwitchActivity(activityId: other))
+        let switchedRead = await logs.getAllActivityLogs()
+        #expect(switchedRead.first { $0.id == switched.logId }?.endTime == nil)
+        _ = await logs.getActivityLogsForTimeFrame(filterData: filter)
+        #expect(try await logs.stopRunningActivity())
+
+        let exportedLogs = await logs.getAllActivityLogs()
+        #expect(exportedLogs.count == 4 && exportedLogs.allSatisfy { $0.endTime != nil })
+        let storedSource = try #require(exportedLogs.first { $0.id == sourceID })
+        let storedResumed = try #require(exportedLogs.first { $0.id == resumed.logId })
+        #expect(storedSource.startTime == start && storedSource.endTime == end)
+        #expect(storedSource.workSnapshot == snapshot && storedResumed.workSnapshot == snapshot)
+        #expect(exportedLogs.first { $0.id == prior.logId }?.endTime == storedResumed.startTime)
+        #expect(storedResumed.endTime == exportedLogs.first { $0.id == switched.logId }?.startTime)
+        #expect(await logs.getPreviousActivtyLogID(activityLogId: switched.logId) == resumed.logId)
+        let analyticsLogs = await logs.getActivityLogsForTimeFrame(filterData: filter)
+        #expect(analyticsLogs.count == 4 && analyticsLogs.allSatisfy { $0.endTime != nil })
+        #expect(analyticsLogs.first { $0.id == resumed.logId }?.workSnapshot == snapshot)
+
+        let csv = parseCSV(try await fullExport(exportedLogs))
+        let values = csv.dropFirst().map { Dictionary(uniqueKeysWithValues: zip(csv[0], $0)) }
+        #expect(values.count == 4)
+        #expect(values.allSatisfy { $0["End Date"]?.isEmpty == false && $0["Duration"]?.isEmpty == false })
+        let historical = values.filter { $0["Task ID"] == task.uuidString }
+        #expect(historical.count == 2)
+        #expect(historical.allSatisfy {
+            $0["Activity"] == "Captured task" && $0["Organization Name"] == "Captured studio"
+                && $0["Task Color"] == "#112233"
+        })
+        let sourceCSV = try #require(historical.first { $0["Start Date"] == "1970-01-01T00:00:00Z" })
+        #expect(sourceCSV["End Date"] == "1970-01-01T00:01:00Z" && sourceCSV["Duration"] == "60.0")
+    }
+
     @Test func orphanAndMalformedLogDetailsInitializeWithoutForcedUnwraps() throws {
         let fixture = try ExportFixture()
         let missingDates = ActivityLog()

@@ -45,6 +45,15 @@ scope, captured assignment, and daily total. To add past time,
 tap **+** for **Create Log**; **New Task** creates and selects a task without
 leaving your log or changing its dates.
 
+To pick up previous work, open a completed entry and tap **Resume Timer** at the
+top. This starts a new entry now with its recorded task, work assignment, color,
+and icon, while keeping the original entry intact. Save any edits first. If a
+timer is already running, confirm the switch. Archived/unavailable tasks need
+to be restored or reassigned before resuming. Location coordinates are captured
+fresh only when the task's current location setting allows it.
+
+The new Minutide mark and app-icon source are documented in [Branding](docs/BRANDING.md).
+
 In **Reports**, select dates and combine work filters. Selecting two clients
 includes either client; adding a project filter narrows that set further.
 Choose a grouping and sort order to combine matching time, then export a summary

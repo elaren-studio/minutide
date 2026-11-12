@@ -2,6 +2,20 @@
 
 Durable choices for Minutide, the independent Stiint continuation. Add a dated entry when a decision changes; keep implementation status in `ACTIVE_CONTEXT.md` and `WORKLOG.md`.
 
+## 2026-11-11 — Resume completed work and Minutide identity
+
+- Resume starts a separate interval at the current time from the saved entry's
+  immutable task/assignment/color/icon snapshot. It never reopens an old entry
+  or counts the time between entries. An already-running identical task and
+  snapshot stays one timer; switching another timer shares one atomic boundary.
+- Keep Resume near the top of Edit Log. Save draft changes before resuming;
+  confirm a switch when a timer is running. Tracking pause and unavailable tasks
+  block Resume. Historical coordinates are not copied; current location opt-in
+  governs fresh location capture.
+- Use the flowing aqua M on midnight blue for the app icon and welcome image.
+  Keep its generation provenance/master and asset paths in `BRANDING.md`.
+  This changes the visual identity, not bundle identifiers or stored models.
+
 ## 2026-11-11 — My Day views, bottom tracking, and compact information
 
 - My Day supports a persisted Timeline/List choice over the same day, scope,

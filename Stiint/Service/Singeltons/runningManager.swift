@@ -80,6 +80,21 @@ public actor RunningManager {
         catch { print("Starting timer failed: \(error)") }
     }
 
+    /// A completed entry supplies its captured work details; a new timer begins
+    /// now. Keep database and visible timer mirrors within the operation gate.
+    @discardableResult
+    public func resumeCompletedLog(logId: UUID) async throws -> ActivityLogActor.RunningActivity {
+        await acquireOperation()
+        defer { releaseOperation() }
+        guard !UserDefaults.standard.bool(forKey: "pauseTracking") else {
+            throw ActivityLogActor.ResumeLogError.trackingPaused
+        }
+        let running = try await PersistenceManager.shared.activityLogActor
+            .resumeCompletedLog(logId: logId, preferredLogId: currentActivityLogId)
+        await display(running)
+        return running
+    }
+
     private func stop(matchingActivityId: UUID? = nil) async throws {
         let stopped = try await PersistenceManager.shared.activityLogActor
             .stopRunningActivity(preferredLogId: currentActivityLogId, matchingActivityId: matchingActivityId)

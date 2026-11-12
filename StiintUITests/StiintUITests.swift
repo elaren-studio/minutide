@@ -363,6 +363,39 @@ final class StiintUITests: XCTestCase {
     }
 
     @MainActor
+    func testCompletedEntryResumesAsAnotherEntryWithoutChangingTheOriginal() throws {
+        let app = launchReadyApp()
+        try requireAvailableTimer(in: app)
+        let name = "UI Resume \(String(UUID().uuidString.prefix(8)))"
+        createActivity(named: name, in: app)
+        startActivity(named: name, in: app)
+        stopActivity(named: name, in: app)
+        app.tabBars.buttons["My Day"].tap()
+        chooseDayMode("timeline", in: app)
+        let original = dayEntry(named: name, prefix: "timeline.segment.", in: app)
+        scrollUntilHittable(original, in: app, message: "The original completed entry must be reachable.")
+        let originalID = original.identifier
+        original.tap()
+        let resume = app.buttons["log.resume"]
+        XCTAssertTrue(resume.waitForExistence(timeout: 5))
+        XCTAssertTrue(resume.isEnabled)
+        attachScreenshot(named: "Completed entry offers Resume Timer", in: app)
+        resume.tap()
+        XCTAssertTrue(app.navigationBars["Edit Log"].waitForNonExistence(timeout: 10))
+        let stop = app.buttons["timer.accessory.stop"]
+        XCTAssertTrue(stop.waitForExistence(timeout: 10))
+        XCTAssertEqual(app.staticTexts["timer.accessory.name"].label, name)
+        attachScreenshot(named: "Resumed entry has a new running timer", in: app)
+        stop.tap()
+        XCTAssertTrue(stop.waitForNonExistence(timeout: 10))
+        let originalAgain = app.buttons[originalID]
+        XCTAssertTrue(originalAgain.waitForExistence(timeout: 5), "Resume must preserve the original entry.")
+        let sameTaskRows = app.buttons.matching(NSPredicate(
+            format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "timeline.segment.", name))
+        XCTAssertGreaterThanOrEqual(sameTaskRows.count, 2, "Resume must create a distinct saved entry.")
+    }
+
+    @MainActor
     func testReportsLongLabelsStayOutsideThePlotAndExportsStaySeparate() throws {
         let app = launchReadyApp()
         try requireAvailableTimer(in: app)

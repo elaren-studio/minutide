@@ -386,3 +386,37 @@ Append dated entries. Record what changed and what evidence was actually collect
   and local-storage runbook remain applicable because stored models and build
   paths did not change. Durable UI choices are in `DECISIONS.md`. Physical
   build-4, minimum-runtime, Shortcuts/GPS/restart acceptance remains open.
+
+## 2026-11-12 UTC — Resume entry and new Minutide identity
+
+- Added Resume Timer to completed-entry details. Saved details create a new
+  interval now; the old entry and its timestamps remain intact. The UI blocks
+  unsaved drafts, paused tracking, and unavailable tasks; switching an existing
+  timer requires confirmation. Errors remain visible in the editor.
+- A native worker requested as Sol/high implemented the serialized manager API,
+  atomic snapshot-preserving resume transaction, coherent fresh-context timer
+  reads, and ten initial unit regressions. Runtime model routing was not exposed.
+  Root owns UI, logo, integration, builds, release, and review. A root review
+  found the CSV read also needed fresh-context coverage; that follow-up is in
+  progress. No schema, identifier, dependency, or license change.
+- Generated the flowing aqua M on midnight blue with built-in image generation,
+  saved the 1254px master and opaque 1024px icon/welcome assets on the SSD. No
+  creative edits were applied after generation; `sips` resampled asset dimensions.
+  `BRANDING.md` retains the exact prompt and asset paths. Original upstream icon
+  source is retained, while the app target selects `MinutideIcon`.
+- Bumped app/extension/tests to 0.2.3 (5). XcodeBuildMCP build/run passed without
+  warnings on iPhone 17 / iOS 26.5 at 05:29 UTC. Compiled primary-icon metadata
+  confirms `MinutideIcon`. Runtime tests and internal delivery remain pending.
+
+## 2026-11-12 UTC — Resume and fresh-reader focused checks pass
+
+- First focused run passed 86 units plus the Resume UI flow, zero failures/skips.
+  Final `ResumeBrandFocused-2.xcresult` passed **87 units plus one UI case**,
+  zero failures/skips, at accessibility-medium text size. The new CSV regression
+  verifies that warmed export/analytics reads see later resume/switch/stop dates
+  and retain recorded details. All three legacy timer readers now use fresh
+  contexts, preserving coherent CSV, analytics and previous-timer queries.
+- Resume UI coverage starts/stops, opens the completed record, resumes it,
+  verifies the running bottom timer, stops again and finds two distinct entries
+  with the original retained. Normal screenshots are in `build/ResumeBrandReview-1`.
+  Full hosted CI, archive verification and internal delivery are next.

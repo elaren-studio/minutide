@@ -4,6 +4,11 @@ The goal is a free, open-source self-build, an eventual free App Store release, 
 
 ## Current priority: work hierarchy and combined reporting — internal beta delivered
 
+Follow-up 0.2.3 (5) is in validation: Resume Timer from completed entries and a
+new Minutide logo/app icon. Resume preserves the recorded work details in a
+separate interval; no stored-model change. Build 4 remains the latest verified
+internal beta until build-5 delivery is read back.
+
 Follow-up **0.2.2 (4)** is processed and available in the existing internal group:
 bottom tracking/Stop, richer Live Activity, brief-entry visibility, My Day
 Timeline/List modes, and adaptive Reports cards/sorting. Final exact-source
