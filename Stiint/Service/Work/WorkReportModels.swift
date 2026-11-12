@@ -33,7 +33,7 @@ nonisolated public struct WorkReportEntry: Identifiable, Equatable, Sendable {
     }
 }
 
-public enum WorkReportSelection<ID: Hashable & Sendable>: Equatable, Sendable {
+nonisolated public enum WorkReportSelection<ID: Hashable & Sendable>: Equatable, Sendable {
     case any
     case unassigned
     case selected(Set<ID>)
@@ -57,7 +57,7 @@ public enum WorkReportSelection<ID: Hashable & Sendable>: Equatable, Sendable {
     }
 }
 
-public struct WorkReportFilters: Equatable, Sendable {
+nonisolated public struct WorkReportFilters: Equatable, Sendable {
     public var organizations: WorkReportSelection<UUID>
     public var clients: WorkReportSelection<UUID>
     public var projects: WorkReportSelection<UUID>
@@ -83,7 +83,7 @@ public struct WorkReportFilters: Equatable, Sendable {
     }
 }
 
-public enum WorkReportGrouping: String, CaseIterable, Identifiable, Hashable, Sendable {
+nonisolated public enum WorkReportGrouping: String, CaseIterable, Identifiable, Hashable, Sendable {
     case organization
     case client
     case project
@@ -103,7 +103,7 @@ public enum WorkReportGrouping: String, CaseIterable, Identifiable, Hashable, Se
     }
 }
 
-public enum WorkReportMetric: String, CaseIterable, Identifiable, Equatable, Sendable {
+nonisolated public enum WorkReportMetric: String, CaseIterable, Identifiable, Hashable, Sendable {
     case duration
     case entries
 
@@ -111,7 +111,7 @@ public enum WorkReportMetric: String, CaseIterable, Identifiable, Equatable, Sen
     public var title: String { self == .duration ? "Time spent" : "Entries" }
 }
 
-public enum WorkReportSortField: String, CaseIterable, Identifiable, Equatable, Sendable {
+nonisolated public enum WorkReportSortField: String, CaseIterable, Identifiable, Hashable, Sendable {
     case metric
     case name
     case date
@@ -126,12 +126,12 @@ public enum WorkReportSortField: String, CaseIterable, Identifiable, Equatable, 
     }
 }
 
-public enum WorkReportSortDirection: Equatable, Sendable {
+nonisolated public enum WorkReportSortDirection: Equatable, Sendable {
     case ascending
     case descending
 }
 
-public struct WorkReportSort: Sendable {
+nonisolated public struct WorkReportSort: Sendable {
     public let field: WorkReportSortField
     public let direction: WorkReportSortDirection
 
@@ -141,7 +141,7 @@ public struct WorkReportSort: Sendable {
     }
 }
 
-public struct WorkReportQuery {
+nonisolated public struct WorkReportQuery {
     public let startDate: Date
     public let endDateExclusive: Date
     public let capturedNow: Date
@@ -173,29 +173,38 @@ public struct WorkReportQuery {
     }
 }
 
-public struct WorkReportEntityValue: Hashable, Sendable {
+nonisolated public struct WorkReportEntityValue: Hashable, Sendable {
     public let id: UUID
     public let name: String
+    public let contextualName: String?
     public let colorHex: String?
     public let sfSymbolName: String?
 
-    public init?(_ snapshot: WorkNodeSnapshot) {
+    public init?(_ snapshot: WorkNodeSnapshot, contextualName: String? = nil) {
         guard let id = snapshot.id else { return nil }
         self.id = id
         name = snapshot.name
+        self.contextualName = contextualName
         colorHex = snapshot.colorHex
         sfSymbolName = snapshot.sfSymbolName
     }
 
-    public init(id: UUID, name: String, colorHex: String? = nil, sfSymbolName: String? = nil) {
+    public init(
+        id: UUID,
+        name: String,
+        contextualName: String? = nil,
+        colorHex: String? = nil,
+        sfSymbolName: String? = nil
+    ) {
         self.id = id
         self.name = name
+        self.contextualName = contextualName
         self.colorHex = colorHex
         self.sfSymbolName = sfSymbolName
     }
 }
 
-public enum WorkReportGroupValue: Hashable, Sendable {
+nonisolated public enum WorkReportGroupValue: Hashable, Sendable {
     case entity(WorkReportEntityValue)
     case unassigned
     case day(Date, label: String)
@@ -217,7 +226,7 @@ public enum WorkReportGroupValue: Hashable, Sendable {
     }
 }
 
-public struct WorkReportGroupComponent: Hashable, Sendable {
+nonisolated public struct WorkReportGroupComponent: Hashable, Sendable {
     public let grouping: WorkReportGrouping
     public let value: WorkReportGroupValue
 
@@ -227,7 +236,7 @@ public struct WorkReportGroupComponent: Hashable, Sendable {
     }
 }
 
-public struct WorkReportGroupKey: Hashable, Identifiable, Sendable {
+nonisolated public struct WorkReportGroupKey: Hashable, Identifiable, Sendable {
     public let components: [WorkReportGroupComponent]
 
     public init(components: [WorkReportGroupComponent]) {
@@ -243,43 +252,71 @@ public struct WorkReportGroupKey: Hashable, Identifiable, Sendable {
 
     public var displayName: String {
         guard !components.isEmpty else { return "All matching work" }
-        return components.map { $0.value.displayName }.joined(separator: " / ")
+        let groupings = Set(components.map(\.grouping))
+        return components.map { component in
+            guard case .entity(let entity) = component.value else { return component.value.displayName }
+            let needsContext: Bool
+            switch component.grouping {
+            case .organization:
+                needsContext = false
+            case .client:
+                needsContext = !groupings.contains(.organization)
+            case .project:
+                needsContext = !groupings.contains(.organization) && !groupings.contains(.client)
+            case .task:
+                needsContext = !groupings.contains(.organization)
+                    && !groupings.contains(.client) && !groupings.contains(.project)
+            case .day:
+                needsContext = false
+            }
+            return needsContext ? (entity.contextualName ?? entity.name) : entity.name
+        }.joined(separator: " / ")
     }
 }
 
-public struct WorkReportRow: Identifiable, Equatable, Sendable {
+nonisolated public struct WorkReportRow: Identifiable, Equatable, Sendable {
     public let key: WorkReportGroupKey
     public let durationSeconds: TimeInterval
     public let entryCount: Int
     public let sortDate: Date?
+    public let presentationName: String?
 
     public var id: String { key.id }
-    public var displayName: String { key.displayName }
+    public var displayName: String { presentationName ?? key.displayName }
 
-    public init(key: WorkReportGroupKey, durationSeconds: TimeInterval, entryCount: Int, sortDate: Date?) {
+    public init(
+        key: WorkReportGroupKey,
+        durationSeconds: TimeInterval,
+        entryCount: Int,
+        sortDate: Date?,
+        presentationName: String? = nil
+    ) {
         self.key = key
         self.durationSeconds = durationSeconds
         self.entryCount = entryCount
         self.sortDate = sortDate
+        self.presentationName = presentationName
     }
 }
 
-public struct WorkReportSeriesPoint: Identifiable, Equatable, Sendable {
+nonisolated public struct WorkReportSeriesPoint: Identifiable, Equatable, Sendable {
     public let key: WorkReportGroupKey
     public let date: Date
     public let durationSeconds: TimeInterval
+    public let presentationName: String?
 
     public var id: String { "\(key.id)|\(date.timeIntervalSinceReferenceDate.bitPattern)" }
-    public var displayName: String { key.displayName }
+    public var displayName: String { presentationName ?? key.displayName }
 
-    public init(key: WorkReportGroupKey, date: Date, durationSeconds: TimeInterval) {
+    public init(key: WorkReportGroupKey, date: Date, durationSeconds: TimeInterval, presentationName: String? = nil) {
         self.key = key
         self.date = date
         self.durationSeconds = durationSeconds
+        self.presentationName = presentationName
     }
 }
 
-public struct WorkReportDetail: Identifiable, Equatable, Sendable {
+nonisolated public struct WorkReportDetail: Identifiable, Equatable, Sendable {
     public let entry: WorkReportEntry
     public let clippedStart: Date
     public let clippedEnd: Date
@@ -294,10 +331,11 @@ public struct WorkReportDetail: Identifiable, Equatable, Sendable {
     }
 }
 
-public struct WorkReportResult: Equatable, Sendable {
+nonisolated public struct WorkReportResult: Equatable, Sendable {
     public let groupings: [WorkReportGrouping]
     public let startDate: Date
     public let endDateExclusive: Date
+    public let capturedNow: Date
     public let rows: [WorkReportRow]
     public let series: [WorkReportSeriesPoint]
     public let details: [WorkReportDetail]
@@ -308,6 +346,7 @@ public struct WorkReportResult: Equatable, Sendable {
         groupings: [WorkReportGrouping] = [],
         startDate: Date = .distantPast,
         endDateExclusive: Date = .distantFuture,
+        capturedNow: Date = .distantPast,
         rows: [WorkReportRow],
         series: [WorkReportSeriesPoint],
         details: [WorkReportDetail],
@@ -317,6 +356,7 @@ public struct WorkReportResult: Equatable, Sendable {
         self.groupings = groupings
         self.startDate = startDate
         self.endDateExclusive = endDateExclusive
+        self.capturedNow = capturedNow
         self.rows = rows
         self.series = series
         self.details = details
@@ -325,7 +365,7 @@ public struct WorkReportResult: Equatable, Sendable {
     }
 }
 
-public struct WorkReportChoice: Hashable, Identifiable, Sendable {
+nonisolated public struct WorkReportChoice: Hashable, Identifiable, Sendable {
     public let id: UUID
     public let name: String
     public let colorHex: String?
@@ -339,7 +379,7 @@ public struct WorkReportChoice: Hashable, Identifiable, Sendable {
     }
 }
 
-public struct WorkReportOptions: Equatable, Sendable {
+nonisolated public struct WorkReportOptions: Equatable, Sendable {
     public let organizations: [WorkReportChoice]
     public let clients: [WorkReportChoice]
     public let projects: [WorkReportChoice]

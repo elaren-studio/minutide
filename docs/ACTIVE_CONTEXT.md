@@ -6,37 +6,37 @@ Last updated: 2026-11-11
 
 Revive the archived Stiint iOS time tracker as **Minutide**, an independently maintained, fully free, open-source app under Elaren Studio. Keep the original Xcode app target named `Stiint` and retain Liam Wittig's original MIT copyright notice. The user explicitly authorized the Minutide rename and publication under the Elaren GitHub organization on 2026-11-11.
 
-## Current feature milestone — implementation in progress
+## Current feature milestone — validated candidate; signing pending
 
-- The maintainer confirms that TestFlight **0.1.0 (1)** launches on his iPhone.
-  This confirms installation and launch, not the remaining physical acceptance matrix.
-- Current branch: `feature/workspaces-reporting`, based on delivered-source
-  handoff commit `2f5ee39878fef4bca4e9dc378553437733cb4bf8`.
-- Authorized work: optional task assignment under organizations → clients →
-  projects, independent appearance/inheritance, organization switching, combined
-  report filtering/grouping/sorting, tests/docs, remote commits, and the next
-  internal TestFlight build. Specification: [WORK_HIERARCHY.md](WORK_HIERARCHY.md).
-- Existing UUIDs and history must survive migration. Historical assignment is
-  captured per entry; later task moves must not recategorize earlier time.
-- Storage/migration, task management UI, and reporting have separate ownership.
-  Root owns integration, release checks, Git publication, and internal delivery.
-- The SSD disappeared during the initial read-only review. After the user's
-  reconnection, its mount and canonical clean repository were verified again.
-  Implementation and builds remain on the SSD; no internal fallback is used.
-- Storage/migration and work-management UI are implemented. The storage suite
-  passed **50 unit tests, 0 failures/skips** on iPhone 17 / iOS 26.5 at
-  2026-11-12 01:11:02 UTC (`build/WorkStorageResults-3.xcresult`). It includes
-  the real unversioned V1 disk migration and idempotent reopen checks.
-- A rebuilt hierarchy UI regression passed at 01:21:06 UTC: organization, client,
-  project, and task creation; Unassigned scope isolation while a project timer
-  continues; relaunch recovery; and stop. Result:
-  `build/WorkHierarchyUIResults-2.xcresult`. Manage Work now owns a dedicated
-  navigation stack in its own sheet. The first UI attempt failed navigation;
-  its result and accessibility attachments are retained separately.
-- Version is prepared as **0.2.0 (2)**. Reporting integration, the final combined
-  suite, Release archive, and next internal TestFlight delivery remain pending.
-  The 50-unit pass preceded small editor polish and the navigation change; the
-  final suite will validate the complete release candidate.
+- The maintainer confirms TestFlight **0.1.0 (1)** installs and launches on his
+  iPhone. Its remaining physical acceptance matrix is separate.
+- Current branch: `feature/workspaces-reporting`. The hierarchy/migration and
+  work-management milestone is published as `a107f6d`; reporting is now integrated.
+- Implemented local organizations → clients → projects with optional task
+  locations, independent color/icon inheritance, archive/restore, and scope
+  switching. The global running timer and Stop control stay above the task list.
+- Entries capture immutable hierarchy IDs/names/styles. Legacy history is
+  migrated without inventing ancestry; date edits/splits preserve snapshots,
+  while explicit reclassification uses the task's current assignment.
+- Reports combine OR-within/AND-across work filters, roll up one or more levels
+  or day, sort, and export summary/detail CSV. All five charts remain free.
+  Date and work filter sheets apply local drafts only on confirmation.
+- Validation covers **65 unit + 5 UI regression cases**. The complete run
+  `build/WorkReportsFullResults-3.xcresult` passed 69/70 with one native-search
+  toolbar failure; the corrected combined hierarchy/report case passed in
+  `build/WorkReportsCombinedUIResults-2.xcresult` at 02:14:29 UTC on 2026-11-12.
+  The sole app-source delta after that complete run is `WorkReportView.swift`;
+  the focused rerun verifies it. No known test failure remains. This is not a
+  claim that the earlier complete result bundle itself is green.
+- The on-disk V1 migration/reopen, history invariants, combined filters, DST,
+  CSV, timer recovery, all free charts, date cancellation, and pinned timer
+  behavior have executed evidence. The candidate-5 SHA-256 manifest matches all
+  132 source files. Original MIT notice and dependency pins are unchanged.
+- Prepared **0.2.0 (2)**. Commit/push the reporting candidate, then archive,
+  export, validate/upload, and verify Apple processing and the existing internal
+  group's availability. Those delivery steps are pending at this checkpoint.
+- Public App Store submission, external testers, and new legal agreements are
+  outside this authorization. See [WORK_HIERARCHY.md](WORK_HIERARCHY.md).
 
 ## Verified orientation
 

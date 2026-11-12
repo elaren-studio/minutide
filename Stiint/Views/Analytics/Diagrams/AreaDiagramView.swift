@@ -44,7 +44,8 @@ struct AreaDiagramView: View {
                     }
                 }
                 .chartForegroundStyleScale(
-                    range: data.dataSeries.map { $0.activity.color }
+                    domain: data.seriesStyles.map { $0.name },
+                    range: data.seriesStyles.map { $0.color }
                 )
 
             } else {

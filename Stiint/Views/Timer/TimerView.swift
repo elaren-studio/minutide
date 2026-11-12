@@ -66,42 +66,54 @@ struct TimerView: View {
 
     var body: some View {
         NavigationStack {
-            List {
+            VStack(spacing: 0) {
                 if let runningActivity {
-                    Section("Now tracking") {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Now tracking")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                         RunningTaskSnapshotCard(activity: runningActivity)
                     }
+                    .padding(14)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                    .padding(.bottom, 8)
                 }
 
-                Section(currentScope.title(in: organizations)) {
-                    if visibleTasks.isEmpty {
-                        ContentUnavailableView(
-                            "No tasks here yet",
-                            systemImage: "checkmark.circle",
-                            description: Text("Add a task or choose another work scope.")
-                        )
-                    } else {
-                        ForEach(visibleTasks) { item in
-                            TaskPickerRow(
-                                item: item,
-                                isRunning: runningActivity?.id == item.id,
-                                hasRunningTimer: runningActivity != nil,
-                                start: { start(item) }
+                List {
+                    Section(currentScope.title(in: organizations)) {
+                        if visibleTasks.isEmpty {
+                            ContentUnavailableView(
+                                "No tasks here yet",
+                                systemImage: "checkmark.circle",
+                                description: Text("Add a task or choose another work scope.")
                             )
-                            .accessibilityIdentifier("activity.start.\(item.id.uuidString)")
-                            .contextMenu {
-                                Button("Edit", systemImage: "pencil") {
-                                    activeSheet = .task(WorkEditorRequest(kind: .task, entityID: item.id))
-                                }
-                                Button("Archive", systemImage: "archivebox", role: .destructive) {
-                                    taskToArchive = item
-                                    showArchiveConfirmation = true
+                        } else {
+                            ForEach(visibleTasks) { item in
+                                TaskPickerRow(
+                                    item: item,
+                                    isRunning: runningActivity?.id == item.id,
+                                    hasRunningTimer: runningActivity != nil,
+                                    start: { start(item) }
+                                )
+                                .accessibilityIdentifier("activity.start.\(item.id.uuidString)")
+                                .contextMenu {
+                                    Button("Edit", systemImage: "pencil") {
+                                        activeSheet = .task(WorkEditorRequest(kind: .task, entityID: item.id))
+                                    }
+                                    Button("Archive", systemImage: "archivebox", role: .destructive) {
+                                        taskToArchive = item
+                                        showArchiveConfirmation = true
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+            .background(Color(uiColor: .systemGroupedBackground))
             .navigationTitle("Tasks")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -261,6 +273,7 @@ private struct TaskPickerRow: View {
 }
 
 private struct RunningTaskCard: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let activity: ActivityDTO
     let snapshot: WorkSnapshot?
 
@@ -282,37 +295,64 @@ private struct RunningTaskCard: View {
     }
 
     var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: symbolName)
-                .font(.title3)
-                .foregroundStyle(color)
-                .frame(width: 36)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(name)
-                    .font(.headline)
-                    .accessibilityIdentifier("timer.running.name")
-                if !path.isEmpty {
-                    Text(path)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(alignment: .top, spacing: 12) {
+                        taskIcon
+                        taskDetails
+                    }
+                    stopButton
+                        .frame(maxWidth: .infinity, alignment: .trailing)
                 }
-                Text(activity.startTime, style: .timer)
-                    .font(.system(.body, design: .monospaced))
-                    .foregroundStyle(.secondary)
-                    .accessibilityIdentifier("timer.running.elapsed")
+            } else {
+                HStack(spacing: 12) {
+                    taskIcon
+                    taskDetails
+                    Spacer(minLength: 8)
+                    stopButton
+                }
             }
-
-            Spacer()
-
-            Button("Stop") {
-                Task { await RunningManager.shared.stopActivity() }
-            }
-            .buttonStyle(.bordered)
-            .accessibilityLabel("Stop \(name)")
-            .accessibilityIdentifier("timer.running.stop")
         }
         .padding(.vertical, 4)
+    }
+
+    private var taskIcon: some View {
+        Image(systemName: symbolName)
+            .font(.title3)
+            .foregroundStyle(color)
+            .accessibilityHidden(true)
+    }
+
+    private var taskDetails: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(name)
+                .font(.headline)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("timer.running.name")
+            if !path.isEmpty {
+                Text(path)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Text(activity.startTime, style: .timer)
+                .font(.system(.body, design: .monospaced))
+                .foregroundStyle(.secondary)
+                .accessibilityIdentifier("timer.running.elapsed")
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var stopButton: some View {
+        Button("Stop") {
+            Task { await RunningManager.shared.stopActivity() }
+        }
+        .buttonStyle(.bordered)
+        .fixedSize()
+        .accessibilityLabel("Stop \(name)")
+        .accessibilityIdentifier("timer.running.stop")
     }
 }

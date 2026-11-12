@@ -2,7 +2,21 @@
 
 Last reviewed: 2026-11-11 local time / 2026-11-12 UTC. This records the verified first internal beta and repeatable self-build procedures. Public App Store release remains a separate step.
 
-## Current state
+## Current candidate — 0.2.0 (2)
+
+- Branch `feature/workspaces-reporting` implements local organization/client/
+  project/task management, independent inherited appearance, immutable entry
+  assignment, and combined reporting/CSV. See `WORK_HIERARCHY.md`.
+- Local validation covers 65 unit and five UI cases, including real disk-store
+  migration. The complete run passed 69/70; the final search-toolbar case passed
+  in a focused rerun. Exact evidence and bounded claims are in `ACTIVE_CONTEXT`.
+- Signing, IPA validation/upload, processing, and assignment to the existing
+  `Minutide Internal` group are pending at this checkpoint. No new tester,
+  public link, production submission, or Apple legal agreement is authorized.
+- The maintainer confirms build 0.1.0 (1) installs and launches on his iPhone.
+  Upgrade and feature acceptance of this candidate remain physical checks.
+
+## First beta record — 0.1.0 (1), historical
 
 - The product goal is a fully free, open-source app that contributors can self-build from the public source, an eventual free App Store release, and an initial processed internal TestFlight build for the maintainer.
 - The public source is available at [elaren-studio/minutide](https://github.com/elaren-studio/minutide). A Simulator self-build needs Xcode and the pinned Swift packages; it does not require Apple signing.

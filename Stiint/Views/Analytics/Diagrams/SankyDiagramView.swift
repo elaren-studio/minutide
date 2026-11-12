@@ -19,7 +19,7 @@ struct SankyDiagramView: View {
 
     private func calcSampleData(timeFrameData: TimeFrameData) -> SankeyData {
         var links: [SankeyLink] = []
-        let day: Double = 24 * 60 * 60
+        let freeTimeAverage = max(0, timeFrameData.timeOverallAvg - timeFrameData.timeSpendOnActivitiesAvg)
         let keyFrom = ""
 
         var nodes: [SankeyNode] = [SankeyNode(keyFrom, color: .accentColor)]
@@ -29,12 +29,10 @@ struct SankyDiagramView: View {
             nodes.append(SankeyNode(name, color: point.activity.color))
             links.append(SankeyLink(point.timeAvg, from: keyFrom, to: name))
         }
-        let freeTimeKey = "Free Time (\(TimeHandler().secondsToLocalizedDuration(day - timeFrameData.timeSpendOnActivitiesAvg)))"
+        let freeTimeKey = "Free Time (\(TimeHandler().secondsToLocalizedDuration(freeTimeAverage)))"
         if filterData.showFreeTime {
             nodes.append(SankeyNode(freeTimeKey, color: .accentColor))
-            print("Free time: \(timeFrameData.timeOverall - timeFrameData.timeSpendOnActivitiesAvg)")
-
-            links.append(SankeyLink(day - timeFrameData.timeSpendOnActivitiesAvg, from: keyFrom, to: freeTimeKey))
+            links.append(SankeyLink(freeTimeAverage, from: keyFrom, to: freeTimeKey))
         }
 
         return SankeyData(nodes: nodes, links: links)

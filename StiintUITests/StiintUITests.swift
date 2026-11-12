@@ -79,11 +79,11 @@ final class StiintUITests: XCTestCase {
         let task = "UI Project Task \(suffix)"
         app.buttons["work.manage"].tap()
         createWorkEntity(named: organization, addIdentifier: "work.organization.add", in: app)
-        openWorkEntity(named: organization, kind: "organization", in: app)
+        let organizationID = openWorkEntity(named: organization, kind: "organization", in: app)
         createWorkEntity(named: client, addIdentifier: "work.client.add", in: app)
-        openWorkEntity(named: client, kind: "client", in: app)
+        let clientID = openWorkEntity(named: client, kind: "client", in: app)
         createWorkEntity(named: project, addIdentifier: "work.project.add", in: app)
-        openWorkEntity(named: project, kind: "project", in: app)
+        let projectID = openWorkEntity(named: project, kind: "project", in: app)
         app.buttons["work.add"].tap()
         app.buttons["task.add"].tap()
         let field = app.textFields["task.name"]
@@ -121,16 +121,73 @@ final class StiintUITests: XCTestCase {
         app.tabBars.buttons["Tasks"].tap()
         assertRunningActivity(named: task, in: app)
         stopActivity(named: task, in: app)
+
+        app.tabBars.buttons["Reports"].tap()
+        selectReportValue(dimension: "organization", id: organizationID, in: app)
+        selectReportValue(dimension: "client", id: clientID, in: app)
+        selectReportValue(dimension: "project", id: projectID, in: app)
+        selectReportValue(dimension: "task", id: taskButtonID.replacingOccurrences(of: "activity.start.", with: ""),
+                          matchingName: task, in: app)
+        let row = app.descendants(matching: .any).matching(NSPredicate(
+            format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "analytics.report.row.", task)).firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 10), "Combined filters must include the recorded project task.")
+        XCTAssertTrue(row.label.contains("1 entries"), "The combined report must count this timer once.")
     }
 
     @MainActor
-    private func openWorkEntity(named name: String, kind: String, in app: XCUIApplication) {
+    func testReportDateCancelPreservesAppliedWindow() {
+        let app = launchReadyApp()
+        app.tabBars.buttons["Reports"].tap()
+        let summary = app.staticTexts["analytics.filter.date.summary"]
+        XCTAssertTrue(summary.waitForExistence(timeout: 10))
+        let original = summary.label
+        app.buttons["analytics.filter.date.open"].tap()
+        // SwiftUI's native inline Picker exposes the parent identifier on each
+        // option; its visible label distinguishes Today from the other rows.
+        let today = app.buttons.matching(NSPredicate(format: "identifier == %@ AND label == %@",
+                                                     "analytics.filter.date.preset", "Today")).firstMatch
+        XCTAssertTrue(today.waitForExistence(timeout: 5))
+        today.tap()
+        app.buttons["analytics.filter.cancel"].tap()
+        XCTAssertTrue(app.buttons["analytics.filter.cancel"].waitForNonExistence(timeout: 5))
+        XCTAssertEqual(summary.label, original, "Cancel must leave both the displayed and applied date range unchanged.")
+        app.buttons["analytics.filter.date.open"].tap()
+        XCTAssertTrue(today.waitForExistence(timeout: 5))
+        today.tap()
+        app.buttons["analytics.filter.apply"].tap()
+        XCTAssertTrue(app.buttons["analytics.filter.apply"].waitForNonExistence(timeout: 5))
+        XCTAssertNotEqual(summary.label, original, "Apply must commit the Today window.")
+    }
+
+    @MainActor
+    private func selectReportValue(dimension: String, id: String, matchingName: String? = nil, in app: XCUIApplication) {
+        let opener = app.buttons["analytics.report.filter.\(dimension)"]
+        XCTAssertTrue(opener.waitForExistence(timeout: 10))
+        opener.tap()
+        if let matchingName {
+            let search = app.searchFields.firstMatch
+            XCTAssertTrue(search.waitForExistence(timeout: 5))
+            search.tap()
+            search.typeText(matchingName)
+        }
+        let option = app.buttons["analytics.report.filter.\(dimension).option.\(id)"]
+        XCTAssertTrue(option.waitForExistence(timeout: 5))
+        option.tap()
+        app.buttons["analytics.report.filter.\(dimension).done"].tap()
+        XCTAssertTrue(option.waitForNonExistence(timeout: 5))
+    }
+
+    @MainActor
+    @discardableResult
+    private func openWorkEntity(named name: String, kind: String, in app: XCUIApplication) -> String {
         let row = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label BEGINSWITH %@",
                                                    "work.\(kind).", name)).firstMatch
         XCTAssertTrue(row.waitForExistence(timeout: 10))
+        let id = row.identifier.replacingOccurrences(of: "work.\(kind).", with: "")
         row.tap()
         XCTAssertTrue(app.navigationBars[name].waitForExistence(timeout: 10),
                       "Opening a work row must show its detail screen.")
+        return id
     }
 
     @MainActor

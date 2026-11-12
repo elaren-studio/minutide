@@ -17,8 +17,13 @@ struct PieDiagramView: View {
         Task {
             let freeTimeActivity = ActivityItem(id: UUID(), name: "Free Time", color: .accentColor)
             pieChartData = data.dataPoints
-
-            pieChartData.append(DataPoint(activity: freeTimeActivity, timeSpend: data.timeOverall - data.timeSpendOnActivities, filterData: filterData))
+            if filterData.showFreeTime {
+                pieChartData.append(DataPoint(
+                    activity: freeTimeActivity,
+                    timeSpend: data.timeOverall - data.timeSpendOnActivities,
+                    filterData: filterData
+                ))
+            }
         }
     }
 

@@ -14,11 +14,19 @@ The first internal TestFlight build is intended to support the maintainer's phys
   Device model and OS were not supplied. Shortcuts, location permission,
   reboot/recovery, accessibility, upgrade, and minimum-runtime checks remain open.
 
-## Work hierarchy beta acceptance — pending
+## Work hierarchy beta acceptance — local validation complete; physical checks pending
 
-The next beta must preserve the existing on-device store. Automated disk-store
-migration and simulator results will be recorded here after execution. Physical
-upgrade acceptance remains a separate maintainer check after delivery:
+The 0.2.0 (2) candidate has 65 unit and five UI regression cases covered on
+an iPhone 17 / iOS 26.5 simulator. `WorkReportsFullResults-3.xcresult` passed
+69/70; the remaining searched-task selection case passed after its fix in
+`WorkReportsCombinedUIResults-2.xcresult` (02:14:29 UTC, 2026-11-12). Only the
+report filter UI changed between those runs. The complete bundle retains its
+original failure; the focused pass resolves that case.
+
+Coverage includes a real unversioned V1 disk migration/reopen, retained IDs and
+running timer, appearance inheritance, immutable history, combined filters,
+DST/grouping conservation, CSV, date cancellation, and pinned timer controls.
+Physical upgrade acceptance remains a separate maintainer check after delivery:
 
 1. Install the update without deleting the app. Verify existing tasks and time
    entries remain, and an existing running timer retains its start time.

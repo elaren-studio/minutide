@@ -1,21 +1,50 @@
 # Minutide
 
-Minutide is a free, open-source iPhone time tracker maintained by [Elaren Studio](https://github.com/elaren-studio), continued from Liam Wittig's archived Stiint project. Create activities, start and stop them with iOS Shortcuts, review a day-by-day timeline, and explore time-use charts.
+Minutide is a free, open-source iPhone time tracker maintained by [Elaren Studio](https://github.com/elaren-studio), continued from Liam Wittig's archived Stiint project. Track tasks across organizations, clients, and projects, keep unassigned work, use iOS Shortcuts and Live Activities, and combine time in reports.
 
-This repository is in community-revival work. It is source code for development and review; it does not announce an App Store release or a downloadable community build. The fork is independent and is not affiliated with or endorsed by the original author.
+This is an early beta with public source for development and self-building. Internal TestFlight availability is recorded below; a public App Store release is a later milestone. The fork is independent and is not affiliated with or endorsed by the original author.
 
 ## What it does
 
-- Create named activities with colors, icons, and optional weekday rules.
+- Organize tasks under organizations, clients, and projects, or leave them unassigned.
+- Give each level its own color and icon, or inherit each property independently.
+- Switch organization scope while one global timer keeps running.
+- Create named tasks with optional weekday rules and location recording.
 - Start, stop, query, and resume activities from the app or Shortcuts actions.
 - Review and edit logged activity on a daily timeline.
-- Explore time-use charts, including Sankey, pie, bar, line, and area diagrams.
+- Combine organization, client, project, and task filters; group and sort matching time.
+- Explore free Sankey, pie, bar, line, and area charts using the matching records.
 - Show the current activity in an iOS Live Activity.
-- Export activity logs as CSV.
+- Export grouped summaries, report details, or complete raw logs as CSV.
 - Optionally record start and end location for selected activities.
 - Use all app features without a subscription or paid tier.
 
 The project uses SwiftUI, SwiftData, App Intents, and Swift Package Manager. The current app deployment target is iOS 26.1. Check the Xcode project settings if you work from a later revision.
+
+## Organize and report on work
+
+Open **Tasks → Manage Work** to add an organization, then clients inside it and
+projects inside a client. A task has one **Location** picker: Unassigned, an
+organization, a client, or a project. Selecting a project fills in its ancestors.
+Color and icon each offer Inherit or Custom; existing task appearance is kept.
+
+Use the organization menu to switch between All Work, Unassigned, and an
+organization. The running timer stays available while you switch scope, and
+choosing another task switches the timer. Archive and restore items from Manage
+Work; archived work remains in history.
+
+In **Reports**, select dates and combine work filters. Selecting two clients
+includes either client; adding a project filter narrows that set further.
+Choose a grouping and sort order to combine matching time, then export a summary
+or detailed CSV. Missing client/project levels keep their own buckets so direct
+organization work is included.
+
+Moving or renaming a task affects new time entries. Earlier entries keep their
+recorded location and appearance. To reclassify an older entry, edit its task or
+enable **Use task’s current assignment** in its log editor. Entries from the
+first beta retain their task but start without an organization, client, or
+project; the upgrade never guesses a past assignment. Install updates without
+deleting the app to preserve its local store.
 
 ## Screenshot
 
@@ -58,7 +87,7 @@ bash scripts/ci-ios.sh
 
 For the canonical SSD checkout, project-local Xcode GUI DerivedData, and the difference between GUI and CLI build subfolders, see [Local Development](docs/LOCAL_DEVELOPMENT.md).
 
-All features remain free and open source. The first internal TestFlight beta, **0.1.0 (1)**, is processed and assigned to the maintainer's internal group; Apple reports the intended tester as invited. Physical-device acceptance and a free public App Store release remain later steps. See [TestFlight build and upload](docs/TESTFLIGHT.md) for verified status and repeatable self-build commands. Signing details stay local; the scripts never submit a public App Store release.
+All features remain free and open source. The maintainer confirms that **0.1.0 (1)** installs and launches on his iPhone. The **0.2.0 (2)** hierarchy/reporting candidate is locally validated and awaiting signed internal delivery. Physical feature/upgrade acceptance and a free public App Store release remain later steps. See [TestFlight build and upload](docs/TESTFLIGHT.md) for verified status and repeatable self-build commands. Signing details stay local; the scripts never submit a public App Store release.
 
 These are contributor instructions, not a claim that the current revision's final test run or hosted CI has passed. See [Device Acceptance](docs/DEVICE_ACCEPTANCE.md) for the manual checks and their current evidence.
 
@@ -70,7 +99,14 @@ Keep personal provisioning profiles and signing keys out of the repository; they
 
 ## Privacy and data
 
-Activity names and start/end times are stored in the app's on-device SwiftData store. Location is optional per activity; when enabled, the app can save precise latitude and longitude at activity start and end. CSV export includes activity names, timestamps, duration, and any saved coordinates. Treat exported files as sensitive and choose their destination deliberately.
+Task and work hierarchy names, appearance, and time entries are stored in the
+app's on-device SwiftData store. Each entry captures its assignment so later
+task changes preserve historical reports. Location is optional per task; when
+enabled, the app can save precise start/end latitude and longitude. CSV exports
+can include names, hierarchy IDs, timestamps, duration, appearance, and saved
+coordinates. Treat exported files as sensitive and choose their destination
+deliberately. Organizations are local work contexts; they do not add team
+accounts or shared access.
 
 The app stores records in an on-device SwiftData store with CloudKit disabled and has no project account or server-sync service. The acknowledgements screen loads the pinned dependency licenses bundled with the app; it does not need to fetch those notices from GitHub. App network traffic has not been independently audited. Shortcuts, iOS Location Services, and system share/export flows are controlled by Apple and by the choices you make on your device. This description summarizes the app source; it is not an independent privacy or security audit. See [SECURITY.md](SECURITY.md) for reporting guidance.
 
