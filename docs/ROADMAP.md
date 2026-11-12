@@ -25,7 +25,7 @@ The goal is a free, open-source self-build, an eventual free App Store release, 
 
 ## 4. Deliver the first internal TestFlight build — internal TestFlight available
 
-- Current source candidate `dec1e884cdd4561c32210e1365359c97558a00c5` is published on `feature/minutide-testflight`; [pull request #1](https://github.com/elaren-studio/minutide/pull/1) remains a draft.
+- Current source candidate `dec1e884cdd4561c32210e1365359c97558a00c5` is published on `feature/minutide-testflight`; [pull request #1](https://github.com/elaren-studio/minutide/pull/1) is ready for review.
 - The 39-test simulator suite passed (36 unit, 3 UI; 0 failures, 0 skips) before notice-only acknowledgement additions. The final source includes all four notices and retains the original MIT notice; no post-notice test run is claimed.
 - App and Live Activity identifiers are registered. App Store Connect record 6833697250 is verified as **Minutide: Time Tracker** / `com.elaren.minutide`.
 - Signed Release archive `build/Archives/Minutide-0.1.0-1.xcarchive` and manual IPA `build/Exports/Minutide-0.1.0-1-manual/Stiint.ipa` (0.1.0 build 1, 6,047,504 bytes) are verified. Both signature checks, privacy reason `CA92.1`, all four notices, bundle identifiers, `get-task-allow=false`, and beta reports active were read back. Receipt: `build/Verification/minutide-0.1.0-1.json`.

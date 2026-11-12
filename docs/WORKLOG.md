@@ -141,3 +141,5 @@ Append dated entries. Record what changed and what evidence was actually collect
 - Added an English What to Test checklist covering timers, relaunch, Live Activities, manual edits, charts/filters, CSV, location denial, and Shortcuts. No external tester or public link was enabled.
 - Artifact source remains `dec1e884cdd4561c32210e1365359c97558a00c5`; later changes affect documentation and the export helper only, preserving the uploaded app. Source PR: https://github.com/elaren-studio/minutide/pull/1 .
 - Hosted CI remains unverified. Physical acceptance is the next user step. No Apple legal agreement or production release was performed.
+
+- Source PR #1 is now ready for review; its title and description record the completed internal TestFlight delivery and pending physical acceptance. No merge or production release was performed.

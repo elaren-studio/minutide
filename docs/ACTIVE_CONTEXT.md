@@ -21,7 +21,7 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
 ## Initial internal TestFlight milestone — TestFlight available
 
 - The user's goal remains a fully free, open-source self-build, an eventual free App Store release, and an initial processed internal TestFlight build for the maintainer's physical testing.
-- Current branch: `feature/minutide-testflight`. Candidate source commit `dec1e884cdd4561c32210e1365359c97558a00c5` is published on the branch; [pull request #1](https://github.com/elaren-studio/minutide/pull/1) is still a draft.
+- Current branch: `feature/minutide-testflight`. Candidate source commit `dec1e884cdd4561c32210e1365359c97558a00c5` is published on the branch; [pull request #1](https://github.com/elaren-studio/minutide/pull/1) is ready for review.
 - App Store Connect record **6833697250**, **Minutide: Time Tracker**, bundle `com.elaren.minutide`, is verified. The app and Live Activity identifiers are registered. No Apple legal agreement was accepted, and no public App Store release is in scope.
 - The expanded simulator suite passed at 23:38:59.771 UTC: **39 tests (36 unit, 3 UI), 0 failures, 0 skips**. This run preceded the notice-only acknowledgement additions; no post-notice app test run is claimed. The final source has the four bundled notices (AcknowList, Sankey, D3, d3-sankey), and the original MIT notice is unchanged.
 - Signed Release archive `build/Archives/Minutide-0.1.0-1.xcarchive` succeeded. Both signature checks, privacy reason `CA92.1`, and all four notices were verified; receipt: `build/Verification/minutide-0.1.0-1.json`.
@@ -62,7 +62,7 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
 1. Internal delivery is verified. Have the maintainer install the invited TestFlight build and record physical acceptance separately.
 2. Use the TestFlight install for physical Shortcuts, GPS permission, reboot/recovery, and minimum-runtime acceptance. Keep these separate from archive signature, IPA upload, and processing evidence.
 3. Rerun app tests if any source changes follow the notice additions; the 39-test result predates those acknowledgement/resource changes.
-4. Check the live outcome of hosted Actions and any pull-request checks. Actions is enabled and the workflow is active; the older workflow-dispatch run was queued, and no PR check/run was observed for draft PR #1. The cause is not established.
+4. Check the live outcome of hosted Actions and any pull-request checks. Actions is enabled and the workflow is active; the older workflow-dispatch run was queued, and no PR check/run was observed for PR #1. The cause is not established.
 5. Keep production App Store submission and acceptance of Apple's legal agreement as future gates.
 6. Private reporting is verified at the repository's Security tab. Keep personal support addresses and response-time commitments unset unless explicitly chosen.
 

@@ -48,7 +48,7 @@ See [ACTIVE_CONTEXT.md](ACTIVE_CONTEXT.md), [WORKLOG.md](WORKLOG.md), and [DEVIC
 
 ## Subsequent internal TestFlight goal — internal TestFlight available
 
-The user later set the goal of an entirely free, open-source app that can be self-built from the public source, an eventual free App Store release, and a first processed internal TestFlight build for the maintainer's physical testing. The source candidate [`dec1e884cdd4561c32210e1365359c97558a00c5`](https://github.com/elaren-studio/minutide/commit/dec1e884cdd4561c32210e1365359c97558a00c5) is published on `feature/minutide-testflight`; [pull request #1](https://github.com/elaren-studio/minutide/pull/1) remains a draft.
+The user later set the goal of an entirely free, open-source app that can be self-built from the public source, an eventual free App Store release, and a first processed internal TestFlight build for the maintainer's physical testing. The source candidate [`dec1e884cdd4561c32210e1365359c97558a00c5`](https://github.com/elaren-studio/minutide/commit/dec1e884cdd4561c32210e1365359c97558a00c5) is published on `feature/minutide-testflight`; [pull request #1](https://github.com/elaren-studio/minutide/pull/1) is ready for review.
 
 The 39-test suite passed (36 unit, 3 UI; 0 failures, 0 skips) at 23:38:59.771 UTC before the notice-only acknowledgement additions; no post-notice app test run is claimed. The final source retains the original MIT notice and includes full D3 and d3-sankey notices alongside AcknowList and Sankey.
 
