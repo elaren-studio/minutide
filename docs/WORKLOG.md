@@ -171,3 +171,20 @@ Append dated entries. Record what changed and what evidence was actually collect
 - Earlier UI failures found the timer controls could scroll off a long list. The running card is now pinned above it. A temporary exact-name UI utility stopped only this session's failed-test timer; it was removed before candidate publication and is not counted as a regression. Tests also use task search and native Picker accessibility labels rather than expecting offscreen or overridden identifiers.
 - Original upstream MIT bytes and dependency pins are unchanged. Candidate manifest `build/Verification/work-report-candidate-5.json` matches 132 source files. No app-source change follows the focused pass at this checkpoint. Requested native workers were Luna xhigh and Sol high; independent runtime routing metadata was not exposed, so no verified model-cost claim is made.
 - Reporting source commit/push, signed Release artifact, and next internal TestFlight availability remain pending. No new physical acceptance, external tester, production release, or legal-agreement acceptance is claimed.
+
+
+## 2026-11-12 UTC — 0.2.0 (2) internal TestFlight available
+
+- Published the reporting candidate as `edf830598a033136028d690a2c0e167d14289a86` on `feature/workspaces-reporting`. Draft PR #2 is stacked on initial-source PR #1: https://github.com/elaren-studio/minutide/pull/2 . Neither PR was merged.
+- The signed Release archive succeeded and both bundles/signatures were verified. Manual App Store export reused the existing local distribution certificate/profiles. IPA: `build/Exports/Minutide-0.2.0-2-manual/Stiint.ipa`, **6,869,853 bytes**, SHA-256 `8f67daa55ec475e563ad02e04012d4332784af7e6e50fa66a69c60b4eef179c6`. Verified app/extension IDs, 0.2.0 build 2, iOS 26.1 minimum, `get-task-allow=false`, beta reports active, four notices, and privacy reason `CA92.1`. No signing access grant or certificate was created.
+- Apple validation succeeded at 02:33:09 UTC and upload at 02:33:57 UTC, without errors. Delivery/build `0cbd1652-c1a3-41ba-b704-82901d5e4c5d` processed as `VALID` for pre-release version 0.2.0. Published reviewed English beta notes and added only this build to the existing internal group.
+- Fresh readback at **02:43:11 UTC** confirmed `IN_BETA_TESTING`, group/build assignment, sole intended maintainer membership, disabled public link, and disabled Mac/Vision availability. Receipt: `build/Verification/minutide-0.2.0-2.json`. New-build installation and email delivery are not claimed; physical upgrade/features remain open.
+- Dispatched hosted workflow run 43141785036 on the exact source. It is in progress as last read; no hosted pass is claimed. Local validation remains the recorded 65-unit/five-UI coverage across the complete run plus final focused rerun.
+- All source/build/archive/export/result evidence remains on the SSD. No public App Store submission, external tester, or Apple legal-agreement acceptance was performed.
+
+
+## 2026-11-12 UTC — Hosted suite green and source ready for review
+
+- Hosted Actions run **43141785036** completed successfully on exact artifact source `edf830598a033136028d690a2c0e167d14289a86`, using Xcode 26.6. Its log independently reports **65 unit tests and five UI tests passed, zero failures/skips**, then `TEST SUCCEEDED` at 02:47:31 UTC. This clean 70-test hosted result is the final complete-suite validation, beyond the earlier local complete/focused sequence.
+- Retained log `build/logs/hosted-ci-43141785036.log`, metadata `build/Verification/hosted-ci-43141785036.json`, and the updated release receipt. PR #2 is ready for review; neither stacked PR is merged.
+- Updated README, roadmap, active context, TestFlight runbook, and acceptance ledger to reflect the shipped internal build and green CI. App source and the verified IPA are unchanged. Physical build-2 upgrade/features remain open; no production release or legal-agreement acceptance occurred.

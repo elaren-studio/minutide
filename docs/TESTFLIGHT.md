@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-11-11 local time / 2026-11-12 UTC. This records the verified first internal beta and repeatable self-build procedures. Public App Store release remains a separate step.
 
-## Current candidate — 0.2.0 (2)
+## Current internal beta — 0.2.0 (2)
 
 - Branch `feature/workspaces-reporting` implements local organization/client/
   project/task management, independent inherited appearance, immutable entry
@@ -10,11 +10,27 @@ Last reviewed: 2026-11-11 local time / 2026-11-12 UTC. This records the verified
 - Local validation covers 65 unit and five UI cases, including real disk-store
   migration. The complete run passed 69/70; the final search-toolbar case passed
   in a focused rerun. Exact evidence and bounded claims are in `ACTIVE_CONTEXT`.
-- Signing, IPA validation/upload, processing, and assignment to the existing
-  `Minutide Internal` group are pending at this checkpoint. No new tester,
-  public link, production submission, or Apple legal agreement is authorized.
+- Source `edf830598a033136028d690a2c0e167d14289a86` is published on the feature branch;
+  [PR #2](https://github.com/elaren-studio/minutide/pull/2) is ready for review, stacked on #1.
+- Signed archive `build/Archives/Minutide-0.2.0-2.xcarchive` and IPA
+  `build/Exports/Minutide-0.2.0-2-manual/Stiint.ipa` are verified. IPA size:
+  6,869,853 bytes; SHA-256 `8f67daa55ec475e563ad02e04012d4332784af7e6e50fa66a69c60b4eef179c6`.
+  App and extension signatures, distribution profiles, version/build, IDs,
+  minimum iOS 26.1, non-debug/beta entitlements, four notices, and `CA92.1` passed.
+- Validation/upload succeeded without errors. Apple build/delivery `0cbd1652-c1a3-41ba-b704-82901d5e4c5d`
+  is `VALID`, with internal state `IN_BETA_TESTING`. Group assignment and English
+  beta notes were read back; availability was independently rechecked at
+  **2026-11-12 02:43:11 UTC**. Expiry: `2027-02-09T18:34:37-08:00`.
+- `Minutide Internal` still contains only the intended maintainer; no public link
+  is enabled and Mac/Vision availability is disabled. No new tester, production
+  submission, certificate/access grant, or legal-agreement acceptance occurred.
+  Receipt: `build/Verification/minutide-0.2.0-2.json`.
+- Hosted [run 43141785036](https://github.com/elaren-studio/minutide/actions/runs/43141785036)
+  passed all **70 tests (65 unit, five UI), zero failures/skips**, on the exact
+  shipped source with Xcode 26.6. This is the final clean full-suite result.
+  Metadata/logs are retained in the local receipt; physical acceptance is separate.
 - The maintainer confirms build 0.1.0 (1) installs and launches on his iPhone.
-  Upgrade and feature acceptance of this candidate remain physical checks.
+  Build-2 installation, email delivery, and physical upgrade/feature acceptance are not claimed. Update through TestFlight without deleting the app to preserve its local store.
 
 ## First beta record — 0.1.0 (1), historical
 
@@ -108,7 +124,7 @@ bash scripts/upload-testflight.sh build/Exports/Minutide/Minutide.ipa
 
 If Xcode chose another IPA filename, provide that exact path. The export script verifies that Xcode produced exactly one nonempty IPA in the output directory. The upload script first runs Apple's `altool --validate-app`, then uploads the same IPA with the same credentials using `altool --upload-package`. Its log is under `build/logs/upload-testflight-*.log`. Upload success means Apple's upload command accepted the package; it does not mean processing finished or testers can install it.
 
-## Apple processing and internal availability
+## Apple processing and internal availability — first beta history
 
 Apple processing is `VALID` for **0.1.0 (1)**, build/delivery `591b8c17-694a-41ce-80bd-39c16a27e4a6`; internal state is `IN_BETA_TESTING`. The build is assigned to `Minutide Internal`, whose sole intended tester is `INVITED`. The website independently shows this version/build, group, and one invitation. Expiry: 2027-02-09. Installation and email delivery are not claimed. Use the invited build for physical acceptance of Shortcuts, location, restart, accessibility, upgrade, and minimum-runtime behavior.
 

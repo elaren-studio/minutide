@@ -2,7 +2,7 @@
 
 The goal is a free, open-source self-build, an eventual free App Store release, and an initial processed internal TestFlight build for the maintainer. A milestone is complete only when its evidence is recorded in `ACTIVE_CONTEXT.md` and `WORKLOG.md`.
 
-## Current priority: work hierarchy and combined reporting — validated; internal delivery pending
+## Current priority: work hierarchy and combined reporting — internal beta delivered
 
 The maintainer confirms the first TestFlight build launches on his iPhone. The
 next authorized internal beta adds organizations, clients, projects, optional
@@ -11,9 +11,11 @@ combined report filtering/grouping/sorting. Preserve the existing store and
 prove its migration on disk. See [WORK_HIERARCHY.md](WORK_HIERARCHY.md) for the
 behavior and acceptance contract. The source implementation and 65 unit plus
 five UI regression cases are validated, with the final search fix verified in a
-focused rerun. Commit/push the reporting candidate, then sign, upload, and verify
-the next build in the existing internal group. Physical upgrade acceptance stays
-separate from local validation and Apple availability.
+focused rerun. Source `edf8305` is published in ready-for-review PR #2; signed **0.2.0 (2)**
+is processed and available to the existing internal maintainer group. Physical
+upgrade/features and minimum-runtime acceptance remain open. Hosted CI for the
+exact shipped source passed all **70 tests (65 unit, five UI), zero failures/skips**;
+run 43141785036 is the final complete-suite evidence.
 
 ## 1. Establish a clear, free community fork — source published; hosted check pending
 

@@ -23,10 +23,19 @@ an iPhone 17 / iOS 26.5 simulator. `WorkReportsFullResults-3.xcresult` passed
 report filter UI changed between those runs. The complete bundle retains its
 original failure; the focused pass resolves that case.
 
+The final hosted run [43141785036](https://github.com/elaren-studio/minutide/actions/runs/43141785036)
+passed all **70 tests (65 unit, five UI), zero failures/skips**, on the shipped
+source with Xcode 26.6. Its clean full-suite result supersedes the local
+complete-plus-focused sequence; it does not complete physical acceptance.
+
 Coverage includes a real unversioned V1 disk migration/reopen, retained IDs and
 running timer, appearance inheritance, immutable history, combined filters,
 DST/grouping conservation, CSV, date cancellation, and pinned timer controls.
-Physical upgrade acceptance remains a separate maintainer check after delivery:
+Build **0.2.0 (2)** is now `VALID` / `IN_BETA_TESTING` for the existing maintainer
+group, verified at 2026-11-12 02:43:11 UTC. Source `edf830598a033136028d690a2c0e167d14289a86`, signed artifact
+receipt `build/Verification/minutide-0.2.0-2.json`. This is delivery evidence;
+physical installation and feature/upgrade acceptance of build 2 are not claimed.
+Update through TestFlight without deleting the app, then check:
 
 1. Install the update without deleting the app. Verify existing tasks and time
    entries remain, and an existing running timer retains its start time.

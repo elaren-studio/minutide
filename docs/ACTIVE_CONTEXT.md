@@ -6,7 +6,7 @@ Last updated: 2026-11-11
 
 Revive the archived Stiint iOS time tracker as **Minutide**, an independently maintained, fully free, open-source app under Elaren Studio. Keep the original Xcode app target named `Stiint` and retain Liam Wittig's original MIT copyright notice. The user explicitly authorized the Minutide rename and publication under the Elaren GitHub organization on 2026-11-11.
 
-## Current feature milestone — validated candidate; signing pending
+## Current feature milestone — 0.2.0 (2) available in internal TestFlight
 
 - The maintainer confirms TestFlight **0.1.0 (1)** installs and launches on his
   iPhone. Its remaining physical acceptance matrix is separate.
@@ -32,9 +32,26 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
   CSV, timer recovery, all free charts, date cancellation, and pinned timer
   behavior have executed evidence. The candidate-5 SHA-256 manifest matches all
   132 source files. Original MIT notice and dependency pins are unchanged.
-- Prepared **0.2.0 (2)**. Commit/push the reporting candidate, then archive,
-  export, validate/upload, and verify Apple processing and the existing internal
-  group's availability. Those delivery steps are pending at this checkpoint.
+- Delivered **0.2.0 (2)** from source `edf830598a033136028d690a2c0e167d14289a86`,
+  published on the feature branch and [PR #2](https://github.com/elaren-studio/minutide/pull/2)
+  (ready for review, stacked on initial-source PR #1). No merge is performed.
+- Signed archive `build/Archives/Minutide-0.2.0-2.xcarchive` and manual-export IPA
+  `build/Exports/Minutide-0.2.0-2-manual/Stiint.ipa` are verified: 6,869,853 bytes,
+  SHA-256 `8f67daa55ec475e563ad02e04012d4332784af7e6e50fa66a69c60b4eef179c6`. Both distribution signatures,
+  identifiers/version/minimum OS, non-debug entitlements, four notices, and
+  privacy reason `CA92.1` were checked. No new certificate or access grant.
+- Apple validation/upload succeeded without errors. Build/delivery `0cbd1652-c1a3-41ba-b704-82901d5e4c5d`
+  is `VALID` and `IN_BETA_TESTING`, assigned to `Minutide Internal`; fresh API
+  readback verified availability at **2026-11-12 02:43:11 UTC**. The group still
+  has only the intended maintainer, no public link, and Mac/Vision disabled.
+  English beta notes are verified. No build-2 installation or email delivery is claimed.
+- Receipt: `build/Verification/minutide-0.2.0-2.json`. Hosted [run 43141785036](https://github.com/elaren-studio/minutide/actions/runs/43141785036)
+  **passed all 70 tests (65 unit, five UI), zero failures/skips**, on the exact
+  shipped source with Xcode 26.6. The clean hosted run supersedes the local
+  complete-plus-focused validation as the final full-suite result. Log/metadata
+  are retained under `build/logs/` and `build/Verification/`.
+- Physical 0.2 upgrade/features and minimum-runtime acceptance remain separate
+  from internal delivery. The maintainer has not yet reported those results.
 - Public App Store submission, external testers, and new legal agreements are
   outside this authorization. See [WORK_HIERARCHY.md](WORK_HIERARCHY.md).
 
@@ -91,12 +108,12 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
 
 ## Next work
 
-1. Internal delivery is verified. Have the maintainer install the invited TestFlight build and record physical acceptance separately.
-2. Use the TestFlight install for physical Shortcuts, GPS permission, reboot/recovery, and minimum-runtime acceptance. Keep these separate from archive signature, IPA upload, and processing evidence.
-3. Rerun app tests if any source changes follow the notice additions; the 39-test result predates those acknowledgement/resource changes.
-4. Check the live outcome of hosted Actions and any pull-request checks. Actions is enabled and the workflow is active; the older workflow-dispatch run was queued, and no PR check/run was observed for PR #1. The cause is not established.
+1. Update the existing TestFlight install to 0.2.0 (2) without deleting it. Record physical upgrade/history/running-timer acceptance separately.
+2. Exercise organizations, appearance, combined reports/exports, physical Shortcuts, GPS permission, reboot/recovery, and minimum-runtime behavior using `DEVICE_ACCEPTANCE.md`.
+3. Review the stacked source PRs #1 and #2. The complete shipped source passed hosted CI; no merge has been performed.
+4. Before a later stored-model change, freeze the shipped V2 schema and extend the ordered migration/disk fixtures.
 5. Keep production App Store submission and acceptance of Apple's legal agreement as future gates.
-6. Private reporting is verified at the repository's Security tab. Keep personal support addresses and response-time commitments unset unless explicitly chosen.
+6. Keep private vulnerability reporting and the canonical SSD source/build paths; do not invent support-address or response-time commitments.
 
 ## Handoff rules
 
