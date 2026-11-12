@@ -33,8 +33,10 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
   review caught a separate Reports sorting collision missed by the original
   assertions; final source stacks those controls and adds a geometry check.
   `MyDayDetailsAccessibility-3.xcresult` passes that correction. Final hosted
-  run 43157603328 is running on `59a1f12`; do not attribute the earlier full
-  result to this later source. Candidate-2 manifests fingerprint 139 files,
+  [run 43157603328](https://github.com/elaren-studio/minutide/actions/runs/43157603328)
+  passed **86 tests (76 unit, ten UI), zero failures/skips**, on exact final
+  source `59a1f12`; `TEST SUCCEEDED` at **2026-11-12 05:16:14 UTC**. This is the
+  final complete-suite evidence. Candidate-2 manifests fingerprint 139 files,
   including 124 product files. Default/larger-text screenshots are retained
   under `build/MyDayDetailsReview-2` and `build/MyDayDetailsAccessibilityReview-*`.
   The first signed candidate was preserved as superseded and never uploaded.
@@ -195,7 +197,7 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
 
 1. Update the existing TestFlight install to 0.2.2 (4) without deleting it. Record physical upgrade/history/running-timer acceptance separately.
 2. Review bottom Start/Stop, richer Live Activities, brief entries, Timeline/List and Reports layouts, plus the prior appearance/inline creation flows. Exercise hardware Shortcuts/GPS/recovery and minimum-runtime behavior using `DEVICE_ACCEPTANCE.md`.
-3. Finish exact-source hosted run 43157603328 and review the stacked source PRs #1 and #2. No merge has been performed.
+3. Review the stacked source PRs #1 and #2. Final exact-source hosted run 43157603328 passed all 86 tests; no merge has been performed.
 4. Before a later stored-model change, freeze the shipped V2 schema and extend the ordered migration/disk fixtures.
 5. Keep production App Store submission and acceptance of Apple's legal agreement as future gates.
 6. Keep private vulnerability reporting and the canonical SSD source/build paths; do not invent support-address or response-time commitments.

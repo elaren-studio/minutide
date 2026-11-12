@@ -103,9 +103,9 @@ All features remain free and open source. **0.2.2 (4)** adds bottom tracking and
 Stop controls, My Day Timeline/List modes and brief-entry visibility, richer
 Live Activities, and adaptive Reports layouts. It is processed and available in
 the existing internal TestFlight group. Update without deleting the app to
-preserve its local store. The earlier complete suite passed **86 tests (76 unit,
-ten UI), zero failures/skips**; the final Reports accessibility correction passed
-its focused test, with exact-source hosted CI still running. Physical acceptance
+preserve its local store. Final hosted CI passed **86 tests (76 unit, ten UI),
+zero failures/skips**, on the released app source. Larger-text My Day and Reports
+checks also passed. Physical acceptance
 and a free public App Store release remain later steps. See [TestFlight build and
 upload](docs/TESTFLIGHT.md) for verified status and repeatable self-build commands.
 Signing details stay local; the scripts never submit a public App Store release.

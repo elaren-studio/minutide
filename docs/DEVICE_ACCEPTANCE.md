@@ -29,7 +29,11 @@ product coverage and removed before publication). The full local
 `MyDayDetailsFull-1.xcresult` passed **86 tests (76 unit, ten UI), zero failures/
 skips**, on `00def43`; hosted run 43154616269 passed the same 86 cases on that
 source. Subsequent final changes stack Reports sorting controls and strengthen
-test navigation/geometry. Final hosted run 43157603328 is in progress.
+test navigation/geometry. Final hosted
+[run 43157603328](https://github.com/elaren-studio/minutide/actions/runs/43157603328)
+passed **86 tests (76 unit, ten UI), zero failures/skips**, on exact final source
+`59a1f12`; `TEST SUCCEEDED` at **2026-11-12 05:16:14 UTC**. This is the final
+complete-suite evidence; prior failed bundles remain retained as historical results.
 Default-size dark screenshots under `build/MyDayDetailsReview-2` were visually
 reviewed for bottom positioning, readable list entries, and report separation.
 A simulator Lock Screen showed the richer task/status/start/elapsed presentation.

@@ -10,8 +10,10 @@ Last reviewed: 2026-11-11 local time / 2026-11-12 UTC. This records verified int
 - Final source `59a1f12f498f4befb28d7bb764300694ca846d22` is published in PR #2.
   Earlier source `00def43` passed all 86 local and hosted tests (76 unit, ten UI),
   zero failures/skips. Final accessibility-size Reports checks passed after a
-  screenshot-driven sorting correction; exact-source hosted run 43157603328 is
-  running. My Day's larger-text flow passed separately.
+  screenshot-driven sorting correction. Final exact-source
+  [hosted run 43157603328](https://github.com/elaren-studio/minutide/actions/runs/43157603328)
+  passed **86 tests (76 unit, ten UI), zero failures/skips**, with `TEST SUCCEEDED`
+  at **2026-11-12 05:16:14 UTC**. My Day's larger-text flow passed separately.
 - Archive `build/Archives/Minutide-0.2.2-4.xcarchive` and IPA
   `build/Exports/Minutide-0.2.2-4-manual/Stiint.ipa` are verified. IPA size:
   **7,125,052 bytes**; SHA-256

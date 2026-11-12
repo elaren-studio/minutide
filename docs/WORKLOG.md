@@ -368,3 +368,21 @@ Append dated entries. Record what changed and what evidence was actually collect
   Mac/Vision availability. No external tester, new certificate/access grant,
   public submission, or legal-agreement acceptance. Physical build-4 acceptance
   and email delivery are not claimed. Final hosted CI is still running.
+
+## 2026-11-12 UTC — Final build-4 source passes complete hosted CI
+
+- Final hosted run 43157603328 succeeded on exact app/test source
+  `59a1f12f498f4befb28d7bb764300694ca846d22`. Logs independently confirm
+  **76 unit and ten UI tests passed, zero failures/skips**, followed by
+  `TEST SUCCEEDED` at **05:16:14 UTC**. This is the final clean full-suite result.
+- Retained metadata and `build/logs/hosted-ci-43157603328.log`, SHA-256
+  `3cac1b9f022e5e0e659666d3f35caa474958d2325698ca692ad19aae9398ad48`,
+  and updated the build-4 receipt. Fresh API readback reconfirms `VALID` /
+  `IN_BETA_TESTING`, exact intended internal group, one tester, no public link,
+  and Mac/Vision disabled. The signed IPA and 139-file source manifest remain
+  unchanged; subsequent commits contain documentation only.
+- Updated README, active context, roadmap, TestFlight/acceptance records and PR
+  #2 around the final behavior and verified delivery. Hierarchy specification
+  and local-storage runbook remain applicable because stored models and build
+  paths did not change. Durable UI choices are in `DECISIONS.md`. Physical
+  build-4, minimum-runtime, Shortcuts/GPS/restart acceptance remains open.
