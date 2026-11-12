@@ -1,8 +1,37 @@
 # Minutide self-build and internal TestFlight
 
-Last reviewed: 2026-11-11 local time / 2026-11-12 UTC. This records the verified first internal beta and repeatable self-build procedures. Public App Store release remains a separate step.
+Last reviewed: 2026-11-11 local time / 2026-11-12 UTC. This records verified internal betas and repeatable self-build procedures. Public App Store release remains a separate step.
 
-## Current internal beta — 0.2.0 (2)
+## Current internal beta — 0.2.1 (3)
+
+- Simplified Color/Icon rows and visual choosers with independent resets; one
+  native scope surface; inline task creation and selection in Create Log; and
+  My Day Start Timer, Switch Task, and Stop. Inline task creation preserves log
+  dates and skips the automation prompt. The chooser keeps new tasks first.
+- Source `a6e629a26faca5b0dd4834b02bd192ca15508aba` is published in PR #2.
+  No stored model, dependency, identifier, minimum-runtime, or notice changes.
+  The full local dark-mode run passed 70/73; all three corrected UI cases then
+  passed. Final hosted [run 43148292343](https://github.com/elaren-studio/minutide/actions/runs/43148292343)
+  passed all **73 tests (65 unit, eight UI), zero failures/skips**, on that exact
+  released source with Xcode 26.6. The clean hosted run is the final full-suite
+  evidence; the earlier local complete bundle retains its recorded failures.
+- Archive `build/Archives/Minutide-0.2.1-3.xcarchive` and IPA
+  `build/Exports/Minutide-0.2.1-3-manual/Stiint.ipa` are verified. IPA size:
+  **6,992,929 bytes**; SHA-256
+  `7ddd1cefe419a1d9a273167037df1ff7229cbda2b3311f79441f79b840fa0572`.
+  Both signatures, distribution profiles/entitlements, IDs/version/build,
+  iOS 26.1, four notices, and `CA92.1` passed; existing signing assets were reused.
+- Apple validation/upload succeeded without errors. Delivery/build
+  `cb6b3643-c3b3-4996-a24d-845d319fed13` is `VALID` / `IN_BETA_TESTING` in
+  `Minutide Internal`; assignment and English beta notes were read back twice.
+  Availability was independently verified at **2026-11-12 03:38:49 UTC**.
+- The sole intended maintainer remains the only tester; public link, Mac, and
+  Vision availability remain disabled. No external tester, public App Store
+  submission, new certificate/access grant, or legal-agreement acceptance.
+  Receipt: `build/Verification/minutide-0.2.1-3.json`. Physical build-3 acceptance
+  and email delivery are unverified. Update without deleting the app.
+
+## Previous internal beta — 0.2.0 (2), historical
 
 - Branch `feature/workspaces-reporting` implements local organization/client/
   project/task management, independent inherited appearance, immutable entry

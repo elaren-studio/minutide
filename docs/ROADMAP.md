@@ -4,9 +4,11 @@ The goal is a free, open-source self-build, an eventual free App Store release, 
 
 ## Current priority: work hierarchy and combined reporting — internal beta delivered
 
-Follow-up UI review is in progress for 0.2.1 (3): simpler appearance choosers,
-one native scope surface, inline task creation in Create Log, and manual tracking
-from My Day. Build/run is verified; regression checks and delivery are pending.
+Follow-up **0.2.1 (3)** is processed and available to the existing internal group:
+simpler appearance choosers, one native scope surface, inline task creation in
+Create Log, and manual tracking from My Day. Final hosted run 43148292343 passed
+all **73 tests (65 unit, eight UI), zero failures/skips**, on the released source.
+Physical acceptance is the next product gate.
 
 The maintainer confirms the first TestFlight build launches on his iPhone. The
 next authorized internal beta adds organizations, clients, projects, optional

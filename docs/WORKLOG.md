@@ -229,3 +229,43 @@ Append dated entries. Record what changed and what evidence was actually collect
 - Reviewed dark-mode screenshots of the labeled palette and single scope
   surface. The three affected UI cases are being rerun; no green/full or new
   internal-delivery claim is made at this checkpoint.
+
+## 2026-11-12 UTC — UI follow-up available in internal TestFlight
+
+- Corrected source `a6e629a26faca5b0dd4834b02bd192ca15508aba` is published on
+  `feature/workspaces-reporting`. All three affected UI cases passed in the
+  focused rerun at 03:31 UTC, zero failures/skips. The 135 source fingerprints
+  match `ui-polish-candidate-2.json`; screenshots are retained in `UIReview-final`.
+- Signed Release archive and manual App Store export reused the existing
+  signing assets. Both bundle signatures, distribution profiles/entitlements,
+  IDs, 0.2.1 build 3, iOS 26.1, four notices, and privacy reason `CA92.1` passed.
+  IPA: **6,992,929 bytes**, SHA-256
+  `7ddd1cefe419a1d9a273167037df1ff7229cbda2b3311f79441f79b840fa0572`.
+- Validation passed at 03:35:30 UTC and upload at 03:36:19 UTC without errors.
+  Delivery/build `cb6b3643-c3b3-4996-a24d-845d319fed13` processed as `VALID`;
+  reviewed English notes were published and only this build was added to the
+  existing internal group. Independent readback at **03:38:49 UTC** confirms
+  `IN_BETA_TESTING`, correct group assignment/notes, one intended maintainer,
+  disabled public link, and disabled Mac/Vision availability.
+- Receipt: `build/Verification/minutide-0.2.1-3.json`. Hosted full-suite run
+  43148292343 is still running; the superseded run was canceled by workflow
+  concurrency. No hosted pass, physical build-3 acceptance, email delivery,
+  production release, new access grant, or legal-agreement acceptance is claimed.
+
+## 2026-11-12 UTC — UI follow-up full suite green
+
+- Hosted [run 43148292343](https://github.com/elaren-studio/minutide/actions/runs/43148292343)
+  completed successfully on exact released source
+  `a6e629a26faca5b0dd4834b02bd192ca15508aba`, using Xcode 26.6 (17F113).
+  The log independently reports **65 unit and eight UI tests passed, zero
+  failures/skips**, then `TEST SUCCEEDED` at **03:50:38 UTC**. This clean 73-test
+  full run is the final validation beyond the earlier local full/focused sequence.
+- Retained `build/logs/hosted-ci-43148292343.log` (SHA-256
+  `4dbbe5f318533cf741353b36501b85a2fa16062182ce85c476b9e5c59e161fc7`),
+  metadata `build/Verification/hosted-ci-43148292343.json`, and the updated beta
+  receipt. Dark-mode focused screenshots were visually reviewed; simulator
+  appearance was restored to its prior light setting after the run.
+- Updated current-context, roadmap, README, TestFlight runbook, and device
+  acceptance evidence/checklist. Compiled source and the uploaded IPA are
+  unchanged. PR #2 remains stacked on #1; neither is merged. Physical build-3
+  review and stable/public release acceptance remain separate.

@@ -6,7 +6,7 @@ The project currently targets iOS 26.1. Simulator checks help with layout and co
 
 The first internal TestFlight build is intended to support the maintainer's physical-device acceptance run. Record those results separately from Apple processing and tester availability; physical acceptance is a gate for stable public release readiness.
 
-## Current TestFlight delivery status — 2026-11-11
+## Initial TestFlight delivery status — 2026-11-11, historical
 
 - The signed 0.1.0 build 1 archive and manual-export IPA are verified; the artifact receipt is `build/Verification/minutide-0.1.0-1.json`.
 - Validation and upload succeeded without errors. Apple processing is `VALID` for **0.1.0 (1)**, build/delivery `591b8c17-694a-41ce-80bd-39c16a27e4a6`; internal state is `IN_BETA_TESTING`. The build is assigned to `Minutide Internal`, whose sole intended tester is `INVITED`. The website independently shows this version/build, group, and one invitation. Expiry: 2027-02-09. Installation and email delivery are not claimed.
@@ -15,6 +15,43 @@ The first internal TestFlight build is intended to support the maintainer's phys
   reboot/recovery, accessibility, upgrade, and minimum-runtime checks remain open.
 
 ## Work hierarchy beta acceptance — local validation complete; physical checks pending
+
+### UI follow-up (0.2.1 build 3)
+
+The full dark-mode local run passed 70/73 tests (65 unit, five UI), then all
+three affected UI cases passed in `UIPolishFocusedResults-1.xcresult` at 03:31 UTC
+on 2026-11-12. The sole app-source correction after the full run pins newly
+created tasks first in the timer chooser. Test fixes search long report lists
+and use the chooser's specific BackButton. The failed complete bundle remains
+failed; final hosted [run 43148292343](https://github.com/elaren-studio/minutide/actions/runs/43148292343)
+passed all **73 tests (65 unit, eight UI), zero failures/skips**, on the exact
+released source with Xcode 26.6. The clean hosted result supersedes the local
+full/focused sequence. Build **0.2.1 (3)** is
+`VALID` / `IN_BETA_TESTING` in the intended internal group, independently
+verified at **2026-11-12 03:38:49 UTC**. Receipt:
+`build/Verification/minutide-0.2.1-3.json`.
+
+Executed UI coverage now includes inline task creation/cancel/save with
+unchanged log fields and persisted task assignment; My Day start/switch/stop
+and saved timers, including new tasks outside the chooser scope; and custom
+appearance save/reopen with independent default resets. Dark-mode screenshots
+of the single scope surface, timer controls, palette, and icon grid are retained
+under `build/UIReview-final` and `build/UIReview-1-all`. Physical checks of these
+flows and large-text/minimum-runtime behavior remain open.
+
+For physical review, update without deleting the app, then check:
+
+1. Open an organization/task editor. Choose a color and icon, save/reopen, then
+   reset each independently; verify the expected parent/default style returns.
+2. Open Tasks and switch All Work/Unassigned/organization; verify there is one
+   scope surface and the running timer stays available.
+3. Open My Day → + → Create Log → New Task. Cancel once, then save a new task;
+   verify the log dates remain and the saved task is selected and recorded.
+4. Open My Day → Start Timer, create/select a task, then switch and stop it.
+   Verify both completed entries, the current Live Activity, and that starting
+   while viewing another day returns to Today.
+
+### Hierarchy/reporting (0.2.0 build 2)
 
 The 0.2.0 (2) candidate has 65 unit and five UI regression cases covered on
 an iPhone 17 / iOS 26.5 simulator. `WorkReportsFullResults-3.xcresult` passed

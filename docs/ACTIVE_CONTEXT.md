@@ -6,9 +6,9 @@ Last updated: 2026-11-11
 
 Revive the archived Stiint iOS time tracker as **Minutide**, an independently maintained, fully free, open-source app under Elaren Studio. Keep the original Xcode app target named `Stiint` and retain Liam Wittig's original MIT copyright notice. The user explicitly authorized the Minutide rename and publication under the Elaren GitHub organization on 2026-11-11.
 
-## Current feature milestone — 0.2.0 (2) available in internal TestFlight
+## Current internal beta — 0.2.1 (3) available in TestFlight
 
-### Follow-up UI corrections — 0.2.1 (3) in validation
+### Follow-up UI corrections
 
 - The maintainer supplied screenshots of the appearance editor, Tasks scope
   menu, and Create Log, requesting simpler styling, removal of the nested scope
@@ -26,9 +26,29 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
   control above the timeline. The full dark-mode run passed 70/73 (65 unit,
   five UI), with three UI failures. Corrected the timer chooser to pin its newly
   created task above long lists, and corrected test navigation/search for
-  offscreen report options and the chooser's actual Back button. A focused
-  three-case rerun is in progress. Delivery remains pending; 0.2.0 (2) is still
-  the latest verified internal beta below.
+  offscreen report options and the chooser's actual Back button. All three
+  corrected cases passed at 03:31 UTC in `build/UIPolishFocusedResults-1.xcresult`,
+  zero failures/skips.
+- Source `a6e629a26faca5b0dd4834b02bd192ca15508aba` is pushed. All 135 source
+  fingerprints match `build/Verification/ui-polish-candidate-2.json`. Signed
+  archive and manual-export IPA are verified: 6,992,929 bytes, SHA-256
+  `7ddd1cefe419a1d9a273167037df1ff7229cbda2b3311f79441f79b840fa0572`.
+  Both distribution signatures, profiles, identifiers, version/build, iOS 26.1,
+  four bundled notices, and `CA92.1` passed. Existing signing assets were reused.
+- Apple validation and upload succeeded without errors. Delivery/build
+  `cb6b3643-c3b3-4996-a24d-845d319fed13` is `VALID` / `IN_BETA_TESTING` for
+  **0.2.1 (3)**. Group assignment and English notes were read back twice;
+  availability was verified at **2026-11-12 03:38:49 UTC**. The existing group
+  still has only the intended maintainer, no public link, and Mac/Vision disabled.
+  Receipt: `build/Verification/minutide-0.2.1-3.json`. Physical build-3 acceptance
+  and email delivery are not claimed.
+- Final hosted [run 43148292343](https://github.com/elaren-studio/minutide/actions/runs/43148292343)
+  passed all **73 tests (65 unit, eight UI), zero failures/skips**, on the exact
+  released source with Xcode 26.6. `TEST SUCCEEDED` was recorded at 03:50:38 UTC.
+  This clean full-suite result supersedes the earlier local full/focused sequence.
+  Log, metadata, and checksum are retained in the release receipt.
+
+## Previous feature milestone — 0.2.0 (2), historical
 
 - The maintainer confirms TestFlight **0.1.0 (1)** installs and launches on his
   iPhone. Its remaining physical acceptance matrix is separate.
@@ -130,8 +150,8 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
 
 ## Next work
 
-1. Update the existing TestFlight install to 0.2.0 (2) without deleting it. Record physical upgrade/history/running-timer acceptance separately.
-2. Exercise organizations, appearance, combined reports/exports, physical Shortcuts, GPS permission, reboot/recovery, and minimum-runtime behavior using `DEVICE_ACCEPTANCE.md`.
+1. Update the existing TestFlight install to 0.2.1 (3) without deleting it. Record physical upgrade/history/running-timer acceptance separately.
+2. Review the simpler appearance controls, single scope surface, inline task creation, and My Day manual timer, then exercise organizations, reports/exports, hardware Shortcuts/GPS/recovery and minimum-runtime behavior using `DEVICE_ACCEPTANCE.md`.
 3. Review the stacked source PRs #1 and #2. The complete shipped source passed hosted CI; no merge has been performed.
 4. Before a later stored-model change, freeze the shipped V2 schema and extend the ordered migration/disk fixtures.
 5. Keep production App Store submission and acceptance of Apple's legal agreement as future gates.

@@ -94,9 +94,18 @@ bash scripts/ci-ios.sh
 
 For the canonical SSD checkout, project-local Xcode GUI DerivedData, and the difference between GUI and CLI build subfolders, see [Local Development](docs/LOCAL_DEVELOPMENT.md).
 
-All features remain free and open source. The maintainer confirms that **0.1.0 (1)** installs and launches on his iPhone. The **0.2.0 (2)** hierarchy/reporting update is processed and available in the existing internal TestFlight group. Update without deleting the app to preserve its local store. Hosted CI passed all 70 tests for this build. Physical feature/upgrade acceptance and a free public App Store release remain later steps. See [TestFlight build and upload](docs/TESTFLIGHT.md) for verified status and repeatable self-build commands. Signing details stay local; the scripts never submit a public App Store release.
+All features remain free and open source. **0.2.1 (3)** adds simpler appearance
+controls, inline task creation, and manual tracking from My Day to the hierarchy/
+reporting beta. It is processed and available in the existing internal TestFlight
+group. Update without deleting the app to preserve its local store. Hosted CI
+passed all **73 tests (65 unit, eight UI), zero failures/skips**, on the released
+source. Physical acceptance
+and a free public App Store release remain later steps. See [TestFlight build and
+upload](docs/TESTFLIGHT.md) for verified status and repeatable self-build commands.
+Signing details stay local; the scripts never submit a public App Store release.
 
-These are contributor instructions, not a claim that the current revision's final test run or hosted CI has passed. See [Device Acceptance](docs/DEVICE_ACCEPTANCE.md) for the manual checks and their current evidence.
+See [Device Acceptance](docs/DEVICE_ACCEPTANCE.md) for recorded validation of the
+released revision and remaining hardware checks.
 
 ### Install on your own iPhone
 
