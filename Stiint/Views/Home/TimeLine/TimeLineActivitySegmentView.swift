@@ -14,6 +14,9 @@ struct TimeLineActivitySegmentView: View {
     let end: CGFloat
     let log: ActivityLog
 
+    private var capturedTask: WorkNodeSnapshot? { log.workSnapshot.task }
+    private var capturedColor: Color { Color(hex: capturedTask?.colorHex ?? log.activity?.colorHex) }
+
     let fmt = DateComponentsFormatter()
 
     let timeDistance: String
@@ -84,11 +87,11 @@ struct TimeLineActivitySegmentView: View {
             ZStack(alignment: .topLeading) {
                 Rectangle()
                     .frame(height: segmentHeight)
-                    .foregroundColor(log.activity?.color ?? .blue)
+                    .foregroundColor(capturedColor)
                     //.opacity(0.95)
                     .cornerRadius(10)
                     .shadow(
-                        color: (log.activity?.color ?? .blue).opacity(0.3),
+                        color: capturedColor.opacity(0.3),
                         radius: 10,
                         x: 0,
                         y: 5
@@ -97,10 +100,10 @@ struct TimeLineActivitySegmentView: View {
                     VStack(alignment: .leading) {
                         HStack {
                             Image(
-                                systemName: log.activity?.sfSymbolName ?? "questionmark.circle.dashed"
+                                systemName: capturedTask?.sfSymbolName ?? "questionmark.circle.dashed"
                             )
 
-                            Text(log.activity?.name ?? "no name")
+                            Text(capturedTask?.name ?? "Unavailable task")
                                 .lineLimit(1)
 
                         }.font(.headline)

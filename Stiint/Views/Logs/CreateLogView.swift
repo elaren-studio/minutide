@@ -9,6 +9,8 @@ import SwiftUI
 import SwiftData
 
 struct CreateLogView: View {
+    @Environment(\.modelContext) private var modelContext
+    @AppStorage("work.organizationScope") private var organizationScope = "all"
     @Environment(\.dismiss) private var dismiss
     @State private var saving = false
     @State private var saveError: String?
@@ -25,6 +27,29 @@ struct CreateLogView: View {
     
     
     @Query private var activities: [ActivityItem]
+    @Query private var organizations: [WorkOrganization]
+    @Query private var clients: [WorkClient]
+    @Query private var projects: [WorkProject]
+
+    private var availableTasks: [ActivityItem] {
+        // Querying the graph also invalidates this list after hierarchy edits.
+        _ = organizations.count + clients.count + projects.count
+        let scope = WorkScope(rawValue: organizationScope)
+        return activities.filter { task in
+            guard let snapshot = try? WorkHierarchy.resolve(task: task, in: modelContext,
+                                                            requireAvailable: true) else { return false }
+            return scope.matches(task: task, snapshot: snapshot)
+        }.sorted { ($0.name ?? "").localizedStandardCompare($1.name ?? "") == .orderedAscending }
+    }
+
+    private func taskLabel(_ task: ActivityItem) -> String {
+        guard let snapshot = try? WorkHierarchy.resolve(task: task, in: modelContext) else {
+            return task.name ?? "Unnamed task"
+        }
+        let path = [snapshot.organization?.name, snapshot.client?.name, snapshot.project?.name]
+            .compactMap { $0 }.joined(separator: " / ")
+        return path.isEmpty ? task.name ?? "Unnamed task" : "\(task.name ?? "Unnamed task") — \(path)"
+    }
     
     
    
@@ -111,12 +136,17 @@ struct CreateLogView: View {
         NavigationStack {
             Form {
                 
-                Section("Activity") {
-                    Picker("Activity", selection: $activity) {
-                        ForEach(activities.filter { $0.archived != true }) { activity in
-                            Text(activity.name ?? "Unnamed")
+                Section("Task") {
+                    Picker("Task", selection: $activity) {
+                        Text("Choose a task").tag(Optional<ActivityItem>.none)
+                        ForEach(availableTasks) { activity in
+                            Text(taskLabel(activity))
                                 .tag(activity as ActivityItem?)
                         }
+                    }
+                    if availableTasks.isEmpty {
+                        Text("Create a task in the Tasks tab, or switch to All Work to use a task from another organization.")
+                            .font(.footnote).foregroundStyle(.secondary)
                     }
                 }
                 Section("Time"){
@@ -154,7 +184,7 @@ struct CreateLogView: View {
                     )
                 }
             }.disabled(saving).onAppear(){
-                activity = activities.first { $0.archived != true }
+                activity = availableTasks.first
             }        .navigationTitle("Create Log")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {

@@ -7,9 +7,13 @@ struct LogDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Bindable var log: ActivityLog
     @Query private var activities: [ActivityItem]
+    @Query private var organizations: [WorkOrganization]
+    @Query private var clients: [WorkClient]
+    @Query private var projects: [WorkProject]
     @State private var showDeleteConfirmation = false
     @State private var saveError: String?
     @State private var saving = false
+    @State private var refreshAssignment = false
     @State private var startTime: Date
     @State private var endTime: Date
     @State private var activity: ActivityItem?
@@ -39,17 +43,21 @@ struct LogDetailView: View {
     }
 
     private var selectableActivities: [ActivityItem] {
-        activities.filter { $0.archived != true || $0.persistentModelID == log.activity?.persistentModelID }
+        _ = organizations.count + clients.count + projects.count
+        return activities.filter {
+            $0.persistentModelID == log.activity?.persistentModelID
+                || WorkHierarchy.isAvailable(task: $0, in: modelContext)
+        }
     }
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("Activity") {
-                    Picker("Activity", selection: $activity) {
-                        Text("Choose an activity").tag(Optional<ActivityItem>.none)
+                Section("Task") {
+                    Picker("Task", selection: $activity) {
+                        Text("Choose a task").tag(Optional<ActivityItem>.none)
                         ForEach(selectableActivities) { item in
-                            Text(item.name ?? "Unnamed").tag(Optional(item))
+                            Text(taskLabel(item)).tag(Optional(item))
                         }
                     }
                     .disabled(!hasCompleteClosedDates || saving)
@@ -57,6 +65,20 @@ struct LogDetailView: View {
                         Text("This log's activity is unavailable. You can keep its missing assignment or choose an existing activity. The saved log is preserved until you tap Done.")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
+                    }
+                }
+                Section("Recorded assignment") {
+                    let snapshot = log.workSnapshot
+                    LabeledContent("Task", value: snapshot.task?.name ?? "Unavailable task")
+                    LabeledContent("Organization", value: snapshot.organization?.name ?? "Unassigned")
+                    LabeledContent("Client", value: snapshot.client?.name ?? "No client")
+                    LabeledContent("Project", value: snapshot.project?.name ?? "No project")
+                    if hasCompleteClosedDates, activity?.id != nil {
+                        Toggle("Use task’s current assignment", isOn: $refreshAssignment)
+                            .accessibilityIdentifier("log.refreshAssignment")
+                            .disabled(saving)
+                        Text("Date changes keep the recorded assignment. Changing the task, or enabling this option, captures its current location and appearance when you save.")
+                            .font(.footnote).foregroundStyle(.secondary)
                     }
                 }
                 Section("Time") {
@@ -138,6 +160,13 @@ struct LogDetailView: View {
         }
     }
 
+    private func taskLabel(_ item: ActivityItem) -> String {
+        let snapshot = try? WorkHierarchy.resolve(task: item, in: modelContext)
+        let location = [snapshot?.organization?.name, snapshot?.client?.name, snapshot?.project?.name]
+            .compactMap { $0 }.joined(separator: " / ")
+        return location.isEmpty ? item.name ?? "Unnamed task" : "\(item.name ?? "Unnamed task") — \(location)"
+    }
+
     private func save() {
         guard canSave, let id = log.id else { return }
         saving = true
@@ -148,7 +177,8 @@ struct LogDetailView: View {
             defer { saving = false }
             do {
                 try await PersistenceManager.shared.activityLogActor.saveCompletedLog(
-                    logId: id, activityId: selectedActivityId, startTime: start, endTime: end
+                    logId: id, activityId: selectedActivityId, startTime: start, endTime: end,
+                    refreshAssignment: refreshAssignment
                 )
                 dismiss()
             } catch {

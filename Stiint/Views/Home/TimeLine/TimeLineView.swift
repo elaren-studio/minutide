@@ -11,6 +11,7 @@ internal import Combine
 
 struct TimeLineView: View {
     @Query private var filteredLogs: [ActivityLog]
+    @AppStorage("work.organizationScope") private var organizationScope = "all"
     let selectedDate: Date
     let calendar = Calendar.current
     let hours: [Int] = Array(0 ... 23)
@@ -32,7 +33,6 @@ struct TimeLineView: View {
     let lineHeight: CGFloat = 2
     
     init(selectedDate: Date) {
-        print("loading data for \(selectedDate)")
         self.selectedDate = selectedDate
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: selectedDate)
@@ -110,7 +110,7 @@ struct TimeLineView: View {
                                 .id(hour)
                             }
                         }
-                        ForEach(filteredLogs) { log in
+                        ForEach(scopedLogs) { log in
                             TimeLineActivitySegmentView(
                                 start: getGeometry(
                                     date: log.startTime,
@@ -153,6 +153,17 @@ struct TimeLineView: View {
             }.onReceive(timer) { _ in
                 updateTime()
 
+            }
+        }
+    }
+
+    private var scopedLogs: [ActivityLog] {
+        let scope = WorkScope(rawValue: organizationScope)
+        return filteredLogs.filter { log in
+            switch scope {
+            case .allWork: return true
+            case .unassigned: return log.workSnapshot.organization?.id == nil
+            case .organization(let id): return log.workSnapshot.organization?.id == id
             }
         }
     }

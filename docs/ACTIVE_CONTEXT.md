@@ -23,9 +23,20 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
 - The SSD disappeared during the initial read-only review. After the user's
   reconnection, its mount and canonical clean repository were verified again.
   Implementation and builds remain on the SSD; no internal fallback is used.
-- Feature implementation, disk migration proof, integrated simulator checks,
-  and the next TestFlight delivery are pending. The older test results below
-  cover the previous build and do not validate these new features.
+- Storage/migration and work-management UI are implemented. The storage suite
+  passed **50 unit tests, 0 failures/skips** on iPhone 17 / iOS 26.5 at
+  2026-11-12 01:11:02 UTC (`build/WorkStorageResults-3.xcresult`). It includes
+  the real unversioned V1 disk migration and idempotent reopen checks.
+- A rebuilt hierarchy UI regression passed at 01:21:06 UTC: organization, client,
+  project, and task creation; Unassigned scope isolation while a project timer
+  continues; relaunch recovery; and stop. Result:
+  `build/WorkHierarchyUIResults-2.xcresult`. Manage Work now owns a dedicated
+  navigation stack in its own sheet. The first UI attempt failed navigation;
+  its result and accessibility attachments are retained separately.
+- Version is prepared as **0.2.0 (2)**. Reporting integration, the final combined
+  suite, Release archive, and next internal TestFlight delivery remain pending.
+  The 50-unit pass preceded small editor polish and the navigation change; the
+  final suite will validate the complete release candidate.
 
 ## Verified orientation
 

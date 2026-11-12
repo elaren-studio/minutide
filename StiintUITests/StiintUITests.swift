@@ -30,7 +30,7 @@ final class StiintUITests: XCTestCase {
                       "Stopping a timer must persist a completed record visible in Export.")
         app.navigationBars["Raw Data"].buttons["Settings"].tap()
 
-        app.tabBars.buttons["Insights"].tap()
+        app.tabBars.buttons["Reports"].tap()
         let scrollView = app.scrollViews.firstMatch
         XCTAssertTrue(scrollView.waitForExistence(timeout: 5))
         for chartName in ["sankey", "pie", "bar", "line", "area"] {
@@ -62,10 +62,87 @@ final class StiintUITests: XCTestCase {
 
         app.terminate()
         app.launch()
-        XCTAssertTrue(app.tabBars.buttons["Timers"].waitForExistence(timeout: 10))
-        app.tabBars.buttons["Timers"].tap()
+        XCTAssertTrue(app.tabBars.buttons["Tasks"].waitForExistence(timeout: 10))
+        app.tabBars.buttons["Tasks"].tap()
         assertRunningActivity(named: name, in: app)
         stopActivity(named: name, in: app)
+    }
+
+    @MainActor
+    func testProjectTaskAndOrganizationSwitchKeepOneGlobalTimer() throws {
+        let app = launchReadyApp()
+        try requireAvailableTimer(in: app)
+        let suffix = String(UUID().uuidString.prefix(8))
+        let organization = "UI Studio \(suffix)"
+        let client = "UI Client \(suffix)"
+        let project = "UI Project \(suffix)"
+        let task = "UI Project Task \(suffix)"
+        app.buttons["work.manage"].tap()
+        createWorkEntity(named: organization, addIdentifier: "work.organization.add", in: app)
+        openWorkEntity(named: organization, kind: "organization", in: app)
+        createWorkEntity(named: client, addIdentifier: "work.client.add", in: app)
+        openWorkEntity(named: client, kind: "client", in: app)
+        createWorkEntity(named: project, addIdentifier: "work.project.add", in: app)
+        openWorkEntity(named: project, kind: "project", in: app)
+        app.buttons["work.add"].tap()
+        app.buttons["task.add"].tap()
+        let field = app.textFields["task.name"]
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap()
+        field.typeText(task)
+        app.buttons["task.save"].tap()
+        let later = app.alerts.buttons["Do It Later"]
+        XCTAssertTrue(later.waitForExistence(timeout: 10))
+        later.tap()
+        XCTAssertTrue(app.navigationBars[project].waitForExistence(timeout: 5))
+        for expectedTitle in [client, organization, "Manage Work"] {
+            app.navigationBars.firstMatch.buttons.element(boundBy: 0).tap()
+            XCTAssertTrue(app.navigationBars[expectedTitle].waitForExistence(timeout: 5))
+        }
+        let done = app.buttons["work.done"]
+        XCTAssertTrue(done.waitForExistence(timeout: 5))
+        done.tap()
+        let taskButtonID = startActivity(named: task, in: app)
+
+        app.buttons["work.scope"].tap()
+        app.buttons["work.scope.unassigned"].tap()
+        assertRunningActivity(named: task, in: app)
+        XCTAssertFalse(app.buttons[taskButtonID].exists,
+                       "A project task must leave the unassigned task list while its timer continues.")
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "Unassigned scope keeps project timer"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        app.buttons["work.scope"].tap()
+        app.buttons["work.scope.all"].tap()
+        assertRunningActivity(named: task, in: app)
+        app.terminate()
+        app.launch()
+        app.tabBars.buttons["Tasks"].tap()
+        assertRunningActivity(named: task, in: app)
+        stopActivity(named: task, in: app)
+    }
+
+    @MainActor
+    private func openWorkEntity(named name: String, kind: String, in app: XCUIApplication) {
+        let row = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label BEGINSWITH %@",
+                                                   "work.\(kind).", name)).firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 10))
+        row.tap()
+        XCTAssertTrue(app.navigationBars[name].waitForExistence(timeout: 10),
+                      "Opening a work row must show its detail screen.")
+    }
+
+    @MainActor
+    private func createWorkEntity(named name: String, addIdentifier: String, in app: XCUIApplication) {
+        app.buttons["work.add"].tap()
+        app.buttons[addIdentifier].tap()
+        let field = app.textFields["work.entity.name"]
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap()
+        field.typeText(name)
+        app.buttons["work.entity.save"].tap()
+        XCTAssertTrue(app.staticTexts[name].firstMatch.waitForExistence(timeout: 10))
     }
 
     @MainActor
@@ -80,19 +157,19 @@ final class StiintUITests: XCTestCase {
         if skip.waitForExistence(timeout: 2) {
             skip.tap()
         }
-        XCTAssertTrue(app.tabBars.buttons["Timers"].waitForExistence(timeout: 10),
+        XCTAssertTrue(app.tabBars.buttons["Tasks"].waitForExistence(timeout: 10),
                       "The main tabs should appear after onboarding is skipped.")
         return app
     }
 
     @MainActor
     private func requireAvailableTimer(in app: XCUIApplication) throws {
-        app.tabBars.buttons["Timers"].tap()
+        app.tabBars.buttons["Tasks"].tap()
         let addActivity = app.buttons["activity.add"]
         // The UI tests never reset a store or stop an unrelated pre-existing timer.
         // XCTest records this explicit skip; run on an idle test simulator to exercise the flow.
-        if !addActivity.waitForExistence(timeout: 5),
-           app.buttons["timer.running.stop"].exists {
+        _ = addActivity.waitForExistence(timeout: 5)
+        if app.buttons["timer.running.stop"].exists {
             throw XCTSkip("A pre-existing timer is running. Preserved it; use an idle test simulator for this regression test.")
         }
         XCTAssertTrue(addActivity.exists, "Expected the activity list. Tracking must be unpaused for this test.")
@@ -101,11 +178,11 @@ final class StiintUITests: XCTestCase {
     @MainActor
     private func createActivity(named name: String, in app: XCUIApplication) {
         app.buttons["activity.add"].tap()
-        let nameField = app.textFields["Activity Name"]
+        let nameField = app.textFields["task.name"]
         XCTAssertTrue(nameField.waitForExistence(timeout: 5))
         nameField.tap()
         nameField.typeText(name)
-        app.navigationBars.buttons["Done"].tap()
+        app.buttons["task.save"].tap()
         let later = app.alerts.buttons["Do It Later"]
         XCTAssertTrue(later.waitForExistence(timeout: 10))
         later.tap()
@@ -119,15 +196,18 @@ final class StiintUITests: XCTestCase {
     }
 
     @MainActor
-    private func startActivity(named name: String, in app: XCUIApplication) {
+    @discardableResult
+    private func startActivity(named name: String, in app: XCUIApplication) -> String {
         let button = activityStartButton(named: name, in: app)
         for _ in 0..<12 {
             if button.isHittable { break }
             app.swipeUp()
         }
         XCTAssertTrue(button.isHittable, "New activity must have an accessible start button.")
+        let identifier = button.identifier
         button.tap()
         assertRunningActivity(named: name, in: app)
+        return identifier
     }
 
     @MainActor
@@ -143,6 +223,7 @@ final class StiintUITests: XCTestCase {
     private func stopActivity(named name: String, in app: XCUIApplication) {
         assertRunningActivity(named: name, in: app)
         app.buttons["timer.running.stop"].tap()
+        XCTAssertTrue(app.buttons["timer.running.stop"].waitForNonExistence(timeout: 10))
         XCTAssertTrue(app.buttons["activity.add"].waitForExistence(timeout: 10),
                       "Stopping must return to the activity list.")
     }

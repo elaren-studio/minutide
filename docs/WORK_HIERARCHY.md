@@ -54,6 +54,11 @@ Schema migration must be proved against a disk store created with the released
 unversioned schema, including archived, orphan, malformed, and running records.
 Opening, migration, or backfill failure must never cause a destructive reset.
 
+V1 is frozen in `WorkStore.swift`; V2 describes this beta's current models.
+Before a later stored-model change, freeze the shipped V2 definitions and add
+an ordered migration stage. Do not change the historical schemas to make a new
+model fit. Extend the disk migration fixtures to cover each shipped version.
+
 ## Reports
 
 Reports filter by dates, organizations, clients, projects, and tasks. Multiple

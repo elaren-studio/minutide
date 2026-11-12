@@ -3,6 +3,13 @@ import SwiftData
 
 struct HomeView: View {
     @State private var dayOffset: Int = 0
+    @AppStorage("work.organizationScope") private var organizationScope = "all"
+    @Query(sort: \WorkOrganization.name) private var organizations: [WorkOrganization]
+
+    private var scopeBinding: Binding<WorkScope> {
+        Binding(get: { WorkScope(rawValue: organizationScope) },
+                set: { organizationScope = $0.rawValue })
+    }
 
     enum ActiveSheet: Identifiable {
         case createLog
@@ -75,6 +82,10 @@ struct HomeView: View {
             .scrollTargetBehavior(.paging)
             .ignoresSafeArea(edges: [.top, .bottom])
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    WorkScopePicker(selection: scopeBinding, organizations: organizations,
+                                    identifier: "timeline.scope")
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Button {
                         activeSheet = .createLog

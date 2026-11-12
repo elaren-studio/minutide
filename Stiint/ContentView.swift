@@ -30,7 +30,7 @@ struct ContentView: View {
                 }
             }
 
-            Tab("Timers", systemImage: "timer") {
+            Tab("Tasks", systemImage: "timer") {
                 if pauseTracking {
                     TrackingPausedView()
                 } else {
@@ -38,7 +38,7 @@ struct ContentView: View {
                 }
             }
 
-            Tab("Insights", systemImage: "chart.bar") {
+            Tab("Reports", systemImage: "chart.bar") {
                 AnalyticsView()
             }
 

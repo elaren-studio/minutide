@@ -12,19 +12,12 @@ public final class PersistenceManager: Sendable {
     public let modelContainer: ModelContainer
     public let activityActor: ActivityActor
     public let activityLogActor: ActivityLogActor
+    public let workHierarchyActor: WorkHierarchyActor
 
     init() {
         modelContainer = {
-            let schema = Schema([
-                ActivityItem.self,
-                ActivityLog.self,
-            ])
-            let modelConfiguration = ModelConfiguration(
-                schema: schema, isStoredInMemoryOnly: false, cloudKitDatabase: .none
-            )
-
             do {
-                return try ModelContainer(for: schema, configurations: [modelConfiguration])
+                return try WorkStore.makeContainer()
             } catch {
                 fatalError("Could not create ModelContainer: \(error)")
             }
@@ -32,6 +25,7 @@ public final class PersistenceManager: Sendable {
 
         activityActor = ActivityActor(modelContainer: modelContainer)
         activityLogActor = ActivityLogActor(modelContainer: modelContainer)
+        workHierarchyActor = WorkHierarchyActor(modelContainer: modelContainer)
     }
 }
 

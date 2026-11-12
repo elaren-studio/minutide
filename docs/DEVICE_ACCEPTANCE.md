@@ -10,7 +10,27 @@ The first internal TestFlight build is intended to support the maintainer's phys
 
 - The signed 0.1.0 build 1 archive and manual-export IPA are verified; the artifact receipt is `build/Verification/minutide-0.1.0-1.json`.
 - Validation and upload succeeded without errors. Apple processing is `VALID` for **0.1.0 (1)**, build/delivery `591b8c17-694a-41ce-80bd-39c16a27e4a6`; internal state is `IN_BETA_TESTING`. The build is assigned to `Minutide Internal`, whose sole intended tester is `INVITED`. The website independently shows this version/build, group, and one invitation. Expiry: 2027-02-09. Installation and email delivery are not claimed.
-- Physical acceptance remains open. Install this invited build for Shortcuts, location permission, reboot/recovery, accessibility, upgrade, and minimum-runtime checks.
+- The maintainer confirms that 0.1.0 (1) is installed and launches on his iPhone.
+  Device model and OS were not supplied. Shortcuts, location permission,
+  reboot/recovery, accessibility, upgrade, and minimum-runtime checks remain open.
+
+## Work hierarchy beta acceptance — pending
+
+The next beta must preserve the existing on-device store. Automated disk-store
+migration and simulator results will be recorded here after execution. Physical
+upgrade acceptance remains a separate maintainer check after delivery:
+
+1. Install the update without deleting the app. Verify existing tasks and time
+   entries remain, and an existing running timer retains its start time.
+2. Create two organizations, clients, projects, and both assigned and unassigned
+   tasks. Switch scope while timing and verify the current timer continues.
+3. Customize color and icon independently; verify inheritance and custom values.
+4. Move or rename a task. Old entries should keep their recorded assignment;
+   new entries should use the current one. Reclassify an old entry explicitly.
+5. Combine filters across levels, group by each level, and compare totals.
+   Export summary, detail, and raw CSV to a chosen destination.
+6. Verify Shortcuts disambiguate repeated task names, and archived ancestors
+   block new starts while keeping old time available in reports.
 
 | Check | Simulator | Physical iPhone | Expected result | Status / evidence |
 |---|---:|---:|---|---|
