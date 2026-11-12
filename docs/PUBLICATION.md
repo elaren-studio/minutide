@@ -40,12 +40,18 @@ The SSD migration validation used the self-contained checkout at `/Volumes/Felix
 
 ## Distribution boundaries
 
-This publishes source code. No domain registration, App Store name reservation, Apple identifier registration, signed iPhone build, TestFlight release, or App Store submission is included. Physical-device acceptance remains open. The bundle-identifier change creates a separate app container from earlier local builds; no automatic cross-container migration exists.
+The initial publication above distributed source code. It did not include a domain, Apple record, signed build, or distribution. The later internal TestFlight delivery is recorded below; production App Store release and physical-device acceptance remain open. The bundle-identifier change creates a separate app container from earlier local builds; no automatic cross-container migration exists.
 
 No personal maintainer contact address or response-time promise is established. GitHub's private vulnerability-reporting flow is verified at the repository's Security tab; see `SECURITY.md`.
 
 See [ACTIVE_CONTEXT.md](ACTIVE_CONTEXT.md), [WORKLOG.md](WORKLOG.md), and [DEVICE_ACCEPTANCE.md](DEVICE_ACCEPTANCE.md) for validation snapshots and remaining acceptance work.
 
-## Subsequent internal TestFlight goal — preparation only
+## Subsequent internal TestFlight goal — internal TestFlight available
 
-The user later set the goal of an entirely free, open-source app that can be self-built from the public source, an eventual free App Store release, and a first processed internal TestFlight build for the maintainer. The stability changes passed all 39 simulator tests (36 unit, 3 UI), with no failures or skips, at 23:38:59.771 UTC on 2026-11-11. The app and Live Activity identifiers are registered, and App Store Connect record 6833697250 is verified as **Minutide: Time Tracker** / `com.elaren.minutide`; the bare name was unavailable. No signed archive, IPA, upload, Apple processing, or internal TestFlight availability is yet verified. This does not change the source publication record above or claim an App Store release. See [TESTFLIGHT.md](TESTFLIGHT.md).
+The user later set the goal of an entirely free, open-source app that can be self-built from the public source, an eventual free App Store release, and a first processed internal TestFlight build for the maintainer's physical testing. The source candidate [`dec1e884cdd4561c32210e1365359c97558a00c5`](https://github.com/elaren-studio/minutide/commit/dec1e884cdd4561c32210e1365359c97558a00c5) is published on `feature/minutide-testflight`; [pull request #1](https://github.com/elaren-studio/minutide/pull/1) remains a draft.
+
+The 39-test suite passed (36 unit, 3 UI; 0 failures, 0 skips) at 23:38:59.771 UTC before the notice-only acknowledgement additions; no post-notice app test run is claimed. The final source retains the original MIT notice and includes full D3 and d3-sankey notices alongside AcknowList and Sankey.
+
+App Store Connect record 6833697250 is verified as **Minutide: Time Tracker** / `com.elaren.minutide`. Signed Release archive `build/Archives/Minutide-0.1.0-1.xcarchive` passed both signature checks; the privacy manifest (`CA92.1`) and all four bundled notices were verified. Manual App Store export produced `build/Exports/Minutide-0.1.0-1-manual/Stiint.ipa`, version 0.1.0 build 1, 6,047,504 bytes, SHA-256 `0e960dc15940d35d5cb094178fd045ed1ce457e6d8d969def12a1f2551626327`. Receipt: `build/Verification/minutide-0.1.0-1.json`.
+
+Validation and upload succeeded without errors at 23:55:37 and 23:56:33 UTC on 2026-11-11. Apple processing is `VALID` for **0.1.0 (1)**, build/delivery `591b8c17-694a-41ce-80bd-39c16a27e4a6`; internal state is `IN_BETA_TESTING`. The build is assigned to `Minutide Internal`, whose sole intended tester is `INVITED`. The website independently shows this version/build, group, and one invitation. Expiry: 2027-02-09. Installation and email delivery are not claimed. No public link or external tester is enabled. No Apple legal agreement or production release occurred. Hosted CI remains unverified.

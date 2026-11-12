@@ -58,7 +58,7 @@ bash scripts/ci-ios.sh
 
 For the canonical SSD checkout, project-local Xcode GUI DerivedData, and the difference between GUI and CLI build subfolders, see [Local Development](docs/LOCAL_DEVELOPMENT.md).
 
-The app is intended to remain free and open source, including for self-builds. A first internal TestFlight build is a separate, maintainer-run distribution step; no processed or available build has been verified. See [TestFlight build and upload](docs/TESTFLIGHT.md) for the current status and repeatable archive/export/upload commands. Team IDs and credentials are local inputs; the scripts never submit the app for public App Store release.
+All features remain free and open source. The first internal TestFlight beta, **0.1.0 (1)**, is processed and assigned to the maintainer's internal group; Apple reports the intended tester as invited. Physical-device acceptance and a free public App Store release remain later steps. See [TestFlight build and upload](docs/TESTFLIGHT.md) for verified status and repeatable self-build commands. Signing details stay local; the scripts never submit a public App Store release.
 
 These are contributor instructions, not a claim that the current revision's final test run or hosted CI has passed. See [Device Acceptance](docs/DEVICE_ACCEPTANCE.md) for the manual checks and their current evidence.
 

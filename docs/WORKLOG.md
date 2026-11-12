@@ -126,3 +126,18 @@ Append dated entries. Record what changed and what evidence was actually collect
 - Manually created a synthetic one-hour log through My Day; it appeared immediately in the timeline and Raw Data with saved timestamps and `3600.0s`. Physical acceptance remains separate.
 - Registered/read back app and Live Activity identifiers. After the maintainer signed in directly, Apple rejected the bare Minutide name. Created and API-verified **Minutide: Time Tracker**, app 6833697250, bundle `com.elaren.minutide`, SKU `minutide-ios`, locale `en-US`, Limited Access. The installed display name remains Minutide. No legal agreement was accepted.
 - Added one configurable bundle-ID base for self-builds, restricted the extension to the host's iOS/iPhone platforms, and included the app-only UserDefaults privacy reason. Signing team remains blank in source. Archive/export/upload and processing are still pending at this entry.
+
+## 2026-11-11 — Signed TestFlight artifact uploaded
+
+- Source candidate `dec1e884cdd4561c32210e1365359c97558a00c5` is published on `feature/minutide-testflight`; draft PR #1 remains open. The 39-test simulator pass preceded the notice-only acknowledgement additions. The original MIT notice remains unchanged, and all four notices are present in the final source; no post-notice app test pass is claimed.
+- Signed Release archive `build/Archives/Minutide-0.1.0-1.xcarchive` succeeded. Both signature checks, privacy reason `CA92.1`, and four notices were verified; receipt `build/Verification/minutide-0.1.0-1.json`.
+- Automatic export failed because Cloud Signing permission and automatic profiles were unavailable. Manual App Store export succeeded with the existing local distribution certificate and explicit App Store profiles, without a new certificate or access grant. IPA: `build/Exports/Minutide-0.1.0-1-manual/Stiint.ipa`, 6,047,504 bytes, SHA-256 `0e960dc15940d35d5cb094178fd045ed1ce457e6d8d969def12a1f2551626327`; version 0.1.0 build 1, `get-task-allow=false`, beta reports active, bundle IDs verified.
+- Apple IPA validation succeeded without errors at 23:55:37 UTC. Upload succeeded without errors at 23:56:33 UTC; delivery UUID `591b8c17-694a-41ce-80bd-39c16a27e4a6`. The builds list was empty immediately after upload; processing/indexing remains pending.
+- `Minutide Internal` contains only the intended maintainer account and remains `NOT_INVITED` until build assignment. There is no public link, and Mac/Vision availability is disabled. Physical acceptance remains pending. No Apple legal agreement or public App Store release is claimed.
+
+## 2026-11-12 UTC — First internal TestFlight build available
+
+- Apple processing is `VALID` for **0.1.0 (1)**, build/delivery `591b8c17-694a-41ce-80bd-39c16a27e4a6`; internal state is `IN_BETA_TESTING`. The build is assigned to `Minutide Internal`, whose sole intended tester is `INVITED`. The website independently shows this version/build, group, and one invitation. Expiry: 2027-02-09. Installation and email delivery are not claimed.
+- Added an English What to Test checklist covering timers, relaunch, Live Activities, manual edits, charts/filters, CSV, location denial, and Shortcuts. No external tester or public link was enabled.
+- Artifact source remains `dec1e884cdd4561c32210e1365359c97558a00c5`; later changes affect documentation and the export helper only, preserving the uploaded app. Source PR: https://github.com/elaren-studio/minutide/pull/1 .
+- Hosted CI remains unverified. Physical acceptance is the next user step. No Apple legal agreement or production release was performed.

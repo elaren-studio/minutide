@@ -13,25 +13,27 @@ The goal is a free, open-source self-build, an eventual free App Store release, 
 ## 2. Make tracking dependable — in progress
 
 - Ensure an activity that was running before suspension or relaunch recovers consistently, with no duplicate or overlapping open logs.
-- The final local suite passes 20 tests with 0 failures and 0 skips, including timer recovery, state transitions, archive handling, CSV export, and the historical split-tail regression. The result is recorded in `ACTIVE_CONTEXT.md`.
+- The expanded stability suite passes 39 tests with 0 failures and 0 skips, including timer recovery, manual-edit integrity, delayed-location safeguards, archived/orphan history, CSV, Shortcuts queries, midnight boundaries, and DST analytics. The result is recorded in `ACTIVE_CONTEXT.md`.
 - Document behavior for force quit, normal backgrounding, device restart, and interrupted location access.
 
 ## 3. Complete acceptance on supported devices — in progress
 
-- A warning-free build/run and timer/Live Activity/relaunch checks succeeded on an iPhone 17 simulator with iOS 26.5; the detailed run is in [DEVICE_ACCEPTANCE.md](DEVICE_ACCEPTANCE.md). The final 20-test run and final Release build also passed. Validation on the iOS 26.1 minimum and physical-device acceptance remain open.
+- A warning-free build/run and timer/Live Activity/relaunch checks succeeded on an iPhone 17 simulator with iOS 26.5; the detailed run is in [DEVICE_ACCEPTANCE.md](DEVICE_ACCEPTANCE.md). The later 39-test stability run and signed Release archive also passed. Validation on the iOS 26.1 minimum and physical-device acceptance remain open.
 - Exercise the main activity, timeline, analytics, CSV, App Intents, and Live Activity paths.
 - Validate location opt-in and denied-permission behavior using synthetic data.
 - Run the physical-device matrix in [DEVICE_ACCEPTANCE.md](DEVICE_ACCEPTANCE.md), recording device and OS evidence.
 
-## 4. Prepare and deliver the first internal TestFlight build — in progress; not release-ready
+## 4. Deliver the first internal TestFlight build — internal TestFlight available
 
-- The manual-edit transaction, delayed-location guard, malformed timeline/analytics handling, overnight/DST clipping, midnight query boundaries, and archived-activity Shortcuts enumeration are implemented. The expanded simulator suite passed all 39 tests (36 unit, 3 UI), with no failures or skips.
-- Complete remaining targeted simulator checks and packaging review, including embedded JavaScript notices. Keep physical-device and minimum-runtime acceptance separate.
-- App and Live Activity identifiers are registered. App Store Connect record 6833697250 is verified as **Minutide: Time Tracker** / `com.elaren.minutide`; installed display name remains Minutide.
-- After simulator gates pass, prepare and inspect a signed archive and exported IPA. Upload remains gated on the App Store Connect app record.
-- Validate and upload the explicit IPA to the verified app record, then read back Apple's processing result and internal tester availability.
-- Use the processed TestFlight build for physical Shortcuts, location permission, reboot/recovery, and minimum-runtime checks. Physical acceptance gates a stable public release.
-- Keep this first milestone limited to internal TestFlight. No external tester rollout or public App Store submission is included.
+- Current source candidate `dec1e884cdd4561c32210e1365359c97558a00c5` is published on `feature/minutide-testflight`; [pull request #1](https://github.com/elaren-studio/minutide/pull/1) remains a draft.
+- The 39-test simulator suite passed (36 unit, 3 UI; 0 failures, 0 skips) before notice-only acknowledgement additions. The final source includes all four notices and retains the original MIT notice; no post-notice test run is claimed.
+- App and Live Activity identifiers are registered. App Store Connect record 6833697250 is verified as **Minutide: Time Tracker** / `com.elaren.minutide`.
+- Signed Release archive `build/Archives/Minutide-0.1.0-1.xcarchive` and manual IPA `build/Exports/Minutide-0.1.0-1-manual/Stiint.ipa` (0.1.0 build 1, 6,047,504 bytes) are verified. Both signature checks, privacy reason `CA92.1`, all four notices, bundle identifiers, `get-task-allow=false`, and beta reports active were read back. Receipt: `build/Verification/minutide-0.1.0-1.json`.
+- Automatic export failed with Cloud Signing permission and missing-profile errors. Manual export used the existing local distribution certificate and explicit App Store profiles, without creating a new certificate or access grant. Export options preserve the reviewed version/build with `manageAppVersionAndBuildNumber=false`.
+- Validation and upload succeeded without errors. Apple processing is `VALID` for **0.1.0 (1)**, build/delivery `591b8c17-694a-41ce-80bd-39c16a27e4a6`; internal state is `IN_BETA_TESTING`. The build is assigned to `Minutide Internal`, whose sole intended tester is `INVITED`. The website independently shows this version/build, group, and one invitation. Expiry: 2027-02-09. Installation and email delivery are not claimed.
+- Internal group `Minutide Internal` contains only the intended maintainer, marked `INVITED`, and build 0.1.0 (1). No public link is active; Mac and Vision availability are disabled.
+- Use the first TestFlight install for physical Shortcuts, location, reboot/recovery, and minimum-runtime acceptance. These tests are pending and gate stable public release readiness.
+- The Apple legal agreement remains unaccepted. No public App Store submission or production release is in scope.
 
 ## 5. Maintain the public source and prepare an eventual free App Store release
 

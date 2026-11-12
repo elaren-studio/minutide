@@ -101,6 +101,8 @@ else
   <string>app-store-connect</string>
   <key>signingStyle</key>
   <string>automatic</string>
+  <key>manageAppVersionAndBuildNumber</key>
+  <false/>
   <key>teamID</key>
   <string>${MINUTIDE_DEVELOPMENT_TEAM}</string>
 </dict>
@@ -119,6 +121,10 @@ fi
 if OPTIONS_TEAM="$(/usr/libexec/PlistBuddy -c 'Print :teamID' "$OPTIONS_PATH" 2>/dev/null)"; then
   [[ "$OPTIONS_TEAM" == "$MINUTIDE_DEVELOPMENT_TEAM" ]] || fail 'export options teamID must match MINUTIDE_DEVELOPMENT_TEAM'
 fi
+if ! MANAGE_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :manageAppVersionAndBuildNumber' "$OPTIONS_PATH" 2>/dev/null)"; then
+  fail 'export options must explicitly set manageAppVersionAndBuildNumber=false to preserve the reviewed version/build'
+fi
+[[ "$MANAGE_VERSION" == 'false' ]] || fail 'export options must not change the reviewed version/build'
 
 printf 'Exporting a local App Store Connect IPA. Xcode output: %s\n' "$LOG_PATH"
 xcodebuild -exportArchive \
