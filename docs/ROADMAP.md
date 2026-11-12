@@ -7,9 +7,9 @@ The goal is a free, open-source self-build, an eventual free App Store release, 
 Follow-up **0.2.3 (5)** is processed and available to the existing internal group:
 Resume Timer from completed entries and a new Minutide logo/app icon. Resume
 preserves recorded details in a separate interval; no stored-model change.
-Final focused checks passed 87 unit tests plus Resume UI at larger text size;
-exact-source 98-case hosted run 43162400317 is in progress. Physical acceptance
-remains open.
+Final exact-source hosted run 43162400317 passed **98 tests (87 unit, 11 UI),
+zero failures/skips**; Resume also passed at larger accessibility text size.
+Physical acceptance remains open.
 
 Follow-up **0.2.2 (4)** is processed and available in the existing internal group:
 bottom tracking/Stop, richer Live Activity, brief-entry visibility, My Day

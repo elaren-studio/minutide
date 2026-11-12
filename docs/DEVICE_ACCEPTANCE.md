@@ -25,7 +25,10 @@ zero failures/skips, at accessibility-medium text size. The prior focused run
 passed Resume at normal size. Unit coverage includes preserved snapshots and
 source dates/coordinates, current availability, idempotent/concurrent timers,
 same-actor start/resume/recover/stop, fresh CSV/analytics reads, and real CSV
-values. Hosted run 43162400317 is running the complete 98-case suite.
+values. Final exact-source
+[hosted run 43162400317](https://github.com/elaren-studio/minutide/actions/runs/43162400317)
+passed **98 tests (87 unit, 11 UI), zero failures/skips**; `TEST SUCCEEDED` at
+**2026-11-12 06:01:55 UTC**. This is the final complete-suite result.
 
 Normal and larger-text editor screenshots were visually reviewed; the installed
 Home Screen icon was checked at native size. Evidence is in

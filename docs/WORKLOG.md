@@ -448,3 +448,21 @@ Append dated entries. Record what changed and what evidence was actually collect
   agreement acceptance. Receipt: `build/Verification/minutide-0.2.3-5.json`.
   Physical build-5 acceptance and email delivery are unverified. Exact-source
   hosted run 43162400317 remains in progress.
+
+## 2026-11-12 UTC — Final Resume/logo source passes complete hosted CI
+
+- Hosted run 43162400317 succeeded on exact app/test source
+  `c8def1d4c7fbc3a6ba03b6538330a09d9b50d2e9`. Logs independently confirm
+  **87 unit and 11 UI tests passed, zero failures/skips**, then `TEST SUCCEEDED`
+  at **06:01:55 UTC**. This is the final full-suite result for build 5.
+- Retained metadata and `build/logs/hosted-ci-43162400317.log`, SHA-256
+  `a0d9913ffba8340916c3513df08d36e8a116ce633d00f9744ccc680324f20b72`.
+  Updated the build-5 receipt; fresh readback reconfirms `VALID` /
+  `IN_BETA_TESTING` in the same intended internal group with one tester and
+  disabled public link/Mac/Vision. Signed IPA and candidate hashes are unchanged.
+- README, active context, roadmap, TestFlight/acceptance records, branding
+  provenance and PR #2 describe the final behavior and verified delivery.
+  `LOCAL_DEVELOPMENT.md`, hierarchy specification and dependency notices remain
+  applicable: paths, stored models, dependencies and original license did not
+  change. Subsequent commits are documentation only. Physical build-5 review,
+  minimum-runtime, Shortcuts/GPS/restart acceptance remains open.

@@ -1,6 +1,6 @@
 # Minutide self-build and internal TestFlight
 
-Last reviewed: 2026-11-11 local time / 2026-11-12 UTC. This records verified internal betas and repeatable self-build procedures. Public App Store release remains a separate step.
+Last reviewed: 2026-11-12 local time and UTC. This records verified internal betas and repeatable self-build procedures. Public App Store release remains a separate step.
 
 ## Current internal beta — 0.2.3 (5)
 
@@ -11,7 +11,10 @@ Last reviewed: 2026-11-11 local time / 2026-11-12 UTC. This records verified int
 - Source `c8def1d4c7fbc3a6ba03b6538330a09d9b50d2e9` is published in PR #2.
   Final focused run passed **87 unit tests plus one UI case**, zero failures/
   skips, at accessibility-medium text size. Normal Resume UI also passed.
-  Exact-source hosted run 43162400317 is running the full 98-case suite.
+  Final exact-source
+  [hosted run 43162400317](https://github.com/elaren-studio/minutide/actions/runs/43162400317)
+  passed **98 tests (87 unit, 11 UI), zero failures/skips**, with `TEST SUCCEEDED`
+  at **2026-11-12 06:01:55 UTC**. This is the final complete-suite evidence.
   All 141 candidate hashes (125 product files) match Git and the signed build.
 - Archive `build/Archives/Minutide-0.2.3-5.xcarchive` and IPA
   `build/Exports/Minutide-0.2.3-5-manual/Stiint.ipa` are verified. IPA:

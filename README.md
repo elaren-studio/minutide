@@ -111,9 +111,9 @@ For the canonical SSD checkout, project-local Xcode GUI DerivedData, and the dif
 All features remain free and open source. **0.2.3 (5)** adds Resume Timer for
 completed entries and the new Minutide logo/app icon to the hierarchy/reporting
 beta. It is processed and available in the existing internal TestFlight group.
-Update without deleting the app to preserve its local store. Final focused checks
-passed **87 unit tests plus the Resume UI case**, zero failures/skips, at larger
-text size; complete 98-case hosted CI is running on the released app source.
+Update without deleting the app to preserve its local store. Final exact-source
+hosted CI passed **98 tests (87 unit, 11 UI), zero failures/skips**. Resume also
+passed at larger accessibility text size.
 Physical acceptance
 and a free public App Store release remain later steps. See [TestFlight build and
 upload](docs/TESTFLIGHT.md) for verified status and repeatable self-build commands.

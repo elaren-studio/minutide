@@ -24,9 +24,11 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
   zero failures/skips, with `content_size=accessibility-medium`. The prior run
   passed 86 units and Resume at normal text size, before the final fresh-reader
   regression. Published source `c8def1d4c7fbc3a6ba03b6538330a09d9b50d2e9` matches
-  all 141 candidate-file hashes (125 product files). Hosted run 43162400317 is
-  running on that exact source; the complete suite now has 98 cases (87 unit,
-  11 UI). Normal and larger-text screenshots were visually reviewed, as was
+  all 141 candidate-file hashes (125 product files). Final hosted
+  [run 43162400317](https://github.com/elaren-studio/minutide/actions/runs/43162400317)
+  passed **98 tests (87 unit, 11 UI), zero failures/skips**, on that exact source;
+  `TEST SUCCEEDED` at **2026-11-12 06:01:55 UTC**. Normal and larger-text
+  screenshots were visually reviewed, as was
   the installed Home Screen icon in `build/ResumeBrandHomeScreen-installed.jpg`.
 - Both signed bundles and the manual-export IPA passed signatures, profiles,
   non-debug/beta entitlements, version/build, IDs, iOS 26.1, four notices,
@@ -37,8 +39,9 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
   `cd4ad8e6-1f70-4763-b599-3e6238277e7d` is `VALID` / `IN_BETA_TESTING`.
   Assignment and English notes were independently read back at
   **2026-11-12 05:41:51 UTC**. Same internal group, sole intended maintainer,
-  public link disabled and Mac/Vision disabled. Final hosted CI remains in
-  progress; physical build-5 acceptance and email delivery are unverified.
+  public link disabled and Mac/Vision disabled. Fresh readback after final CI
+  reconfirms availability. Physical build-5 acceptance and email delivery remain
+  unverified. Subsequent commits update documentation only; signed source is unchanged.
 
 ## Previous internal beta — 0.2.2 (4), historical
 
@@ -229,7 +232,7 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
 
 1. Update the existing TestFlight install to 0.2.3 (5) without deleting it. Record physical upgrade/history/Resume and new-icon acceptance separately.
 2. Review Resume with recorded details, cancellation/switching/paused/unavailable behavior and the new icon, plus the prior My Day/Reports/appearance flows. Exercise hardware Shortcuts/GPS/recovery and minimum-runtime behavior using `DEVICE_ACCEPTANCE.md`.
-3. Finish hosted run 43162400317 on the exact build-5 app/test source, then review the stacked source PRs #1 and #2. No merge has been performed.
+3. Review the stacked source PRs #1 and #2. Final exact-source hosted run 43162400317 passed all 98 tests; no merge has been performed.
 4. Before a later stored-model change, freeze the shipped V2 schema and extend the ordered migration/disk fixtures.
 5. Keep production App Store submission and acceptance of Apple's legal agreement as future gates.
 6. Keep private vulnerability reporting and the canonical SSD source/build paths; do not invent support-address or response-time commitments.
