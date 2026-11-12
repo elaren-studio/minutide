@@ -16,6 +16,54 @@ The first internal TestFlight build is intended to support the maintainer's phys
 
 ## Work hierarchy beta acceptance — local validation complete; physical checks pending
 
+### Day views and tracking details (0.2.2 build 4, available internally)
+
+Final source `59a1f12f498f4befb28d7bb764300694ca846d22` adds bottom Start/running
+controls with independent Stop, My Day Timeline/List modes with clipped daily
+totals and brief-entry rows, richer captured-context Live Activity details, and
+measured Reports cards with wrapped legends. No stored models changed.
+
+Focused run `MyDayDetailsFocused-2.xcresult` passed all 76 units and three
+user-flow UI cases (plus one temporary exact-owned-timer cleanup, excluded from
+product coverage and removed before publication). The full local
+`MyDayDetailsFull-1.xcresult` passed **86 tests (76 unit, ten UI), zero failures/
+skips**, on `00def43`; hosted run 43154616269 passed the same 86 cases on that
+source. Subsequent final changes stack Reports sorting controls and strengthen
+test navigation/geometry. Final hosted run 43157603328 is in progress.
+Default-size dark screenshots under `build/MyDayDetailsReview-2` were visually
+reviewed for bottom positioning, readable list entries, and report separation.
+A simulator Lock Screen showed the richer task/status/start/elapsed presentation.
+New DTO tests verify legacy attribute decoding and immutable hierarchy projection.
+
+Larger-text (`accessibility-medium`) My Day passed in
+`MyDayDetailsAccessibility-2.xcresult` after scrolling to the offscreen detail
+duration. Screenshot review caught a Reports sorting collision missed by the
+initial assertions; the final controls, explanation, exports, plot, and wrapping
+legend were visually reviewed after correction. Final Reports UI case passed
+in `MyDayDetailsAccessibility-4.xcresult`, zero failures/skips. Simulator text
+size and appearance were restored to `large` / light. Screenshots are under
+`build/MyDayDetailsAccessibilityReview-4`.
+
+Both final signed bundles and the export were verified; Apple validation and
+upload succeeded without errors. Build/delivery
+`9717a731-94ea-43e5-9cd2-c1c0c7a1db0f` is `VALID` / `IN_BETA_TESTING` in
+the existing internal group, independently verified at **2026-11-12 04:59:17 UTC**.
+Receipt: `build/Verification/minutide-0.2.2-4.json`. Physical build-4 acceptance
+has not been performed.
+
+Physical checks after the update:
+
+1. Verify Start Timer sits above the tab bar. Start, switch, and stop from the
+   bottom timer across tabs; verify entries are saved and a late Stop does not
+   affect a different task.
+2. Complete a brief task. Verify its recent row/marker, seconds, daily total,
+   and the same entry in List. Reopen its details and relaunch to verify mode
+   persistence. Switch days and organization scopes in both modes.
+3. Check Lock Screen and expanded Dynamic Island with long task and hierarchy
+   names; verify captured context, start and elapsed times remain readable.
+4. Check long report labels, CSV actions, all charts/free-time toggles, narrow
+   display and larger text; verify display changes do not alter exported values.
+
 ### UI follow-up (0.2.1 build 3)
 
 The full dark-mode local run passed 70/73 tests (65 unit, five UI), then all

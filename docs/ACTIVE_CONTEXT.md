@@ -6,9 +6,9 @@ Last updated: 2026-11-11
 
 Revive the archived Stiint iOS time tracker as **Minutide**, an independently maintained, fully free, open-source app under Elaren Studio. Keep the original Xcode app target named `Stiint` and retain Liam Wittig's original MIT copyright notice. The user explicitly authorized the Minutide rename and publication under the Elaren GitHub organization on 2026-11-11.
 
-## Current internal beta — 0.2.1 (3) available in TestFlight
+## Current internal beta — 0.2.2 (4) available in TestFlight
 
-### 0.2.2 (4) follow-up — implementation and validation in progress
+### Day views and tracking details
 
 - Maintainer screenshots showed oversized/top tracking controls, a bottom timer
   without Stop, sparse Live Activity details, a missing completed brief entry,
@@ -22,11 +22,36 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
   richer snapshot-based Live Activity details and backward-compatible attributes,
   and measured Reports cards with wrapped legends and seconds below a minute.
   Existing stored models, UUIDs, dependencies, and raw CSV semantics are unchanged.
-- Version/build is 0.2.2 (4). App build/run succeeded on iPhone 17 / iOS 26.5.
-  First unit/UI checks are in progress; no green validation or internal delivery
-  is claimed for this follow-up. Build 3 remains the latest verified internal beta.
+- Version/build is 0.2.2 (4), final source `59a1f12f498f4befb28d7bb764300694ca846d22`.
+  App build/run succeeded on iPhone 17 / iOS 26.5. Focused run
+  `MyDayDetailsFocused-2.xcresult` passed all 76 units plus three user-flow cases,
+  and a separate task-owned cleanup case (not product coverage). First failed
+  evidence is retained separately. Published source removes that temporary helper.
+- Full local run `MyDayDetailsFull-1.xcresult` and hosted run 43154616269 passed
+  **86 tests (76 unit, ten UI), zero failures/skips** on `00def43`. Accessibility
+  tests passed My Day after scrolling to its offscreen detail field. Visual
+  review caught a separate Reports sorting collision missed by the original
+  assertions; final source stacks those controls and adds a geometry check.
+  `MyDayDetailsAccessibility-3.xcresult` passes that correction. Final hosted
+  run 43157603328 is running on `59a1f12`; do not attribute the earlier full
+  result to this later source. Candidate-2 manifests fingerprint 139 files,
+  including 124 product files. Default/larger-text screenshots are retained
+  under `build/MyDayDetailsReview-2` and `build/MyDayDetailsAccessibilityReview-*`.
+  The first signed candidate was preserved as superseded and never uploaded.
+  Final archive and manual-export IPA passed both signatures, distribution
+  profiles/entitlements, IDs/version/build, iOS 26.1, four notices and `CA92.1`.
+  IPA: 7,125,052 bytes, SHA-256
+  `a0513d810cced28aae554633e09abfe323334d67e3b847e1385f89f585b7fc97`.
+- Apple validation/upload succeeded without errors. Delivery/build
+  `9717a731-94ea-43e5-9cd2-c1c0c7a1db0f` is `VALID` / `IN_BETA_TESTING`.
+  Assignment and English notes were independently read back at
+  **2026-11-12 04:59:17 UTC**. The existing internal group still has only the
+  intended maintainer, public link disabled, and Mac/Vision disabled. Receipt:
+  `build/Verification/minutide-0.2.2-4.json`. Final Reports accessibility run
+  `MyDayDetailsAccessibility-4.xcresult` passed and its plot/legend screenshots
+  were visually reviewed. Physical build-4 acceptance remains open.
 
-### Follow-up UI corrections
+## Previous internal beta — 0.2.1 (3), historical
 
 - The maintainer supplied screenshots of the appearance editor, Tasks scope
   menu, and Create Log, requesting simpler styling, removal of the nested scope
@@ -168,9 +193,9 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
 
 ## Next work
 
-1. Update the existing TestFlight install to 0.2.1 (3) without deleting it. Record physical upgrade/history/running-timer acceptance separately.
-2. Review the simpler appearance controls, single scope surface, inline task creation, and My Day manual timer, then exercise organizations, reports/exports, hardware Shortcuts/GPS/recovery and minimum-runtime behavior using `DEVICE_ACCEPTANCE.md`.
-3. Review the stacked source PRs #1 and #2. The complete shipped source passed hosted CI; no merge has been performed.
+1. Update the existing TestFlight install to 0.2.2 (4) without deleting it. Record physical upgrade/history/running-timer acceptance separately.
+2. Review bottom Start/Stop, richer Live Activities, brief entries, Timeline/List and Reports layouts, plus the prior appearance/inline creation flows. Exercise hardware Shortcuts/GPS/recovery and minimum-runtime behavior using `DEVICE_ACCEPTANCE.md`.
+3. Finish exact-source hosted run 43157603328 and review the stacked source PRs #1 and #2. No merge has been performed.
 4. Before a later stored-model change, freeze the shipped V2 schema and extend the ordered migration/disk fixtures.
 5. Keep production App Store submission and acceptance of Apple's legal agreement as future gates.
 6. Keep private vulnerability reporting and the canonical SSD source/build paths; do not invent support-address or response-time commitments.

@@ -2,7 +2,34 @@
 
 Last reviewed: 2026-11-11 local time / 2026-11-12 UTC. This records verified internal betas and repeatable self-build procedures. Public App Store release remains a separate step.
 
-## Current internal beta — 0.2.1 (3)
+## Current internal beta — 0.2.2 (4)
+
+- Bottom Start/running controls with independent Stop, My Day Timeline/List and
+  brief-entry seconds, captured-context Live Activity details, and adaptive
+  Reports cards, legends, exports, and sorting controls. No stored-model change.
+- Final source `59a1f12f498f4befb28d7bb764300694ca846d22` is published in PR #2.
+  Earlier source `00def43` passed all 86 local and hosted tests (76 unit, ten UI),
+  zero failures/skips. Final accessibility-size Reports checks passed after a
+  screenshot-driven sorting correction; exact-source hosted run 43157603328 is
+  running. My Day's larger-text flow passed separately.
+- Archive `build/Archives/Minutide-0.2.2-4.xcarchive` and IPA
+  `build/Exports/Minutide-0.2.2-4-manual/Stiint.ipa` are verified. IPA size:
+  **7,125,052 bytes**; SHA-256
+  `a0513d810cced28aae554633e09abfe323334d67e3b847e1385f89f585b7fc97`.
+  Both signatures, distribution profiles/entitlements, IDs/version/build,
+  minimum iOS 26.1, four notices, and `CA92.1` passed. The superseded first
+  signed candidate was retained separately and never uploaded.
+- Apple validation/upload succeeded without errors. Delivery/build
+  `9717a731-94ea-43e5-9cd2-c1c0c7a1db0f` is `VALID` / `IN_BETA_TESTING` in
+  `Minutide Internal`; assignment and English notes were read back independently.
+  Availability verified at **2026-11-12 04:59:17 UTC**. The group still contains
+  only the intended maintainer, public link disabled, Mac/Vision disabled.
+  Receipt: `build/Verification/minutide-0.2.2-4.json`.
+- Physical build-4 acceptance and email delivery are unverified. Update without
+  deleting the app. Public submission, external testers, new certificates/access
+  grants, and acceptance of Apple's legal agreement remain outside this delivery.
+
+## Previous internal beta — 0.2.1 (3), historical
 
 - Simplified Color/Icon rows and visual choosers with independent resets; one
   native scope surface; inline task creation and selection in Create Log; and

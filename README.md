@@ -11,10 +11,11 @@ This is an early beta with public source for development and self-building. Inte
 - Switch organization scope while one global timer keeps running.
 - Create named tasks with optional weekday rules and location recording.
 - Start, stop, query, and resume activities from the app or Shortcuts actions.
-- Review and edit logged activity on a daily timeline.
+- Review and edit daily activity in Timeline or chronological List view.
+- Keep brief entries visible with seconds and a day-clipped tracked total.
 - Combine organization, client, project, and task filters; group and sort matching time.
 - Explore free Sankey, pie, bar, line, and area charts using the matching records.
-- Show the current activity in an iOS Live Activity.
+- Show recorded work context, start time, and elapsed time in an iOS Live Activity.
 - Export grouped summaries, report details, or complete raw logs as CSV.
 - Optionally record start and end location for selected activities.
 - Use all app features without a subscription or paid tier.
@@ -34,9 +35,13 @@ organization. The running timer stays available while you switch scope, and
 choosing another task switches the timer. Archive and restore items from Manage
 Work; archived work remains in history.
 
-In **My Day**, tap **Start Timer** and choose a task, or create one there.
+In **My Day**, tap **Start Timer** above the tab bar and choose a task, or create one there.
 Tracking starts now and returns to Today even when you were viewing an older
-day. Use **Switch Task** or **Stop** on the running timer. To add past time,
+day. Tap the task name in the bottom timer to switch, or tap **Stop** from any
+tab. Use the view menu beside **+** to choose **Timeline** or **List**; the
+choice persists. Brief calendar entries also have readable recent rows, and
+**Show list** opens the complete day's entries. Both modes use the same dates,
+scope, captured assignment, and daily total. To add past time,
 tap **+** for **Create Log**; **New Task** creates and selects a task without
 leaving your log or changing its dates.
 
@@ -94,12 +99,13 @@ bash scripts/ci-ios.sh
 
 For the canonical SSD checkout, project-local Xcode GUI DerivedData, and the difference between GUI and CLI build subfolders, see [Local Development](docs/LOCAL_DEVELOPMENT.md).
 
-All features remain free and open source. **0.2.1 (3)** adds simpler appearance
-controls, inline task creation, and manual tracking from My Day to the hierarchy/
-reporting beta. It is processed and available in the existing internal TestFlight
-group. Update without deleting the app to preserve its local store. Hosted CI
-passed all **73 tests (65 unit, eight UI), zero failures/skips**, on the released
-source. Physical acceptance
+All features remain free and open source. **0.2.2 (4)** adds bottom tracking and
+Stop controls, My Day Timeline/List modes and brief-entry visibility, richer
+Live Activities, and adaptive Reports layouts. It is processed and available in
+the existing internal TestFlight group. Update without deleting the app to
+preserve its local store. The earlier complete suite passed **86 tests (76 unit,
+ten UI), zero failures/skips**; the final Reports accessibility correction passed
+its focused test, with exact-source hosted CI still running. Physical acceptance
 and a free public App Store release remain later steps. See [TestFlight build and
 upload](docs/TESTFLIGHT.md) for verified status and repeatable self-build commands.
 Signing details stay local; the scripts never submit a public App Store release.
@@ -123,6 +129,10 @@ can include names, hierarchy IDs, timestamps, duration, appearance, and saved
 coordinates. Treat exported files as sensitive and choose their destination
 deliberately. Organizations are local work contexts; they do not add team
 accounts or shared access.
+
+Live Activities display the running task, recorded organization/client/project
+names, start time, and elapsed time on the Lock Screen and expanded Dynamic
+Island. Their visibility is controlled by iOS Live Activity settings.
 
 The app stores records in an on-device SwiftData store with CloudKit disabled and has no project account or server-sync service. The acknowledgements screen loads the pinned dependency licenses bundled with the app; it does not need to fetch those notices from GitHub. App network traffic has not been independently audited. Shortcuts, iOS Location Services, and system share/export flows are controlled by Apple and by the choices you make on your device. This description summarizes the app source; it is not an independent privacy or security audit. See [SECURITY.md](SECURITY.md) for reporting guidance.
 

@@ -306,3 +306,65 @@ Append dated entries. Record what changed and what evidence was actually collect
 - Native workers were requested as Sol/high for My Day and Luna/xhigh for
   Reports/Live Activity. Runtime model routing was not exposed. Root reviewed
   their diffs and owns integration, executed tests, signing and external actions.
+
+## 2026-11-12 UTC — Full local day-view/details suite green
+
+- Published source `00def433ee652833be67874499d98dbe177fc217` on the existing
+  feature branch/PR #2. Hosted run 43154616269 is running on that exact source.
+- Full local `MyDayDetailsFull-1.xcresult` passed **86 tests (76 unit, ten UI),
+  zero failures/skips**, with source fingerprints unchanged across all 139 files.
+  Retained log `build/logs/myday-details-full-1.log` and independent summary
+  `build/Verification/myday-details-full-summary.json`.
+- Visually reviewed focused screenshots of bottom Stop, short completed entries,
+  the persisted List, long report summary labels, and the separated Sankey
+  description/plot/wrapping legend. All recorded data is synthetic.
+- Started `MyDayDetailsAccessibility-1.xcresult` for the new day/report flows
+  with simulator `content_size=accessibility-medium`; normal setting was `large`.
+  Its result and signing/internal delivery remain pending at this checkpoint.
+
+## 2026-11-12 UTC — Accessibility visual review and final candidate
+
+- Hosted run 43154616269 passed all 86 tests (76 unit, ten UI), zero failures/
+  skips, on `00def43`. Local full results cover the same source.
+- My Day's accessibility run passed bottom Stop/list/seconds, then initially
+  failed a direct lookup of the offscreen Edit Log duration. Its corrected
+  scroll navigation passed in `MyDayDetailsAccessibility-2.xcresult`.
+- Reports' initial accessibility assertions passed, but screenshot inspection
+  revealed sorting controls colliding with the explanatory text. Stacked those
+  controls with measured labels, added a geometry regression and an explicit
+  plot-scroll action for screenshots. The app correction passed the larger-text
+  Reports test in `MyDayDetailsAccessibility-3.xcresult`; screenshots visibly
+  separate controls, explanation, summary, and export actions.
+- Published final source `59a1f12f498f4befb28d7bb764300694ca846d22`; hosted run
+  43157603328 is in progress. Root retained this small integration correction
+  because it depended on the just-reviewed UI evidence and release fingerprints.
+- Preserved the first signed archive/export/receipt as candidate 1, superseded
+  before upload. Final fingerprints are `myday-details-candidate-2.json` (139
+  files) and `myday-details-app-source-2.json` (124 product files). A new final
+  archive is built; export verification and internal delivery remain pending.
+
+## 2026-11-12 UTC — Final signed day-view/details build uploaded
+
+- Final Reports accessibility test, including bringing the plot into view,
+  passed in `MyDayDetailsAccessibility-4.xcresult`; screenshots show separate
+  sorting/explanation/export rows and a contained plot with wrapping full-name
+  legend. Restored simulator content size `large` and light appearance.
+- Final archive/export from `59a1f12` passed both signatures, distribution
+  profiles/entitlements, IDs, 0.2.2 (4), minimum iOS 26.1, all four notices, and
+  privacy reason `CA92.1`. IPA: 7,125,052 bytes, SHA-256
+  `a0513d810cced28aae554633e09abfe323334d67e3b847e1385f89f585b7fc97`.
+- Apple validation and upload succeeded without errors. Delivery UUID:
+  `9717a731-94ea-43e5-9cd2-c1c0c7a1db0f`. Processing/internal availability and
+  final hosted run 43157603328 remain pending at this checkpoint. Earlier
+  candidate 1 was never uploaded. Receipt: `build/Verification/minutide-0.2.2-4.json`.
+
+## 2026-11-12 UTC — Build 4 available internally
+
+- Apple processing reached `VALID`. Added only build 0.2.2 (4) and the reviewed
+  English beta notes to the existing `Minutide Internal` group; fresh independent
+  readback confirms `IN_BETA_TESTING` at **04:59:17 UTC**. Delivery/build UUID
+  matches `9717a731-94ea-43e5-9cd2-c1c0c7a1db0f`.
+- Verified the same sole intended maintainer, disabled public link, and disabled
+  Mac/Vision availability. No external tester, new certificate/access grant,
+  public submission, or legal-agreement acceptance. Physical build-4 acceptance
+  and email delivery are not claimed. Final hosted CI is still running.
