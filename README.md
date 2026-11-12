@@ -108,13 +108,13 @@ bash scripts/ci-ios.sh
 
 For the canonical SSD checkout, project-local Xcode GUI DerivedData, and the difference between GUI and CLI build subfolders, see [Local Development](docs/LOCAL_DEVELOPMENT.md).
 
-All features remain free and open source. **0.2.2 (4)** adds bottom tracking and
-Stop controls, My Day Timeline/List modes and brief-entry visibility, richer
-Live Activities, and adaptive Reports layouts. It is processed and available in
-the existing internal TestFlight group. Update without deleting the app to
-preserve its local store. Final hosted CI passed **86 tests (76 unit, ten UI),
-zero failures/skips**, on the released app source. Larger-text My Day and Reports
-checks also passed. Physical acceptance
+All features remain free and open source. **0.2.3 (5)** adds Resume Timer for
+completed entries and the new Minutide logo/app icon to the hierarchy/reporting
+beta. It is processed and available in the existing internal TestFlight group.
+Update without deleting the app to preserve its local store. Final focused checks
+passed **87 unit tests plus the Resume UI case**, zero failures/skips, at larger
+text size; complete 98-case hosted CI is running on the released app source.
+Physical acceptance
 and a free public App Store release remain later steps. See [TestFlight build and
 upload](docs/TESTFLIGHT.md) for verified status and repeatable self-build commands.
 Signing details stay local; the scripts never submit a public App Store release.

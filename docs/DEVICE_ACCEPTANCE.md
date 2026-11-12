@@ -16,6 +16,42 @@ The first internal TestFlight build is intended to support the maintainer's phys
 
 ## Work hierarchy beta acceptance — local validation complete; physical checks pending
 
+### Resume and identity (0.2.3 build 5, available internally)
+
+Source `c8def1d4c7fbc3a6ba03b6538330a09d9b50d2e9` adds Resume Timer to the top
+of completed-entry details and selects the new Minutide app/welcome icon.
+`ResumeBrandFocused-2.xcresult` passed **87 unit tests plus the Resume UI case**,
+zero failures/skips, at accessibility-medium text size. The prior focused run
+passed Resume at normal size. Unit coverage includes preserved snapshots and
+source dates/coordinates, current availability, idempotent/concurrent timers,
+same-actor start/resume/recover/stop, fresh CSV/analytics reads, and real CSV
+values. Hosted run 43162400317 is running the complete 98-case suite.
+
+Normal and larger-text editor screenshots were visually reviewed; the installed
+Home Screen icon was checked at native size. Evidence is in
+`build/ResumeBrandReview-1`, `build/ResumeBrandReview-2` and
+`build/ResumeBrandHomeScreen-installed.jpg`. Signed archive/IPA checks passed;
+Apple validation/upload passed without errors. Delivery/build
+`cd4ad8e6-1f70-4763-b599-3e6238277e7d` is `VALID` / `IN_BETA_TESTING`, independently
+verified at **2026-11-12 05:41:51 UTC** in the intended internal group. Receipt:
+`build/Verification/minutide-0.2.3-5.json`.
+
+Physical checks after updating without deleting the app:
+
+1. Verify the new Home Screen icon and existing history. Open an older completed
+   entry, tap Resume Timer, and stop it. Confirm two entries remain and the gap
+   between them is not counted.
+2. Resume an entry whose task has since moved or changed appearance. Confirm
+   the new entry and Live Activity use its recorded assignment/name/style.
+3. While another timer runs, cancel Resume once and confirm it once; verify
+   cancellation leaves the timer alone and confirmation keeps one running timer.
+4. Check paused tracking, archived/unavailable tasks, and unsaved edits. Confirm
+   the guidance is clear. Review larger text and dark/tinted icon appearances
+   on hardware; location opt-in must capture new coordinates, never old ones.
+
+Physical build-5 acceptance remains unverified. Apple processing and internal
+availability are verified separately from these hardware checks.
+
 ### Day views and tracking details (0.2.2 build 4, available internally)
 
 Final source `59a1f12f498f4befb28d7bb764300694ca846d22` adds bottom Start/running

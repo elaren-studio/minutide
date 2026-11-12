@@ -2,7 +2,34 @@
 
 Last reviewed: 2026-11-11 local time / 2026-11-12 UTC. This records verified internal betas and repeatable self-build procedures. Public App Store release remains a separate step.
 
-## Current internal beta — 0.2.2 (4)
+## Current internal beta — 0.2.3 (5)
+
+- Resume Timer at the top of completed-entry details creates a new interval
+  with recorded task/assignment/style, preserving the old entry and gap. It
+  handles one global timer, current availability/location opt-in, paused tracking,
+  and unsaved edits. New Minutide app/welcome icon; no stored-model change.
+- Source `c8def1d4c7fbc3a6ba03b6538330a09d9b50d2e9` is published in PR #2.
+  Final focused run passed **87 unit tests plus one UI case**, zero failures/
+  skips, at accessibility-medium text size. Normal Resume UI also passed.
+  Exact-source hosted run 43162400317 is running the full 98-case suite.
+  All 141 candidate hashes (125 product files) match Git and the signed build.
+- Archive `build/Archives/Minutide-0.2.3-5.xcarchive` and IPA
+  `build/Exports/Minutide-0.2.3-5-manual/Stiint.ipa` are verified. IPA:
+  **4,153,776 bytes**, SHA-256
+  `ce8ca72139c6f16c16df8f91ef81bc59eea946f2f62fafee48583b432378c7ec`.
+  Both signatures/profiles/entitlements, IDs/version/build, iOS 26.1, four
+  notices, `CA92.1`, and `MinutideIcon` primary-icon metadata passed.
+- Apple validation/upload succeeded without errors. Delivery/build
+  `cd4ad8e6-1f70-4763-b599-3e6238277e7d` is `VALID` / `IN_BETA_TESTING` in
+  the existing internal group, independently verified at **2026-11-12 05:41:51 UTC**.
+  Assignment/English notes were read back; the same sole maintainer, disabled
+  public link, and disabled Mac/Vision availability are verified. Receipt:
+  `build/Verification/minutide-0.2.3-5.json`.
+- Physical build-5 acceptance and email delivery remain unverified. Update
+  without deleting the app. Public release, external testers, new signing/access
+  grants and legal-agreement acceptance remain outside this internal delivery.
+
+## Previous internal beta — 0.2.2 (4), historical
 
 - Bottom Start/running controls with independent Stop, My Day Timeline/List and
   brief-entry seconds, captured-context Live Activity details, and adaptive

@@ -420,3 +420,31 @@ Append dated entries. Record what changed and what evidence was actually collect
   verifies the running bottom timer, stops again and finds two distinct entries
   with the original retained. Normal screenshots are in `build/ResumeBrandReview-1`.
   Full hosted CI, archive verification and internal delivery are next.
+
+## 2026-11-12 UTC — Resume/logo source published and signed
+
+- Published `c8def1d4c7fbc3a6ba03b6538330a09d9b50d2e9` on the existing feature
+  branch. Candidate manifest covers 141 files (125 product files); all hashes
+  match Git and the signed candidate. Hosted run 43162400317 is in progress on
+  this exact app/test source; expected full coverage is 87 unit plus 11 UI cases.
+- Visually reviewed normal/accessibility-size Resume screenshots and the new
+  installed Home Screen icon. Restored simulator text size `large` and light
+  appearance. All activity data used in checks is synthetic.
+- Archive/export verified for both bundles, profiles/entitlements, IDs, version
+  0.2.3 (5), minimum iOS 26.1, notices/privacy reason, and `MinutideIcon` metadata.
+  IPA: 4,153,776 bytes, SHA-256
+  `ce8ca72139c6f16c16df8f91ef81bc59eea946f2f62fafee48583b432378c7ec`.
+  Existing signing assets were reused. Apple validation/upload and full hosted
+  CI are running; internal availability is not yet claimed.
+
+## 2026-11-12 UTC — Build 5 available internally
+
+- Apple validation/upload passed without errors; delivery/build
+  `cd4ad8e6-1f70-4763-b599-3e6238277e7d` reached `VALID` / `IN_BETA_TESTING`.
+  Added only this build and reviewed English notes to the existing internal
+  group, then independently verified assignment/notes at **05:41:51 UTC**.
+- Same sole intended maintainer, disabled public link and Mac/Vision availability.
+  No external tester, new certificate/access grant, public submission or legal
+  agreement acceptance. Receipt: `build/Verification/minutide-0.2.3-5.json`.
+  Physical build-5 acceptance and email delivery are unverified. Exact-source
+  hosted run 43162400317 remains in progress.
