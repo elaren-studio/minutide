@@ -105,7 +105,8 @@ struct LogDetailView: View {
                 if hasCompleteClosedDates, endTime >= startTime {
                     Section("Duration") {
                         Text(Duration.seconds(endTime.timeIntervalSince(startTime)),
-                             format: .units(allowed: [.hours, .minutes]))
+                             format: .units(allowed: [.hours, .minutes, .seconds]))
+                            .accessibilityIdentifier("log.detail.duration")
                     }
                 }
 

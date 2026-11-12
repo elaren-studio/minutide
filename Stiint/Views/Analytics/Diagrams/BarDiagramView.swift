@@ -1,52 +1,58 @@
-//
-//  BarDiagramView.swift
-//  Stiint
-//
-//  Created by Wittig, Liam on 15.12.25.
-//
-
 import Charts
 import SwiftUI
 
 struct BarDiagramView: View {
     let data: TimeFrameData
 
-    var body: some View {
-        VStack(alignment: .leading) {
-            Text("Avg. Time per Day")
-                .font(.headline)
-            Text("The diagram illustrates the average amount of time you spend each day over a given period.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .padding(.bottom, 10)
-            Chart(data.dataPoints, id: \.activity.id) { element in
-                BarMark(
-                    x: .value("Index", data.dataPoints.firstIndex(where: { elem in
-                        elem.activity.id == element.activity.id
-                    }) ?? 0),
-                    y: .value("Count", max(0, element.timeAvg)) // Prevent negative values
-                )
-                .foregroundStyle(by: .value("Name", element.activity.name ?? "error"))
-            }
-            .chartForegroundStyleScale(
-                range: data.dataPoints.map { $0.activity.color }
+    private var legendItems: [AnalyticsChartLegendItem] {
+        data.dataPoints.map { point in
+            AnalyticsChartLegendItem(
+                id: point.id.uuidString,
+                label: point.activity.name ?? "Unknown task",
+                color: point.activity.color
             )
-            .chartYAxis {
-                AxisMarks { value in
-                    AxisValueLabel {
-                        if let time = value.as(Double.self) {
-                            Text(TimeHandler().secondsToLocalizedDuration(time)) // Add "s" suffix
+        }
+    }
+
+    var body: some View {
+        AnalyticsChartCard(
+            title: "Avg. Time per Day",
+            description: "Bars compare each tracked activity by its average daily time."
+        ) {
+            if data.dataPoints.isEmpty {
+                ContentUnavailableView("Nothing to display", systemImage: "questionmark.app")
+                    .frame(maxWidth: .infinity, minHeight: 220)
+            } else {
+                VStack(alignment: .leading, spacing: 14) {
+                    Chart(data.dataPoints, id: \.id) { element in
+                        BarMark(
+                            x: .value("Index", data.dataPoints.firstIndex(where: { item in
+                                item.id == element.id
+                            }) ?? 0),
+                            y: .value("Count", max(0, element.timeAvg))
+                        )
+                        .foregroundStyle(by: .value("Name", element.activity.name ?? "Unknown task"))
+                    }
+                    .chartForegroundStyleScale(range: data.dataPoints.map { $0.activity.color })
+                    .chartLegend(.hidden)
+                    .chartYAxis {
+                        AxisMarks { value in
+                            AxisValueLabel {
+                                if let time = value.as(Double.self) {
+                                    Text(ReportDurationText.string(from: time))
+                                }
+                            }
+                            AxisGridLine()
+                            AxisTick()
                         }
                     }
-                    AxisGridLine()
-                    AxisTick()
+                    .chartXAxis(.hidden)
+                    .frame(height: 260)
+                    .clipped()
+
+                    AnalyticsChartLegend(items: legendItems)
                 }
             }
-            .chartXAxis(.hidden)
-
-        }.padding(15)
-            .frame(height: 500)
-            .background(.regularMaterial)
-            .cornerRadius(12)
+        }
     }
 }

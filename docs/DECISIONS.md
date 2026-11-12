@@ -2,6 +2,24 @@
 
 Durable choices for Minutide, the independent Stiint continuation. Add a dated entry when a decision changes; keep implementation status in `ACTIVE_CONTEXT.md` and `WORKLOG.md`.
 
+## 2026-11-11 — My Day views, bottom tracking, and compact information
+
+- My Day supports a persisted Timeline/List choice over the same day, scope,
+  and validated day-clipped intervals. Show seconds for brief positive work.
+  Calendar markers preserve true interval positions; the latest three compact
+  entries have readable rows and a Show list action for the complete history.
+- Put idle Start Timer in the native tab bottom accessory on My Day. One global
+  running accessory provides task/context, elapsed time, Switch, and Stop on all
+  tabs. Keep Stop available while tracking is paused. A delayed Stop targets
+  the displayed task rather than stopping a different task started meanwhile.
+- Live Activities use optional, backward-compatible hierarchy metadata from the
+  entry snapshot, plus the existing captured start time. Present richer details
+  within system height limits, keeping compact/minimal content concise.
+- Report cards measure headings/descriptions separately from bounded plots;
+  full labels wrap in legends. Keep chart labels inside their plot and export
+  actions on a separate adaptable row. Display formatting does not change CSV
+  values or report calculations. No stored-model/schema change is required.
+
 ## 2026-11-11 — Manual tracking and contextual task creation
 
 - My Day offers a visible Start Timer action, plus Switch Task and Stop while

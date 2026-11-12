@@ -573,7 +573,8 @@ public actor ActivityLogActor {
             return nil
         }
 
-        let task = activityLog.workSnapshot.task
+        let snapshot = activityLog.workSnapshot
+        let task = snapshot.task
         guard let activityName = task?.name ?? activity.name else { return nil }
         return ActivityDTO(
             id: activityId,
@@ -582,7 +583,10 @@ public actor ActivityLogActor {
             icon: task?.sfSymbolName ?? activity.sfSymbolName ?? "questionmark.circle.fill",
             color: Color(hex: task?.colorHex ?? activity.colorHex),
             weekdays: activity.weekdays ?? [],
-            endTime: activityLog.endTime
+            endTime: activityLog.endTime,
+            organizationName: snapshot.organization?.name,
+            clientName: snapshot.client?.name,
+            projectName: snapshot.project?.name
         )
     }
 

@@ -1,61 +1,56 @@
-
-//
-//  LineDiagramView.swift
-//  Stiint
-//
-//  Created by Wittig, Liam on 15.12.25.
-//
-
 import Charts
 import SwiftUI
 
 struct LineDiagramView: View {
-    let calendar = Calendar.current
-
     let data: TimeFrameData
 
-    var body: some View {
-        VStack(alignment: .leading) {
-            Text("Daily Time Spent")
-                .font(.headline)
-            Text("Each point represents the total time spent on activities for that day over the selected period.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .padding(.bottom, 10)
-            if data.dataSeries.isEmpty == false {
-                Chart {
-                    ForEach(data.dataSeries) { point in
-                        LineMark(
-                            x: .value("Date", point.date),
-                            y: .value("Time Spent", point.timeSpend)
-                        )
-                        .foregroundStyle(by: .value("Activity", point.activity.name!)) // separate line for each activity
-                        .symbol(by: .value("Activity", point.activity.name!)) // optional: different symbols for points
-                    }
-                }
+    private var legendItems: [AnalyticsChartLegendItem] {
+        data.seriesStyles.enumerated().map { index, style in
+            AnalyticsChartLegendItem(id: "line-\(index)", label: style.name, color: style.color)
+        }
+    }
 
-                .chartYScale(domain: 0 ... data.dataSeries.map { $0.timeSpend }.max()!)
-                .chartForegroundStyleScale(
-                    domain: data.seriesStyles.map { $0.name },
-                    range: data.seriesStyles.map { $0.color }
-                )
-                .chartYAxis {
-                    AxisMarks(position: .leading) { value in
-                        AxisValueLabel {
-                            if let time = value.as(Double.self) {
-                                Text(TimeHandler().secondsToLocalizedDuration(time))
+    var body: some View {
+        AnalyticsChartCard(
+            title: "Daily Time Spent",
+            description: "Each point shows the time recorded for an activity on a selected date."
+        ) {
+            if data.dataSeries.isEmpty {
+                ContentUnavailableView("Nothing to display", systemImage: "questionmark.app")
+                    .frame(maxWidth: .infinity, minHeight: 220)
+            } else {
+                VStack(alignment: .leading, spacing: 14) {
+                    Chart {
+                        ForEach(data.dataSeries) { point in
+                            LineMark(
+                                x: .value("Date", point.date),
+                                y: .value("Time Spent", point.timeSpend)
+                            )
+                            .foregroundStyle(by: .value("Activity", point.activity.name ?? "Unknown task"))
+                            .symbol(by: .value("Activity", point.activity.name ?? "Unknown task"))
+                        }
+                    }
+                    .chartYScale(domain: 0 ... max(1, data.dataSeries.map(\.timeSpend).max() ?? 0))
+                    .chartForegroundStyleScale(
+                        domain: data.seriesStyles.map { $0.name },
+                        range: data.seriesStyles.map { $0.color }
+                    )
+                    .chartLegend(.hidden)
+                    .chartYAxis {
+                        AxisMarks(position: .leading) { value in
+                            AxisValueLabel {
+                                if let time = value.as(Double.self) {
+                                    Text(ReportDurationText.string(from: time))
+                                }
                             }
                         }
                     }
+                    .frame(height: 260)
+                    .clipped()
+
+                    AnalyticsChartLegend(items: legendItems)
                 }
-
-            } else {
-                ContentUnavailableView("Nothing to display", systemImage: "questionmark.app")
             }
-
-        }.padding(15)
-            .frame(height: 400)
-            .background(.regularMaterial)
-            .cornerRadius(12)
+        }
     }
 }

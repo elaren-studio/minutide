@@ -4,6 +4,11 @@ The goal is a free, open-source self-build, an eventual free App Store release, 
 
 ## Current priority: work hierarchy and combined reporting — internal beta delivered
 
+Follow-up 0.2.2 (4) is in validation: bottom tracking/Stop, richer Live Activity,
+brief-entry visibility, My Day Timeline/List modes, and adaptive Reports cards.
+No stored-schema change. Keep physical screenshots as observations and record
+executed simulator/CI/delivery evidence separately in `ACTIVE_CONTEXT.md`.
+
 Follow-up **0.2.1 (3)** is processed and available to the existing internal group:
 simpler appearance choosers, one native scope surface, inline task creation in
 Create Log, and manual tracking from My Day. Final hosted run 43148292343 passed

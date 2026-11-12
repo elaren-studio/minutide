@@ -269,3 +269,40 @@ Append dated entries. Record what changed and what evidence was actually collect
   acceptance evidence/checklist. Compiled source and the uploaded IPA are
   unchanged. PR #2 remains stacked on #1; neither is merged. Physical build-3
   review and stable/public release acceptance remain separate.
+
+## 2026-11-12 UTC — My Day, bottom tracking, Live Activity and Reports follow-up
+
+- Addressed six maintainer observations: top Start Timer spacing/location, bottom
+  Stop, sparse Live Activity information, hidden completed brief work, Reports
+  collisions, and a list alternative to the day calendar.
+- Replaced the top tracking panel with the native tab bottom accessory: idle
+  Start on My Day; one global task/context/time/Switch/Stop row while running.
+  Individual controls are separate accessibility targets; Stop targets the shown
+  task and remains usable when tracking is paused.
+- Found completed segments at five pixels or less were explicitly hidden; the
+  open-log query also captured a stale clock. The shared projection clips valid
+  intervals to live day boundaries (including DST), feeds Timeline and List,
+  shows brief markers plus up to three recent rows, and preserves true durations.
+- Added optional backward-compatible ActivityKit hierarchy attributes from the
+  immutable log snapshot. Compact Lock Screen/expanded Island show context,
+  start, status, elapsed; old attributes decode with nil hierarchy names. A
+  simulator Lock Screen check displayed the enriched content within its space.
+- Reports use measured text sections, bounded plots, compact Sankey tags with
+  wrapped full legends, and separate adaptive export actions. Subminute positive
+  display values keep seconds, including <1s; calculations and CSV are unchanged.
+- Initial compile exposed a missing SwiftData import; the next build succeeded.
+  Fixed an actor-isolation warning on the Sendable DTO initializer. First tests
+  exposed Swift Testing optional numeric inference in a DST assertion and a
+  bottom-accessory identifier propagated over child controls. Corrected the
+  assertion with exact typed Double operands and exposed the controls separately.
+- Focused run `MyDayDetailsFocused-2.xcresult` passed **76 unit and three user-flow
+  UI cases**, no failures/skips. It also ran one narrowly guarded temporary
+  cleanup for this run's failed synthetic timer; that helper was removed before
+  publication and is not counted as a product regression. Full validation is
+  pending. Version/build: **0.2.2 (4)**; no stored schema/dependency/license changes.
+- Raised hosted job timeout to 35 minutes: the prior 73-test run took 22 minutes;
+  this suite adds two UI cases and 11 units. Keep full results on the SSD and
+  distinguish the future clean hosted run from failed earlier local evidence.
+- Native workers were requested as Sol/high for My Day and Luna/xhigh for
+  Reports/Live Activity. Runtime model routing was not exposed. Root reviewed
+  their diffs and owns integration, executed tests, signing and external actions.

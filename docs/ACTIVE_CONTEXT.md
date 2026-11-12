@@ -8,6 +8,24 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
 
 ## Current internal beta — 0.2.1 (3) available in TestFlight
 
+### 0.2.2 (4) follow-up — implementation and validation in progress
+
+- Maintainer screenshots showed oversized/top tracking controls, a bottom timer
+  without Stop, sparse Live Activity details, a missing completed brief entry,
+  Reports collisions, and a request for a My Day list view.
+- Root cause of hidden brief entries: `shouldRenderSegment` discarded completed
+  intervals at five pixels or less. A separate captured-now query also excluded
+  new open intervals after the view appeared. The shared day projection now
+  validates/clips at live now, renders brief markers/readable recent entries,
+  and feeds a persisted Timeline/List choice with daily totals and detail taps.
+- Implemented one native bottom Start/running accessory with matching-task Stop,
+  richer snapshot-based Live Activity details and backward-compatible attributes,
+  and measured Reports cards with wrapped legends and seconds below a minute.
+  Existing stored models, UUIDs, dependencies, and raw CSV semantics are unchanged.
+- Version/build is 0.2.2 (4). App build/run succeeded on iPhone 17 / iOS 26.5.
+  First unit/UI checks are in progress; no green validation or internal delivery
+  is claimed for this follow-up. Build 3 remains the latest verified internal beta.
+
 ### Follow-up UI corrections
 
 - The maintainer supplied screenshots of the appearance editor, Tasks scope

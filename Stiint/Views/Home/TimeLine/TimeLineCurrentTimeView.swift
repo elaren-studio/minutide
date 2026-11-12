@@ -13,6 +13,7 @@ struct TimeLineCurrentTimeView: View {
 
     let currentTimeValue: Double
     let geometry: GeometryProxy
+    var totalHours: Double = 24
     let frameHieght: CGFloat = 40
 
     var body: some View {
@@ -32,6 +33,6 @@ struct TimeLineCurrentTimeView: View {
 
         }.frame(height: frameHieght)
             .padding(.leading, 15)
-            .offset(y: CGFloat(currentTimeValue) * (geometry.size.height / 24) + (geometry.size.height / 24) / 2 - CGFloat(frameHieght / 2))
+            .offset(y: CGFloat(currentTimeValue) * (geometry.size.height / totalHours) + (geometry.size.height / totalHours) / 2 - CGFloat(frameHieght / 2))
     }
 }

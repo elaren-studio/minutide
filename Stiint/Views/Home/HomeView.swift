@@ -2,7 +2,9 @@ import SwiftUI
 import SwiftData
 
 struct HomeView: View {
+    var todayRequest: UUID? = nil
     @State private var dayOffset: Int = 0
+    @AppStorage("timeline.displayMode") private var displayMode = MyDayDisplayMode.timeline.rawValue
     @AppStorage("work.organizationScope") private var organizationScope = "all"
     @Query(sort: \WorkOrganization.name) private var organizations: [WorkOrganization]
 
@@ -14,16 +16,12 @@ struct HomeView: View {
     enum ActiveSheet: Identifiable {
         case createLog
         case selectDate
-        case startTimer
         var id: Int { hashValue }
     }
 
     @State private var activeSheet: ActiveSheet?
 
     let dayRange: Int = -2000
-
-    @Query(sort: \ActivityLog.startTime)
-    var logs: [ActivityLog]
 
     private func dateFor(offset: Int) -> Date {
         Calendar.current.date(byAdding: .day, value: offset, to: .now) ?? .now
@@ -61,7 +59,8 @@ struct HomeView: View {
                     ForEach(dayRange...0, id: \.self) { offset in
                         TimeLineDisplayer(
                             offset: offset,
-                            currentOffset: dayOffset
+                            currentOffset: dayOffset,
+                            mode: MyDayDisplayMode(rawValue: displayMode) ?? .timeline
                         )
                         .tag(offset)
                         .scrollTransition(.interactive, axis: .horizontal) { content, phase in
@@ -81,14 +80,27 @@ struct HomeView: View {
                 )
             )
             .scrollTargetBehavior(.paging)
-            .ignoresSafeArea(edges: [.top, .bottom])
-            .safeAreaInset(edge: .top, spacing: 0) {
-                trackingControls
-            }
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     WorkScopePicker(selection: scopeBinding, organizations: organizations,
                                     identifier: "timeline.scope")
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    Menu {
+                        Picker("View mode", selection: $displayMode) {
+                            Label("Timeline", systemImage: "calendar.day.timeline.left")
+                                .tag(MyDayDisplayMode.timeline.rawValue)
+                                .accessibilityIdentifier("timeline.mode.timeline")
+                            Label("List", systemImage: "list.bullet")
+                                .tag(MyDayDisplayMode.list.rawValue)
+                                .accessibilityIdentifier("timeline.mode.list")
+                        }
+                    } label: {
+                        Image(systemName: displayMode == MyDayDisplayMode.list.rawValue
+                              ? "list.bullet" : "calendar.day.timeline.left")
+                    }
+                    .accessibilityLabel("View mode")
+                    .accessibilityIdentifier("timeline.mode")
                 }
                 ToolbarItem(placement: .primaryAction) {
                     Button {
@@ -113,6 +125,7 @@ struct HomeView: View {
             .toolbarBackground(.hidden, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
             .sensoryFeedback(.selection, trigger: dayOffset)
+            .onChange(of: todayRequest) { _, _ in dayOffset = 0 }
         }
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
@@ -128,49 +141,16 @@ struct HomeView: View {
                     dayRange: dayRange
                 )
                 .presentationDetents([.medium])
-            case .startTimer:
-                StartTimerView {
-                    dayOffset = 0
-                }
             }
         }
     }
 
-    private var trackingControls: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            if let activity = DtoManager.shared.activityDTO {
-                HStack {
-                    Text("Now tracking")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    Button("Switch Task") { activeSheet = .startTimer }
-                        .font(.subheadline.weight(.semibold))
-                        .accessibilityIdentifier("timeline.timer.switch")
-                }
-                RunningTaskSnapshotCard(activity: activity)
-            } else {
-                Button {
-                    activeSheet = .startTimer
-                } label: {
-                    Label("Start Timer", systemImage: "play.fill")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity, minHeight: 36)
-                }
-                .buttonStyle(.borderedProminent)
-                .accessibilityIdentifier("timeline.timer.start")
-            }
-        }
-        .padding(14)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18))
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-    }
 }
 
 struct TimeLineDisplayer: View {
     let offset: Int
     let currentOffset: Int
+    let mode: MyDayDisplayMode
 
     private var date: Date {
         Calendar.current.date(byAdding: .day, value: offset, to: .now) ?? .now
@@ -179,7 +159,7 @@ struct TimeLineDisplayer: View {
     var body: some View {
         ZStack {
             if abs(offset - currentOffset) <= 1 {
-                TimeLineView(selectedDate: date)
+                MyDayEntriesView(selectedDate: date, mode: mode)
             } else {
                 Color.clear
             }

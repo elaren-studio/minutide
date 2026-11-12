@@ -206,7 +206,7 @@ final class StiintUITests: XCTestCase {
         createTaskInNestedEditor(named: firstTask, in: app)
         XCTAssertTrue(app.navigationBars["Start Timer"].waitForExistence(timeout: 10))
         XCTAssertFalse(app.alerts["What would you like to do?"].exists)
-        XCTAssertFalse(app.staticTexts["timer.running.name"].exists,
+        XCTAssertFalse(app.buttons["timer.accessory.stop"].exists,
                        "Saving a new task must return to the picker; the user starts it by tapping its row.")
 
         let firstChoice = startTimerChoice(named: firstTask, in: app)
@@ -231,11 +231,11 @@ final class StiintUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Start Timer"].waitForExistence(timeout: 10))
         startTimerChoice(named: secondTask, in: app).tap()
         assertRunningActivity(named: secondTask, in: app)
-        XCTAssertEqual(app.staticTexts.matching(identifier: "timer.running.name").count, 1,
+        XCTAssertEqual(app.buttons.matching(identifier: "timeline.timer.switch").count, 1,
                        "Switching a task must leave exactly one active timer visible.")
 
-        app.buttons["timer.running.stop"].tap()
-        XCTAssertTrue(app.buttons["timer.running.stop"].waitForNonExistence(timeout: 10))
+        app.buttons["timer.accessory.stop"].tap()
+        XCTAssertTrue(app.buttons["timer.accessory.stop"].waitForNonExistence(timeout: 10))
         app.tabBars.buttons["Settings"].tap()
         app.buttons["Export"].tap()
         XCTAssertTrue(app.navigationBars["Raw Data"].waitForExistence(timeout: 10))
@@ -317,6 +317,78 @@ final class StiintUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Edit Task"].waitForExistence(timeout: 10))
         assertAppearance(named: "Minutide default", icon: "Minutide default", in: app)
         app.navigationBars["Edit Task"].buttons["Cancel"].tap()
+    }
+
+    @MainActor
+    func testMyDayBriefEntryHasBottomStopAndAppearsInBothModes() throws {
+        let app = launchReadyApp()
+        try requireAvailableTimer(in: app)
+        let name = "UI Brief Entry \(String(UUID().uuidString.prefix(8)))"
+        createActivity(named: name, in: app)
+        startActivity(named: name, in: app)
+        app.tabBars.buttons["My Day"].tap()
+        let stop = app.buttons["timer.accessory.stop"]
+        XCTAssertTrue(stop.waitForExistence(timeout: 10))
+        XCTAssertGreaterThan(stop.frame.midY, app.frame.height * 0.65,
+                             "The timer controls should sit above the bottom navigation.")
+        XCTAssertLessThanOrEqual(stop.frame.maxY, app.tabBars.firstMatch.frame.minY + 2)
+        attachScreenshot(named: "Bottom timer has Stop", in: app)
+        stop.tap()
+        XCTAssertTrue(stop.waitForNonExistence(timeout: 10))
+        let start = app.buttons["timeline.timer.start"]
+        XCTAssertTrue(start.waitForExistence(timeout: 5))
+        XCTAssertGreaterThan(start.frame.midY, app.frame.height * 0.65)
+        chooseDayMode("timeline", in: app)
+        let marker = dayEntry(named: name, prefix: "timeline.segment.", in: app)
+        XCTAssertTrue(marker.waitForExistence(timeout: 10),
+                      "A seconds-long completed task must remain discoverable in the timeline.")
+        attachScreenshot(named: "Brief entry remains visible in Timeline", in: app)
+        chooseDayMode("list", in: app)
+        let row = dayEntry(named: name, prefix: "timeline.entry.", in: app)
+        scrollUntilHittable(row, in: app, message: "The same brief entry must appear in List mode.")
+        XCTAssertTrue(row.label.contains("sec"), "The brief entry should show seconds rather than zero minutes.")
+        attachScreenshot(named: "My Day list shows exact short duration", in: app)
+        row.tap()
+        XCTAssertTrue(app.navigationBars["Edit Log"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["log.detail.duration"].waitForExistence(timeout: 5))
+        app.navigationBars["Edit Log"].buttons["Cancel"].tap()
+        app.terminate()
+        app.launch()
+        app.tabBars.buttons["My Day"].tap()
+        let restoredRow = dayEntry(named: name, prefix: "timeline.entry.", in: app)
+        scrollUntilHittable(restoredRow, in: app, message: "List mode and the completed entry should survive relaunch.")
+        chooseDayMode("timeline", in: app)
+    }
+
+    @MainActor
+    func testReportsLongLabelsStayOutsideThePlotAndExportsStaySeparate() throws {
+        let app = launchReadyApp()
+        try requireAvailableTimer(in: app)
+        let name = "UI Long Report planning and coordination for an extended project \(String(UUID().uuidString.prefix(8)))"
+        createActivity(named: name, in: app)
+        let taskID = startActivity(named: name, in: app).replacingOccurrences(of: "activity.start.", with: "")
+        stopActivity(named: name, in: app)
+        app.tabBars.buttons["Reports"].tap()
+        let summary = app.descendants(matching: .any).matching(identifier: "analytics.report.summary").firstMatch
+        XCTAssertTrue(summary.waitForExistence(timeout: 10))
+        selectReportValue(dimension: "task", id: taskID, matchingName: name, in: app)
+        let row = app.descendants(matching: .any).matching(NSPredicate(
+            format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "analytics.report.row.", name)).firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 10))
+        XCTAssertFalse(row.label.contains("0m"), "A short positive entry must not display zero minutes.")
+        let summaryExport = app.buttons["analytics.report.export.summary"]
+        let detailsExport = app.buttons["analytics.report.export.details"]
+        XCTAssertFalse(summaryExport.frame.intersects(app.staticTexts["Report summary"].frame))
+        XCTAssertFalse(detailsExport.frame.intersects(app.staticTexts["Report summary"].frame))
+        attachScreenshot(named: "Report summary wraps long labels", in: app)
+        let chart = app.descendants(matching: .any).matching(identifier: "analytics.chart.sankey").firstMatch
+        scrollUntilHittable(chart, in: app, message: "Sankey card must remain reachable.")
+        let plot = app.descendants(matching: .any).matching(identifier: "analytics.sankey.plot").firstMatch
+        XCTAssertTrue(plot.waitForExistence(timeout: 10))
+        let description = app.staticTexts["The diagram compares each activity's average daily time over the selected period."]
+        XCTAssertLessThanOrEqual(description.frame.maxY, plot.frame.minY + 2,
+                                 "The diagram must begin after its description.")
+        attachScreenshot(named: "Sankey contains labels and a wrapping legend", in: app)
     }
 
     @MainActor
@@ -466,6 +538,20 @@ final class StiintUITests: XCTestCase {
     }
 
     @MainActor
+    private func chooseDayMode(_ mode: String, in app: XCUIApplication) {
+        app.buttons["timeline.mode"].tap()
+        let option = app.buttons["timeline.mode.\(mode)"]
+        XCTAssertTrue(option.waitForExistence(timeout: 5))
+        option.tap()
+    }
+
+    @MainActor
+    private func dayEntry(named name: String, prefix: String, in app: XCUIApplication) -> XCUIElement {
+        app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS %@",
+                                         prefix, name)).firstMatch
+    }
+
+    @MainActor
     private func scrollUntilHittable(_ element: XCUIElement, in app: XCUIApplication,
                                      message: String, maxSwipes: Int = 20) {
         for _ in 0..<maxSwipes {
@@ -500,7 +586,7 @@ final class StiintUITests: XCTestCase {
         // The UI tests never reset a store or stop an unrelated pre-existing timer.
         // XCTest records this explicit skip; run on an idle test simulator to exercise the flow.
         _ = addActivity.waitForExistence(timeout: 5)
-        if app.buttons["timer.running.stop"].exists {
+        if app.buttons["timer.running.stop"].exists || app.buttons["timer.accessory.stop"].exists {
             throw XCTSkip("A pre-existing timer is running. Preserved it; use an idle test simulator for this regression test.")
         }
         XCTAssertTrue(addActivity.exists, "Expected the activity list. Tracking must be unpaused for this test.")
@@ -544,10 +630,17 @@ final class StiintUITests: XCTestCase {
     @MainActor
     private func assertRunningActivity(named name: String, in app: XCUIApplication) {
         let title = app.staticTexts["timer.running.name"]
-        XCTAssertTrue(title.waitForExistence(timeout: 10))
-        XCTAssertEqual(title.label, name)
-        XCTAssertTrue(app.buttons["timer.running.stop"].exists)
-        XCTAssertTrue(app.staticTexts["timer.running.elapsed"].exists)
+        if title.exists {
+            XCTAssertEqual(title.label, name)
+            XCTAssertTrue(app.buttons["timer.running.stop"].exists)
+            XCTAssertTrue(app.staticTexts["timer.running.elapsed"].exists)
+        } else {
+            let switcher = app.buttons["timeline.timer.switch"]
+            XCTAssertTrue(switcher.waitForExistence(timeout: 10))
+            XCTAssertTrue(switcher.label.contains(name))
+            XCTAssertTrue(app.buttons["timer.accessory.stop"].exists)
+            XCTAssertTrue(app.staticTexts["timer.accessory.elapsed"].exists)
+        }
     }
 
     @MainActor

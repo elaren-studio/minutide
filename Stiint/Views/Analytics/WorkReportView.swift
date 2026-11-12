@@ -452,36 +452,26 @@ struct WorkReportSummaryView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Report summary")
-                        .font(.headline)
-                        .accessibilityAddTraits(.isHeader)
-                    Text("\(durationText(result.totalDurationSeconds)) · \(result.totalEntryCount) entries")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .accessibilityIdentifier("analytics.report.totals")
-                }
-                Spacer()
-                if let summaryURL {
-                    ShareLink(item: summaryURL, preview: SharePreview("Summary CSV")) {
-                        Label("Summary CSV", systemImage: "square.and.arrow.up")
-                    }
-                    .accessibilityIdentifier("analytics.report.export.summary")
-                } else {
-                    Button("Summary CSV", systemImage: "tablecells") { exportSummary() }
-                        .accessibilityIdentifier("analytics.report.export.summary")
-                }
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Report summary")
+                    .font(.headline)
+                    .accessibilityAddTraits(.isHeader)
+                Text("\(durationText(result.totalDurationSeconds)) · \(result.totalEntryCount) entries")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .accessibilityIdentifier("analytics.report.totals")
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
-            if let detailsURL {
-                ShareLink(item: detailsURL, preview: SharePreview("Detailed CSV")) {
-                    Label("Detailed CSV", systemImage: "square.and.arrow.up")
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .center, spacing: 12) {
+                    summaryExportButton
+                    detailsExportButton
                 }
-                .accessibilityIdentifier("analytics.report.export.details")
-            } else {
-                Button("Detailed CSV", systemImage: "tablecells") { exportDetails() }
-                    .accessibilityIdentifier("analytics.report.export.details")
+                VStack(alignment: .leading, spacing: 8) {
+                    summaryExportButton
+                    detailsExportButton
+                }
             }
 
             if result.rows.isEmpty {
@@ -490,18 +480,30 @@ struct WorkReportSummaryView: View {
                     .padding(.vertical, 20)
             } else {
                 ForEach(result.rows) { row in
-                    HStack(alignment: .firstTextBaseline, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 6) {
                         Text(row.displayName)
+                            .fixedSize(horizontal: false, vertical: true)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .lineLimit(2)
-                        VStack(alignment: .trailing, spacing: 2) {
-                            Text(durationText(row.durationSeconds))
-                                .fontWeight(.medium)
-                            Text("\(row.entryCount) entries")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
+
+                        ViewThatFits(in: .horizontal) {
+                            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                                Text(durationText(row.durationSeconds))
+                                    .fontWeight(.medium)
+                                Spacer(minLength: 8)
+                                Text("\(row.entryCount) entries")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(durationText(row.durationSeconds))
+                                    .fontWeight(.medium)
+                                Text("\(row.entryCount) entries")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.vertical, 6)
                     .accessibilityElement(children: .combine)
                     .accessibilityIdentifier("analytics.report.row.\(row.id)")
@@ -538,6 +540,32 @@ struct WorkReportSummaryView: View {
     }
 
     private func durationText(_ seconds: TimeInterval) -> String {
-        TimeHandler().secondsToLocalizedDuration(seconds)
+        ReportDurationText.string(from: seconds)
+    }
+
+    @ViewBuilder
+    private var summaryExportButton: some View {
+        if let summaryURL {
+            ShareLink(item: summaryURL, preview: SharePreview("Summary CSV")) {
+                Label("Summary CSV", systemImage: "square.and.arrow.up")
+            }
+            .accessibilityIdentifier("analytics.report.export.summary")
+        } else {
+            Button("Summary CSV", systemImage: "tablecells") { exportSummary() }
+                .accessibilityIdentifier("analytics.report.export.summary")
+        }
+    }
+
+    @ViewBuilder
+    private var detailsExportButton: some View {
+        if let detailsURL {
+            ShareLink(item: detailsURL, preview: SharePreview("Detailed CSV")) {
+                Label("Detailed CSV", systemImage: "square.and.arrow.up")
+            }
+            .accessibilityIdentifier("analytics.report.export.details")
+        } else {
+            Button("Detailed CSV", systemImage: "tablecells") { exportDetails() }
+                .accessibilityIdentifier("analytics.report.export.details")
+        }
     }
 }

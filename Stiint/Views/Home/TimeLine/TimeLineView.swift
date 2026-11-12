@@ -5,66 +5,35 @@
 //  Created by Wittig, Liam on 11.12.25.
 //
 
-import SwiftData
+import Foundation
 import SwiftUI
-internal import Combine
 
 struct TimeLineView: View {
-    @Query private var filteredLogs: [ActivityLog]
-    @AppStorage("work.organizationScope") private var organizationScope = "all"
+    @AppStorage("timeline.displayMode") private var displayMode = MyDayDisplayMode.timeline.rawValue
     let selectedDate: Date
+    let entries: [MyDayEntry]
+    let now: Date
     let calendar = Calendar.current
-    let hours: [Int] = Array(0 ... 23)
-
-    let totalHours: Int = 24
-
-    let currentHour: Int = Calendar.current.component(.hour, from: Date())
-    @State private var currentTimeValue: Double = 0.0
-
-    let timer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
-
-    @State private var currentZoom = 0.0
-    @State private var totalZoom = 1000.0
-
-    // Add minimum and maximum zoom constraints
-    private let minZoom: Double = 800.0
-    private let maxZoom: Double = 5000.0
-
-    let lineHeight: CGFloat = 2
+    private let calendarHeight: Double = 1000
+    private var dayStart: Date { calendar.startOfDay(for: selectedDate) }
+    private var dayEnd: Date { calendar.date(byAdding: .day, value: 1, to: dayStart) ?? dayStart }
+    private var totalHours: Double { dayEnd.timeIntervalSince(dayStart) / 3600 }
+    private var hours: [Int] { Array(0..<Int(totalHours.rounded(.up))) }
+    private var currentHour: Int { Int(max(0, now.timeIntervalSince(dayStart) / 3600)) }
     
-    init(selectedDate: Date) {
-        self.selectedDate = selectedDate
-        let calendar = Calendar.current
-        let startOfDay = calendar.startOfDay(for: selectedDate)
-        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
-        let predicate = TimelineDayQuery.predicate(
-            dayStart: startOfDay,
-            dayEnd: endOfDay,
-            now: .now
-        )
-
-        _filteredLogs = Query(filter: predicate, sort: \.startTime)
-    }
-
-    func updateTime() {
-        let now = Date()
-        let hour = Calendar.current.component(.hour, from: now)
-        let minute = Calendar.current.component(.minute, from: now)
-        let second = Calendar.current.component(.second, from: now)
-        currentTimeValue = Double(hour) + Double(minute) / 60 + Double(
-            second
-        ) / 3600
+    private var currentTimeValue: Double {
+        now.timeIntervalSince(dayStart) / 3600
     }
 
     func calculateGeometryOfHouer(hour: Double, geometry: GeometryProxy) -> CGFloat {
-        return geometry.size.height / 24 * CGFloat(hour) + (
-            geometry.size.height / 24
+        return geometry.size.height / totalHours * CGFloat(hour) + (
+            geometry.size.height / totalHours
         ) / 2
     }
 
     func getGeometry(date: Date?, geometry: GeometryProxy) -> CGFloat {
-        let startOfDay = calendar.startOfDay(for: selectedDate)
-        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+        let startOfDay = dayStart
+        let endOfDay = dayEnd
         
         // Determine target date
         let targetDate: Date
@@ -86,41 +55,63 @@ struct TimeLineView: View {
             )
         }
         
-        let timeVal = TimeHandler().getTimeValueForDate(
-            date: targetDate,
-            selectedDate: selectedDate
-        )
+        // Elapsed position stays monotonic through a repeated DST hour, and
+        // retains subsecond intervals instead of truncating both ends to zero.
+        let timeVal = targetDate.timeIntervalSince(startOfDay) / 3600
         return calculateGeometryOfHouer(hour: timeVal, geometry: geometry)
     }
 
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                Spacer()
-                    .frame(height: 110)
+                VStack(alignment: .leading, spacing: 10) {
+                    LabeledContent("Tracked this day", value: MyDayEntry.durationText(entries.reduce(0) { $0 + $1.duration }))
+                        .accessibilityIdentifier("timeline.total")
+                    if entries.isEmpty {
+                        Text("No tracked time for this day in the selected work scope.")
+                            .font(.subheadline).foregroundStyle(.secondary)
+                    }
+                    if !shortEntries.isEmpty {
+                        HStack {
+                            Text("Recent entries").font(.headline)
+                            Spacer()
+                            Button("Show list") { displayMode = MyDayDisplayMode.list.rawValue }
+                                .font(.subheadline)
+                                .accessibilityIdentifier("timeline.showList")
+                        }
+                        ForEach(Array(shortEntries.suffix(3).reversed())) { entry in
+                            MyDayEntryRow(entry: entry, identifierPrefix: "timeline.segment")
+                            Divider()
+                        }
+                    }
+                }
+                .padding()
+                .id("daySummary")
                 GeometryReader { geometry in
                     ZStack(alignment: .top) {
                         VStack(spacing: 0) {
                             ForEach(hours, id: \.self) { hour in
                                 TimeLineSegmentView(
-                                    hour: hour,
-                                    height: geometry.size.height / 24
+                                    hour: calendar.component(.hour, from: dayStart.addingTimeInterval(Double(hour) * 3600)),
+                                    height: geometry.size.height / totalHours
                                 )
                                 .padding(.leading, 20)
                                 .id(hour)
                             }
                         }
-                        ForEach(scopedLogs) { log in
+                        ForEach(entries) { entry in
                             TimeLineActivitySegmentView(
                                 start: getGeometry(
-                                    date: log.startTime,
+                                    date: entry.start,
                                     geometry: geometry
                                 ),
                                 end: getGeometry(
-                                    date: log.endTime,
+                                    date: entry.end,
                                     geometry: geometry
                                 ),
-                                log: log
+                                log: entry.log,
+                                now: now,
+                                displayDuration: entry.duration
                             )
                             .padding(.horizontal, 20)
                             .offset(x: 12)
@@ -131,18 +122,20 @@ struct TimeLineView: View {
                         if Calendar.current.isDateInToday(selectedDate) {
                             TimeLineCurrentTimeView(
                                 currentTimeValue: currentTimeValue,
-                                geometry: geometry
+                                geometry: geometry,
+                                totalHours: totalHours
                             )
                         }
                     }
                 }
-                .frame(height: currentZoom + totalZoom)
+                .frame(height: calendarHeight)
 
                 Spacer()
-                    .frame(height: 110)
+                    .frame(height: 24)
             }.onAppear {
-                updateTime()
-                if(selectedDate > calendar.startOfDay(for: Date.now)){
+                if !shortEntries.isEmpty {
+                    proxy.scrollTo("daySummary", anchor: .top)
+                } else if calendar.isDateInToday(selectedDate) {
                     withAnimation {
                         proxy.scrollTo(currentHour, anchor: .center)
                     }
@@ -150,22 +143,19 @@ struct TimeLineView: View {
                     proxy.scrollTo(12, anchor: .center)
                 }
                 
-            }.onReceive(timer) { _ in
-                updateTime()
-
+            }
+            .onChange(of: shortEntries.filter { !$0.isRunning }.map(\.id)) { old, new in
+                // A newly stopped brief timer should be discoverable without
+                // moving the calendar on each elapsed-time refresh.
+                if new.contains(where: { !old.contains($0) }) {
+                    withAnimation { proxy.scrollTo("daySummary", anchor: .top) }
+                }
             }
         }
     }
 
-    private var scopedLogs: [ActivityLog] {
-        let scope = WorkScope(rawValue: organizationScope)
-        return filteredLogs.filter { log in
-            switch scope {
-            case .allWork: return true
-            case .unassigned: return log.workSnapshot.organization?.id == nil
-            case .organization(let id): return log.workSnapshot.organization?.id == id
-            }
-        }
+    private var shortEntries: [MyDayEntry] {
+        entries.filter { $0.duration / 3600 * calendarHeight / totalHours < 44 }
     }
 }
 
@@ -187,5 +177,5 @@ enum TimelineDayQuery {
 }
 
 #Preview {
-    TimeLineView(selectedDate: Date.now)
+    MyDayEntriesView(selectedDate: Date.now, mode: .timeline)
 }
