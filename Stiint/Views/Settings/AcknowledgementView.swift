@@ -45,7 +45,7 @@ struct AcknowledgementsView: View {
     }
 
     private static var thirdPartyAcknowledgements: [Acknow] {
-        ["AcknowList", "Sankey"].map { name in
+        ["AcknowList", "Sankey", "D3", "D3-Sankey"].map { name in
             let url = Bundle.main.url(forResource: "\(name)-LICENSE", withExtension: "txt")
             let text = url.flatMap { try? String(contentsOf: $0, encoding: .utf8) }
             return Acknow(title: name, text: text ?? "License resource unavailable in this build.")

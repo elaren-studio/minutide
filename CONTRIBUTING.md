@@ -16,6 +16,8 @@ Use Xcode with an iOS 26.1 SDK or newer. Open `Stiint.xcodeproj`, select the `St
 
 The project and scheme retain their upstream internal names. The public app name is Minutide; bundle identifiers use the `com.elaren.minutide` prefix. For personal signed builds, choose identifiers available to your own team consistently across the app, extension, and tests.
 
+The source is intended to be fully free and open source, with no subscription or paid feature tier. Simulator self-builds do not require Apple signing. Signed device, TestFlight, and eventual free App Store distribution are separate Apple account and release steps; current TestFlight status and safe local commands are in [docs/TESTFLIGHT.md](docs/TESTFLIGHT.md).
+
 For command-line checks, use `xcodebuild -showdestinations` to select a simulator available on your Mac, then run:
 
 ```sh

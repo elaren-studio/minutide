@@ -16,7 +16,9 @@
 - The fork's product direction is fully free and open source. Do not restore subscriptions, paid feature gates, tracking SDKs, or account/server sync without an explicit decision recorded in `docs/DECISIONS.md`.
 - Treat activity names, timestamps, location coordinates, exports, credentials, and signing material as sensitive. Use synthetic test data and do not commit personal records or secrets.
 - Do not claim a build, test, physical acceptance, CI run, App Store release, or public repository publication without current evidence for that exact state.
-- Do not commit, push, sign a release, publish, or submit an App Store build as an incidental implementation step. These actions require their own explicit authorization and target check.
+- The user explicitly authorized a first processed internal TestFlight build for the Minutide maintainer. That scope includes preparation, signing, upload, and verification for the intended internal tester after the release candidate passes its review gates. It does not include external testers or a public App Store submission.
+- Verify the Apple team, app record, bundle identifiers, intended internal group, archive, and IPA before credentialed actions. App Store Connect processing and actual internal availability are separate readback checks.
+- Do not commit or push incidentally. Public App Store submission, changes to release pricing, or any distribution outside the initial internal TestFlight scope remain future gates requiring their own explicit authorization and target check.
 
 ## Documentation discipline
 

@@ -15,18 +15,11 @@ import SwiftData
 struct GetAllActivities: AppIntent {
     static var title: LocalizedStringResource = "Get all available Activities"
     static var description = IntentDescription(
-        "Get all available activites."
+        "Get all available activities."
     )
 
     func perform() async throws -> some IntentResult & ReturnsValue<[ActivityEntity]> {
-        var activities: [ActivityEntity] = []
-        let allActivites = await PersistenceManager.shared.activityActor.getAllAvaibleActivitys()
-        for activity in allActivites {
-            if activity.isDeleted != true {
-                activities.append(ActivityEntity(id: activity.id!, name: activity.name ?? "No name avaible"))
-            }
-        }
-
+        let activities = try await ActivityQuery().suggestedEntities()
         return .result(value: activities)
     }
 }

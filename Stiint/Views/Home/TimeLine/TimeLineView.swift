@@ -37,22 +37,11 @@ struct TimeLineView: View {
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: selectedDate)
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
-        
-        let distantFuture = Date.distantFuture
-        
-        let distantPast = Date.distantPast
-
-        let predicate = #Predicate<ActivityLog> { log in
-            // Condition 1: Log ends during the selected day
-            return (log.endTime ?? distantFuture) > startOfDay && (log.endTime ?? distantFuture) < endOfDay ||
-            
-            // Condition 2: Log starts during the selected day
-            (log.startTime ?? distantPast) > startOfDay &&  (log.startTime ?? distantPast) < endOfDay ||
-            
-            // Condition 3: Log spans across the entire day (starts before, ends after)
-            (log.startTime ?? distantPast) < startOfDay && (log.endTime ?? distantFuture) > endOfDay
-
-        }
+        let predicate = TimelineDayQuery.predicate(
+            dayStart: startOfDay,
+            dayEnd: endOfDay,
+            now: .now
+        )
 
         _filteredLogs = Query(filter: predicate, sort: \.startTime)
     }
@@ -165,6 +154,23 @@ struct TimeLineView: View {
                 updateTime()
 
             }
+        }
+    }
+}
+
+enum TimelineDayQuery {
+    static func predicate(dayStart: Date, dayEnd: Date, now: Date) -> Predicate<ActivityLog> {
+        let distantPast = Date.distantPast
+        let distantFuture = Date.distantFuture
+
+        return #Predicate<ActivityLog> { log in
+            (log.endTime ?? now) > dayStart
+                && (log.startTime ?? dayEnd) < dayEnd
+                && (log.endTime ?? now) > (log.startTime ?? dayEnd)
+                && (log.startTime ?? dayEnd) > distantPast
+                && (log.startTime ?? dayEnd) < distantFuture
+                && (log.endTime ?? now) > distantPast
+                && (log.endTime ?? now) < distantFuture
         }
     }
 }

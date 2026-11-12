@@ -58,11 +58,15 @@ bash scripts/ci-ios.sh
 
 For the canonical SSD checkout, project-local Xcode GUI DerivedData, and the difference between GUI and CLI build subfolders, see [Local Development](docs/LOCAL_DEVELOPMENT.md).
 
+All features remain free and open source. The first internal TestFlight beta, **0.1.0 (1)**, is processed and assigned to the maintainer's internal group; Apple reports the intended tester as invited. Physical-device acceptance and a free public App Store release remain later steps. See [TestFlight build and upload](docs/TESTFLIGHT.md) for verified status and repeatable self-build commands. Signing details stay local; the scripts never submit a public App Store release.
+
 These are contributor instructions, not a claim that the current revision's final test run or hosted CI has passed. See [Device Acceptance](docs/DEVICE_ACCEPTANCE.md) for the manual checks and their current evidence.
 
 ### Install on your own iPhone
 
-Physical-device installation requires signing with an Apple Developer team you control. In Xcode, select the app target, open **Signing & Capabilities**, choose your own Team, and let Xcode manage provisioning. If the community bundle identifier is unavailable to your team, use a unique personal identifier for local development and apply it consistently to the app and its extensions. Simulator use does not require signing. Do not use another person's signing credentials or provisioning profile.
+Physical-device installation requires signing with an Apple Developer team you control. In Xcode, choose your own Team under **Signing & Capabilities** for both the app and Live Activity targets. At the project level, set the user-defined build setting `MINUTIDE_BUNDLE_ID_BASE` to a unique identifier registered to your team, such as `com.example.minutide`; the extension and test identifiers follow automatically. Simulator use does not require signing. For a signed archive, follow [TestFlight build and upload](docs/TESTFLIGHT.md). Do not use another person's signing credentials or provisioning profile.
+
+Keep personal provisioning profiles and signing keys out of the repository; they remain local to your signing team.
 
 ## Privacy and data
 

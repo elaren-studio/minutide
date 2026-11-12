@@ -98,3 +98,48 @@ Append dated entries. Record what changed and what evidence was actually collect
 - Cleanup completed at 22:56:37.889 UTC. `build/history/pre-ssd/internal-retirement.json` records `internal_retired: true`. The three approved internal directories are absent; no other workspace folders were removed.
 - Rechecked SSD `git fsck --full` (exit 0) and the complete-history Git bundle after removal. The SSD worktree remained clean. Saved products/results and the 20-test SSD result remain intact. These documentation-only updates do not require rerunning unchanged application tests.
 - Internal disk free space was reported as about 13 GiB afterward; no exact amount of physically reclaimed storage is claimed.
+
+## 2026-11-11 — Internal TestFlight tooling prepared
+
+- Added self-contained archive, local App Store Connect export, and explicit IPA validate/upload scripts. They default outputs and logs under `build/`, quote paths, refuse existing archive/export destinations, do not change version numbers or make commits, and keep credentials as local inputs.
+- Documented the free/open-source self-build goal, first internal TestFlight milestone, eventual free App Store intent, Apple setup prerequisites, processing/readback boundary, and the pending release gates. Expanded the device-acceptance checklist for edit persistence, malformed records, overnight intervals, and archived-activity Shortcuts enumeration.
+- Preparation is not release evidence: no application build/tests, signed archive, IPA, upload, Apple processing, or tester availability was performed by this tooling/docs pass. The prior SSD 20-test result remains baseline evidence only for the reviewed release changes.
+
+## 2026-11-11 — TestFlight preparation status refresh
+
+- The app and Live Activity bundle identifiers are registered and read back in the verified paid developer team. The App Store Connect app record is still absent; website sign-in is pending while the exact credential item title is located. No credential value was retrieved or recorded.
+- Analytics, project settings, privacy, and Shortcuts changes are integrated on `feature/minutide-testflight`. The app/extension bundle-base override was read back with `com.example.minutide` and `com.example.minutide.liveactivity`; source signing team remains blank and the current target family is iPhone-only.
+- Initial compile fixes are applied. The first expanded simulator run reached tests: manual/location-10 and Shortcuts passed, while numeric optional-value assertions failed. Assertion fixes and rerun remain pending; no overall expanded-suite pass is claimed.
+- The manual-edit location-metadata race guard and actual running-log query regression remain in progress. No signed archive, IPA, upload, Apple processing, internal tester availability, or physical-device acceptance is verified. Physical acceptance is intended to follow the first internal TestFlight availability; public release readiness remains a later gate.
+
+## 2026-11-11 — Manual/location regression runtime update
+
+- The manual-edit location-metadata race guard and actual running-log query regression are now integrated. All 10 related manual/location cases passed at runtime.
+- The first expanded simulator run exposed numeric optional-value assertion failures. A full expanded rerun remains pending; no overall suite pass is claimed.
+- The first internal TestFlight build is intended to provide the maintainer's physical-test device. Physical Shortcuts, GPS, reboot/recovery, and minimum-runtime acceptance remain open for after processing and internal availability.
+
+## 2026-11-11 — Integrated stability suite and Apple app record
+
+- Implemented atomic manual-log creation/editing, delayed-location boundary/identity/policy validation, running-log analytics queries, finite clipped intervals with calendar-day/DST splitting, midnight timeline overlap queries, and archived/malformed activity exclusion in Shortcuts. Added 19 regressions to the prior 20-test suite.
+- Fixed the query's required zero-argument initializer and clarified expected `Double` values in Swift Testing assertions after compiler/assertion failures. The first runtime run had 35 passes and 2 failures; its result is retained as `build/TestResults-assertions.xcresult`. Its automatic simulator diagnostic collector was explicitly stopped after tests completed so Xcode could finalize that failed result.
+- The corrected suite ran from 23:36:30.672 to 23:38:59.771 UTC and passed **39 tests: 36 unit, 3 UI; 0 failures, 0 skips**. `xcresulttool get test-results summary --path build/TestResults.xcresult` independently verified counts. Log: `build/minutide-testflight-ci.log`. Invocation: `env SWIFTBUILD_LAUNCH_IN_PROCESS=1 xcodebuild test -project Stiint.xcodeproj -scheme Stiint -destination 'platform=iOS Simulator,id=A0FC95C9-60F0-46AB-BBCC-CD2FBA540215' -derivedDataPath build/DerivedData -resultBundlePath build/TestResults.xcresult -parallel-testing-enabled NO -collect-test-diagnostics never CODE_SIGNING_ALLOWED=NO`.
+- Manually created a synthetic one-hour log through My Day; it appeared immediately in the timeline and Raw Data with saved timestamps and `3600.0s`. Physical acceptance remains separate.
+- Registered/read back app and Live Activity identifiers. After the maintainer signed in directly, Apple rejected the bare Minutide name. Created and API-verified **Minutide: Time Tracker**, app 6833697250, bundle `com.elaren.minutide`, SKU `minutide-ios`, locale `en-US`, Limited Access. The installed display name remains Minutide. No legal agreement was accepted.
+- Added one configurable bundle-ID base for self-builds, restricted the extension to the host's iOS/iPhone platforms, and included the app-only UserDefaults privacy reason. Signing team remains blank in source. Archive/export/upload and processing are still pending at this entry.
+
+## 2026-11-11 — Signed TestFlight artifact uploaded
+
+- Source candidate `dec1e884cdd4561c32210e1365359c97558a00c5` is published on `feature/minutide-testflight`; draft PR #1 remains open. The 39-test simulator pass preceded the notice-only acknowledgement additions. The original MIT notice remains unchanged, and all four notices are present in the final source; no post-notice app test pass is claimed.
+- Signed Release archive `build/Archives/Minutide-0.1.0-1.xcarchive` succeeded. Both signature checks, privacy reason `CA92.1`, and four notices were verified; receipt `build/Verification/minutide-0.1.0-1.json`.
+- Automatic export failed because Cloud Signing permission and automatic profiles were unavailable. Manual App Store export succeeded with the existing local distribution certificate and explicit App Store profiles, without a new certificate or access grant. IPA: `build/Exports/Minutide-0.1.0-1-manual/Stiint.ipa`, 6,047,504 bytes, SHA-256 `0e960dc15940d35d5cb094178fd045ed1ce457e6d8d969def12a1f2551626327`; version 0.1.0 build 1, `get-task-allow=false`, beta reports active, bundle IDs verified.
+- Apple IPA validation succeeded without errors at 23:55:37 UTC. Upload succeeded without errors at 23:56:33 UTC; delivery UUID `591b8c17-694a-41ce-80bd-39c16a27e4a6`. The builds list was empty immediately after upload; processing/indexing remains pending.
+- `Minutide Internal` contains only the intended maintainer account and remains `NOT_INVITED` until build assignment. There is no public link, and Mac/Vision availability is disabled. Physical acceptance remains pending. No Apple legal agreement or public App Store release is claimed.
+
+## 2026-11-12 UTC — First internal TestFlight build available
+
+- Apple processing is `VALID` for **0.1.0 (1)**, build/delivery `591b8c17-694a-41ce-80bd-39c16a27e4a6`; internal state is `IN_BETA_TESTING`. The build is assigned to `Minutide Internal`, whose sole intended tester is `INVITED`. The website independently shows this version/build, group, and one invitation. Expiry: 2027-02-09. Installation and email delivery are not claimed.
+- Added an English What to Test checklist covering timers, relaunch, Live Activities, manual edits, charts/filters, CSV, location denial, and Shortcuts. No external tester or public link was enabled.
+- Artifact source remains `dec1e884cdd4561c32210e1365359c97558a00c5`; later changes affect documentation and the export helper only, preserving the uploaded app. Source PR: https://github.com/elaren-studio/minutide/pull/1 .
+- Hosted CI remains unverified. Physical acceptance is the next user step. No Apple legal agreement or production release was performed.
+
+- Source PR #1 is now ready for review; its title and description record the completed internal TestFlight delivery and pending physical acceptance. No merge or production release was performed.

@@ -16,6 +16,12 @@ Durable choices for Minutide, the independent Stiint continuation. Add a dated e
 - Preserve the original MIT license and Liam Wittig's copyright notice exactly in `LICENSE`.
 - Keep third-party license notices separate and tied to the exact pins in `Package.resolved`.
 
+## 2026-11-11 — Self-builds and free distribution
+
+- Keep all Minutide app features free and the source available for contributors to self-build. The eventual public App Store listing is intended to be free of charge.
+- Prioritize a first processed internal TestFlight build for the maintainer's physical-device acceptance. Simulator stability and signed-artifact checks precede upload; physical acceptance is completed on TestFlight and gates a stable public release.
+- Keep source publication, self-builds, Apple signing, TestFlight processing/internal access, and public App Store submission as separate evidence states. This internal beta goal does not authorize external testers or a public App Store submission.
+
 ## 2026-11-11 — User data stays local by design
 
 - Store activity data in the on-device SwiftData store; do not add an account or server-sync service.
@@ -42,6 +48,11 @@ Durable choices for Minutide, the independent Stiint continuation. Add a dated e
 - Keep the internal Xcode project, target, module, folders, and scheme names to minimize unrelated churn. Keep Liam Wittig's attribution and original MIT notice intact.
 - Changing the bundle identifier creates a separate app container from prior local Stiint Community installs; no automatic cross-container data migration is implemented or claimed. The community build has not been publicly distributed.
 - The bounded name screen in `NAME_RESEARCH_MINUTIDE.md` is evidence for choosing the name, not comprehensive trademark clearance. Domain registration, App Store name reservation, signed builds, TestFlight, and App Store submission are separate actions.
+
+## 2026-11-11 — Initial store-record title
+
+- App Store Connect rejected the bare Minutide name as already in use. Use **Minutide: Time Tracker** for the initial store record, verified as app 6833697250 with `com.elaren.minutide`; keep Minutide as the installed display name.
+- This descriptive title can be reviewed before public release. It does not establish trademark clearance or an App Store release. The app record uses Limited Access; existing account-holder access remains.
 
 ## 2026-11-11 — Repository reporting route
 

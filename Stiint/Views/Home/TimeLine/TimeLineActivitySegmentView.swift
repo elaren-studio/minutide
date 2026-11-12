@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct TimeLineActivitySegmentView: View {
+    private static let unavailableDuration = "Duration unavailable"
+
     let start: CGFloat
     let end: CGFloat
     let log: ActivityLog
@@ -15,31 +17,73 @@ struct TimeLineActivitySegmentView: View {
     let fmt = DateComponentsFormatter()
 
     let timeDistance: String
+    private let canShowRunningTimer: Bool
+    private let hasValidTimeRange: Bool
 
     init(
         start: CGFloat,
         end: CGFloat,
         log: ActivityLog,
-        isShowingLogSheet: Bool = false
+        isShowingLogSheet: Bool = false,
+        now: Date = .now
     ) {
         self.start = start
         self.end = end
         self.log = log
         self.isShowingLogSheet = isShowingLogSheet
+        let finiteNow = Self.isFiniteDate(now)
+        canShowRunningTimer = log.endTime == nil
+            && finiteNow
+            && log.startTime.map {
+                guard Self.isFiniteDate($0) else { return false }
+                let elapsed = now.timeIntervalSince($0)
+                return elapsed.isFinite && elapsed >= 0
+            } == true
 
         fmt.unitsStyle = .abbreviated
         fmt.allowedUnits = [.hour, .minute]
-        let secs = (log.endTime ?? Date.now).timeIntervalSince(log.startTime!)
-        timeDistance = fmt.string(from: secs) ?? "Formating error"
+        if let startTime = log.startTime,
+           Self.isFiniteDate(startTime),
+           let endTime = log.endTime ?? (Self.isFiniteDate(now) ? now : nil),
+           Self.isFiniteDate(endTime),
+           endTime > startTime {
+            let seconds = endTime.timeIntervalSince(startTime)
+            if seconds.isFinite, seconds > 0 {
+                hasValidTimeRange = true
+                timeDistance = fmt.string(from: seconds) ?? Self.unavailableDuration
+            } else {
+                hasValidTimeRange = false
+                timeDistance = Self.unavailableDuration
+            }
+        } else {
+            hasValidTimeRange = canShowRunningTimer
+            timeDistance = Self.unavailableDuration
+        }
     }
 
     @State private var isShowingLogSheet = false
 
+    var hasValidGeometry: Bool {
+        start.isFinite && end.isFinite && start >= 0 && end >= start
+    }
+
+    var shouldRenderSegment: Bool {
+        hasValidGeometry && hasValidTimeRange && (segmentHeight > 5 || log.endTime == nil)
+    }
+
+    private var segmentHeight: CGFloat {
+        end - start
+    }
+
+    private static func isFiniteDate(_ date: Date) -> Bool {
+        date.timeIntervalSinceReferenceDate.isFinite
+    }
+
     var body: some View {
-        if end - start > 5 || log.endTime == nil {
+        if shouldRenderSegment {
             ZStack(alignment: .topLeading) {
                 Rectangle()
-                    .frame(height: end - start)
+                    .frame(height: segmentHeight)
                     .foregroundColor(log.activity?.color ?? .blue)
                     //.opacity(0.95)
                     .cornerRadius(10)
@@ -49,7 +93,7 @@ struct TimeLineActivitySegmentView: View {
                         x: 0,
                         y: 5
                     )
-                if end - start > 39 {
+                if segmentHeight > 39 {
                     VStack(alignment: .leading) {
                         HStack {
                             Image(
@@ -62,11 +106,16 @@ struct TimeLineActivitySegmentView: View {
                         }.font(.headline)
                             .foregroundColor(.white)
 
-                        if end - start > 59 {
+                        if segmentHeight > 59 {
                             if log.endTime == nil {
-                                Text(log.startTime!, style: .timer)
-                                    .monospaced()
-                                    .foregroundColor(.white)
+                                if canShowRunningTimer, let startTime = log.startTime {
+                                    Text(startTime, style: .timer)
+                                        .monospaced()
+                                        .foregroundColor(.white)
+                                } else {
+                                    Text("Time unavailable")
+                                        .foregroundColor(.white)
+                                }
                             } else {
                                 Text(timeDistance)
                                     .foregroundColor(.white)

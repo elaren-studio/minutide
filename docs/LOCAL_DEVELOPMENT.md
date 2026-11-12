@@ -47,7 +47,7 @@ The script writes build output beneath `build/DerivedData` and test results to `
 xcodebuild -showBuildSettings -project Stiint.xcodeproj -scheme Stiint
 ```
 
-An archive is separate from routine simulator work. If a signed archive is separately authorized and needed, keep it under `build/Archives`; no archive or signed distribution is implied by the commands above.
+An archive is separate from routine simulator work. The authorized initial internal TestFlight objective is not evidence that an archive or signed distribution exists. When the stability and Apple-account gates are ready, use the self-contained [TestFlight scripts](TESTFLIGHT.md); default archives, exports, and logs stay under `build/`.
 
 ## Migration evidence
 

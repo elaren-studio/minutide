@@ -12,6 +12,90 @@ import os
 
 @ModelActor
 public actor ActivityLogActor {
+    public enum ManualLogError: LocalizedError, Equatable {
+        case invalidInterval, unavailableActivity, unavailableLog, runningActivityOverlap
+
+        public var errorDescription: String? {
+            switch self {
+            case .invalidInterval: "Choose a valid start and end time, with the end after the start and no later than now."
+            case .unavailableActivity: "This activity is unavailable. Choose an active activity and try again."
+            case .unavailableLog: "This log is unavailable or still running. Close and reopen the editor."
+            case .runningActivityOverlap: "The log must end before the current timer starts. Stop the timer or choose an earlier end time."
+            }
+        }
+    }
+
+    /// All destructive overlap changes and their replacement share one fresh
+    /// context and one save. A rejected target or failed save leaves history intact.
+    @discardableResult
+    public func saveCompletedLog(logId: UUID? = nil, activityId: UUID?, startTime: Date, endTime: Date) throws -> UUID {
+        guard startTime.timeIntervalSinceReferenceDate.isFinite,
+              endTime.timeIntervalSinceReferenceDate.isFinite,
+              startTime < endTime, endTime <= Date.now else {
+            throw ManualLogError.invalidInterval
+        }
+
+        let context = ModelContext(modelContainer)
+        context.autosaveEnabled = false
+        do {
+            let editedLog: ActivityLog?
+            if let logId {
+                guard let saved = try context.fetch(FetchDescriptor<ActivityLog>(
+                    predicate: #Predicate { $0.id == logId }
+                )).first, saved.endTime != nil else { throw ManualLogError.unavailableLog }
+                editedLog = saved
+            } else {
+                editedLog = nil
+            }
+
+            let target: ActivityItem?
+            if let activityId {
+                guard let activity = try context.fetch(FetchDescriptor<ActivityItem>(
+                    predicate: #Predicate { $0.id == activityId }
+                )).first, activity.archived != true || editedLog?.activity?.id == activityId else {
+                    throw ManualLogError.unavailableActivity
+                }
+                target = activity
+            } else {
+                // An orphan may keep its missing relationship while its dates
+                // are edited; a new log cannot be created without an activity.
+                guard let editedLog, editedLog.activity == nil else { throw ManualLogError.unavailableActivity }
+                target = nil
+            }
+
+            let runningLogs = try context.fetch(FetchDescriptor<ActivityLog>(
+                predicate: #Predicate { $0.endTime == nil }
+            ))
+            for running in runningLogs {
+                guard let start = running.startTime,
+                      start.timeIntervalSinceReferenceDate.isFinite,
+                      endTime <= start else { throw ManualLogError.runningActivityOverlap }
+            }
+
+            let replacement = editedLog ?? ActivityLog(startTime: startTime, endTime: endTime, activity: target)
+            guard let replacementId = replacement.id else { throw ManualLogError.unavailableLog }
+            try applyTimeFrameClear(startDate: startTime, endDate: endTime,
+                                    logId: replacementId, currentActivityStartDate: nil, context: context)
+            if editedLog == nil { context.insert(replacement) }
+            if replacement.startTime != startTime {
+                replacement.startLatitude = nil
+                replacement.startLongitude = nil
+            }
+            if replacement.endTime != endTime {
+                replacement.endLatitude = nil
+                replacement.endLongitude = nil
+            }
+            replacement.startTime = startTime
+            replacement.endTime = endTime
+            replacement.activity = target
+            try context.save()
+            return replacementId
+        } catch {
+            context.rollback()
+            throw error
+        }
+    }
+
     public struct RunningActivity: Sendable {
         public let logId: UUID
         public let activity: ActivityDTO
@@ -69,19 +153,39 @@ public actor ActivityLogActor {
         catch { modelContext.rollback(); throw error }
 
         let result = runningActivity(for: log)
-        if previous?.activity?.storeLocation == true, let id = previous?.id {
-            Task { await captureLocation(activityLogId: id, isStart: false) }
+        if previous?.activity?.storeLocation == true, let id = previous?.id,
+           let previousActivityId = previous?.activity?.id, let boundary = previous?.endTime {
+            Task { await captureLocation(activityLogId: id, activityId: previousActivityId, boundary: boundary, isStart: false) }
         }
-        if activity.storeLocation == true, let id = log.id {
-            Task { await captureLocation(activityLogId: id, isStart: true) }
+        if activity.storeLocation == true, let id = log.id, let boundary = log.startTime {
+            Task { await captureLocation(activityLogId: id, activityId: activityId, boundary: boundary, isStart: true) }
         }
         return result
     }
 
     // Optional metadata must never hold up starting/stopping a timer or its UI.
-    private func captureLocation(activityLogId: UUID, isStart: Bool) async {
-        guard let location = try? await LocationProvider.shared.getCurrentLocation(),
-              let log = getActivityLogById(from: activityLogId) else { return }
+    private func captureLocation(activityLogId: UUID, activityId: UUID, boundary: Date, isStart: Bool) async {
+        guard let location = try? await LocationProvider.shared.getCurrentLocation() else { return }
+        _ = try? applyCapturedLocation(location, activityLogId: activityLogId,
+                                       activityId: activityId, boundary: boundary, isStart: isStart)
+    }
+
+    /// A location request can outlive edits, deletion, archiving, or opt-out.
+    /// Revalidate its original boundary against storage after the suspension,
+    /// and never save a model retained by the actor's long-lived context.
+    @discardableResult
+    func applyCapturedLocation(_ location: CLLocation, activityLogId: UUID,
+                               activityId: UUID, boundary: Date, isStart: Bool) throws -> Bool {
+        guard boundary.timeIntervalSinceReferenceDate.isFinite,
+              CLLocationCoordinate2DIsValid(location.coordinate) else { return false }
+        let context = ModelContext(modelContainer)
+        context.autosaveEnabled = false
+        guard let log = try context.fetch(FetchDescriptor<ActivityLog>(
+            predicate: #Predicate { $0.id == activityLogId }
+        )).first, let activity = log.activity,
+              activity.id == activityId, activity.archived != true,
+              activity.storeLocation == true,
+              (isStart ? log.startTime : log.endTime) == boundary else { return false }
         if isStart {
             log.startLatitude = location.coordinate.latitude
             log.startLongitude = location.coordinate.longitude
@@ -89,8 +193,8 @@ public actor ActivityLogActor {
             log.endLatitude = location.coordinate.latitude
             log.endLongitude = location.coordinate.longitude
         }
-        do { try modelContext.save() }
-        catch { modelContext.rollback() }
+        do { try context.save(); return true }
+        catch { context.rollback(); throw error }
     }
 
     private func runningActivity(for log: ActivityLog) -> RunningActivity? {
@@ -226,7 +330,7 @@ public actor ActivityLogActor {
     public func clearTimeFrame(startDate: Date, endDate: Date, logId: UUID, currentActivityStartDate: Date? = nil) throws {
         do {
             try applyTimeFrameClear(startDate: startDate, endDate: endDate, logId: logId,
-                                    currentActivityStartDate: currentActivityStartDate)
+                                    currentActivityStartDate: currentActivityStartDate, context: modelContext)
             try modelContext.save()
         } catch {
             modelContext.rollback()
@@ -234,7 +338,7 @@ public actor ActivityLogActor {
         }
     }
 
-    private func applyTimeFrameClear(startDate: Date, endDate: Date, logId: UUID, currentActivityStartDate: Date?) throws {
+    private func applyTimeFrameClear(startDate: Date, endDate: Date, logId: UUID, currentActivityStartDate: Date?, context: ModelContext) throws {
         let defaultDate = Date.distantPast
         let defaultDateFuture = Date.distantFuture
         
@@ -252,7 +356,7 @@ public actor ActivityLogActor {
         let splitDescriptor = FetchDescriptor<ActivityLog>(
             predicate: logsToSplit
         )
-        let dataToSplit = try modelContext.fetch(splitDescriptor)
+        let dataToSplit = try context.fetch(splitDescriptor)
         
         for log in dataToSplit {
             guard log.id != logId else { continue }
@@ -268,7 +372,7 @@ public actor ActivityLogActor {
             )
             tail.endLatitude = log.endLatitude
             tail.endLongitude = log.endLongitude
-            modelContext.insert(tail)
+            context.insert(tail)
             log.endTime = startDate
             log.endLatitude = nil
             log.endLongitude = nil
@@ -281,14 +385,14 @@ public actor ActivityLogActor {
         let deleteDescriptor = FetchDescriptor<ActivityLog>(
             predicate: logsToDelete
         )
-        let dataToDelete = try modelContext.fetch(deleteDescriptor)
+        let dataToDelete = try context.fetch(deleteDescriptor)
         
         for log in dataToDelete {
             guard log.id != logId else { continue }
             guard log.endTime != nil else {
                 throw(ActivityLogActorErrors.cannotOverwriteRunningActivity)
             }
-            modelContext.delete(log)
+            context.delete(log)
         }
         
         // 2. Truncate logs that start before range and end within range
@@ -300,7 +404,7 @@ public actor ActivityLogActor {
         let beforeDescriptor = FetchDescriptor<ActivityLog>(
             predicate: logsStartingBefore
         )
-        let dataStartingBefore = try modelContext.fetch(beforeDescriptor)
+        let dataStartingBefore = try context.fetch(beforeDescriptor)
         
         for log in dataStartingBefore {
             guard log.id != logId else { continue }
@@ -308,6 +412,8 @@ public actor ActivityLogActor {
                 throw(ActivityLogActorErrors.cannotOverwriteRunningActivity)
             }
             log.endTime = startDate
+            log.endLatitude = nil
+            log.endLongitude = nil
         }
         
         // 3. Truncate logs that start within range and end after range
@@ -319,7 +425,7 @@ public actor ActivityLogActor {
         let afterDescriptor = FetchDescriptor<ActivityLog>(
             predicate: logsEndingAfter
         )
-        let dataEndingAfter = try modelContext.fetch(afterDescriptor)
+        let dataEndingAfter = try context.fetch(afterDescriptor)
         
         for log in dataEndingAfter {
             guard log.id != logId else { continue }
@@ -328,19 +434,22 @@ public actor ActivityLogActor {
             }
             
             log.startTime = endDate
+            log.startLatitude = nil
+            log.startLongitude = nil
         }
         
     }
 
     public func getActivityLogsForTimeFrame(filterData: FilterData) -> [ActivityLog] {
         let defaultDate = Date.distantPast
+        let now = Date.now
         let startDate = filterData.startDate
         let endDate = filterData.endDate
         let selectedIds: [UUID] = filterData.selectedActivityIds
 
-        // Glaub hier muss endzeit genommen werden
+        // Open timers contribute up to this query's captured current time.
         let afterStartDate = #Predicate<ActivityLog> { log in
-            (log.endTime ?? defaultDate) > startDate
+            (log.endTime ?? now) > startDate
         }
 
         // Hier passt es
@@ -456,8 +565,9 @@ public actor ActivityLogActor {
         do { try modelContext.save() }
         catch { modelContext.rollback(); throw error }
 
-        if activityLog.activity?.storeLocation == true {
-            Task { await captureLocation(activityLogId: activityLogId, isStart: false) }
+        if activityLog.activity?.storeLocation == true,
+           let activityId = activityLog.activity?.id, let boundary = activityLog.endTime {
+            Task { await captureLocation(activityLogId: activityLogId, activityId: activityId, boundary: boundary, isStart: false) }
         }
     }
 
