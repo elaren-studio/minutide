@@ -350,7 +350,9 @@ final class StiintUITests: XCTestCase {
         attachScreenshot(named: "My Day list shows exact short duration", in: app)
         row.tap()
         XCTAssertTrue(app.navigationBars["Edit Log"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["log.detail.duration"].waitForExistence(timeout: 5))
+        let duration = app.staticTexts["log.detail.duration"]
+        scrollUntilHittable(duration, in: app,
+                            message: "The detail duration must be reachable at larger text sizes.")
         app.navigationBars["Edit Log"].buttons["Cancel"].tap()
         app.terminate()
         app.launch()
@@ -372,6 +374,13 @@ final class StiintUITests: XCTestCase {
         let summary = app.descendants(matching: .any).matching(identifier: "analytics.report.summary").firstMatch
         XCTAssertTrue(summary.waitForExistence(timeout: 10))
         selectReportValue(dimension: "task", id: taskID, matchingName: name, in: app)
+        let sortDirection = app.buttons["analytics.report.sort-direction"]
+        scrollUntilHittable(sortDirection, in: app, message: "Report sorting must remain reachable.")
+        let filterHelp = app.staticTexts["analytics.report.filter-help"]
+        XCTAssertTrue(filterHelp.waitForExistence(timeout: 5))
+        XCTAssertLessThanOrEqual(sortDirection.frame.maxY, filterHelp.frame.minY + 2,
+                                 "Sort controls must not collide with the filter explanation.")
+        attachScreenshot(named: "Report sort controls remain separate from explanation", in: app)
         let row = app.descendants(matching: .any).matching(NSPredicate(
             format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "analytics.report.row.", name)).firstMatch
         XCTAssertTrue(row.waitForExistence(timeout: 10))
@@ -388,6 +397,7 @@ final class StiintUITests: XCTestCase {
         let description = app.staticTexts["The diagram compares each activity's average daily time over the selected period."]
         XCTAssertLessThanOrEqual(description.frame.maxY, plot.frame.minY + 2,
                                  "The diagram must begin after its description.")
+        scrollUntilHittable(plot, in: app, message: "The chart plot must remain reachable below its description.")
         attachScreenshot(named: "Sankey contains labels and a wrapping legend", in: app)
     }
 

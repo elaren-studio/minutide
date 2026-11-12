@@ -139,25 +139,37 @@ struct WorkReportControls: View {
             }
             .accessibilityIdentifier("analytics.report.grouping")
 
-            HStack {
-                Picker("Metric", selection: $metric) {
-                    ForEach(WorkReportMetric.allCases) { value in
-                        Text(value.title).tag(value)
+            VStack(alignment: .leading, spacing: 12) {
+                Menu {
+                    Picker("Metric", selection: $metric) {
+                        ForEach(WorkReportMetric.allCases) { value in
+                            Text(value.title).tag(value)
+                        }
                     }
+                } label: {
+                    Text("Metric: \(metric.title)")
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 .accessibilityIdentifier("analytics.report.metric")
 
-                Picker("Sort", selection: $sortField) {
-                    ForEach(WorkReportSortField.allCases) { value in
-                        Text(value.title).tag(value)
+                Menu {
+                    Picker("Sort", selection: $sortField) {
+                        ForEach(WorkReportSortField.allCases) { value in
+                            Text(value.title).tag(value)
+                        }
                     }
+                } label: {
+                    Text("Sort by: \(sortField.title)")
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 .accessibilityIdentifier("analytics.report.sort")
 
                 Button {
                     sortDirection = sortDirection == .ascending ? .descending : .ascending
                 } label: {
-                    Image(systemName: sortDirection == .ascending ? "arrow.up" : "arrow.down")
+                    Label(sortDirection == .ascending ? "Ascending" : "Descending",
+                          systemImage: sortDirection == .ascending ? "arrow.up" : "arrow.down")
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 .accessibilityLabel(sortDirection == .ascending ? "Sort ascending" : "Sort descending")
                 .accessibilityIdentifier("analytics.report.sort-direction")
@@ -167,6 +179,8 @@ struct WorkReportControls: View {
             Text("Selections match any value within a level and must match every selected level.")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("analytics.report.filter-help")
         }
         .padding(14)
         .background(.regularMaterial)
