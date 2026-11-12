@@ -5,6 +5,7 @@
 //  Created by Wittig, Liam on 11.12.25.
 //
 
+import SwiftData
 import SwiftUI
 
 struct TimeLineActivitySegmentView: View {
@@ -14,7 +15,8 @@ struct TimeLineActivitySegmentView: View {
     let end: CGFloat
     let log: ActivityLog
 
-    let fmt = DateComponentsFormatter()
+    private var capturedTask: WorkNodeSnapshot? { log.workSnapshot.task }
+    private var capturedColor: Color { Color(hex: capturedTask?.colorHex) }
 
     let timeDistance: String
     private let canShowRunningTimer: Bool
@@ -25,7 +27,8 @@ struct TimeLineActivitySegmentView: View {
         end: CGFloat,
         log: ActivityLog,
         isShowingLogSheet: Bool = false,
-        now: Date = .now
+        now: Date = .now,
+        displayDuration: TimeInterval? = nil
     ) {
         self.start = start
         self.end = end
@@ -40,8 +43,6 @@ struct TimeLineActivitySegmentView: View {
                 return elapsed.isFinite && elapsed >= 0
             } == true
 
-        fmt.unitsStyle = .abbreviated
-        fmt.allowedUnits = [.hour, .minute]
         if let startTime = log.startTime,
            Self.isFiniteDate(startTime),
            let endTime = log.endTime ?? (Self.isFiniteDate(now) ? now : nil),
@@ -50,7 +51,7 @@ struct TimeLineActivitySegmentView: View {
             let seconds = endTime.timeIntervalSince(startTime)
             if seconds.isFinite, seconds > 0 {
                 hasValidTimeRange = true
-                timeDistance = fmt.string(from: seconds) ?? Self.unavailableDuration
+                timeDistance = MyDayEntry.durationText(displayDuration ?? seconds)
             } else {
                 hasValidTimeRange = false
                 timeDistance = Self.unavailableDuration
@@ -68,7 +69,7 @@ struct TimeLineActivitySegmentView: View {
     }
 
     var shouldRenderSegment: Bool {
-        hasValidGeometry && hasValidTimeRange && (segmentHeight > 5 || log.endTime == nil)
+        hasValidGeometry && hasValidTimeRange
     }
 
     private var segmentHeight: CGFloat {
@@ -83,24 +84,26 @@ struct TimeLineActivitySegmentView: View {
         if shouldRenderSegment {
             ZStack(alignment: .topLeading) {
                 Rectangle()
-                    .frame(height: segmentHeight)
-                    .foregroundColor(log.activity?.color ?? .blue)
+                    // This is a marker, not a minimum-duration block. Compact entries
+                    // also have separate full-size rows above the calendar.
+                    .frame(height: max(segmentHeight, 2))
+                    .foregroundColor(capturedColor)
                     //.opacity(0.95)
                     .cornerRadius(10)
                     .shadow(
-                        color: (log.activity?.color ?? .blue).opacity(0.3),
+                        color: capturedColor.opacity(0.3),
                         radius: 10,
                         x: 0,
                         y: 5
                     )
-                if segmentHeight > 39 {
+                if segmentHeight >= 44 {
                     VStack(alignment: .leading) {
                         HStack {
                             Image(
-                                systemName: log.activity?.sfSymbolName ?? "questionmark.circle.dashed"
+                                systemName: capturedTask?.sfSymbolName ?? "questionmark.circle.dashed"
                             )
 
-                            Text(log.activity?.name ?? "no name")
+                            Text(capturedTask?.name ?? "Unavailable task")
                                 .lineLimit(1)
 
                         }.font(.headline)
@@ -131,6 +134,11 @@ struct TimeLineActivitySegmentView: View {
         
                 LogDetailView(log: log)
             }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(capturedTask?.name ?? "Unavailable task"), \(timeDistance)")
+            .accessibilityAddTraits(log.endTime == nil ? [] : .isButton)
+            .accessibilityIdentifier("timeline.segment.\(log.id?.uuidString ?? String(describing: log.persistentModelID))")
+            .accessibilityHidden(segmentHeight < 44)
             .padding(.leading, 40)
             .offset(y: start)
         }

@@ -2,7 +2,16 @@ import SwiftUI
 import SwiftData
 
 struct HomeView: View {
+    var todayRequest: UUID? = nil
     @State private var dayOffset: Int = 0
+    @AppStorage("timeline.displayMode") private var displayMode = MyDayDisplayMode.timeline.rawValue
+    @AppStorage("work.organizationScope") private var organizationScope = "all"
+    @Query(sort: \WorkOrganization.name) private var organizations: [WorkOrganization]
+
+    private var scopeBinding: Binding<WorkScope> {
+        Binding(get: { WorkScope(rawValue: organizationScope) },
+                set: { organizationScope = $0.rawValue })
+    }
 
     enum ActiveSheet: Identifiable {
         case createLog
@@ -13,9 +22,6 @@ struct HomeView: View {
     @State private var activeSheet: ActiveSheet?
 
     let dayRange: Int = -2000
-
-    @Query(sort: \ActivityLog.startTime)
-    var logs: [ActivityLog]
 
     private func dateFor(offset: Int) -> Date {
         Calendar.current.date(byAdding: .day, value: offset, to: .now) ?? .now
@@ -53,7 +59,8 @@ struct HomeView: View {
                     ForEach(dayRange...0, id: \.self) { offset in
                         TimeLineDisplayer(
                             offset: offset,
-                            currentOffset: dayOffset
+                            currentOffset: dayOffset,
+                            mode: MyDayDisplayMode(rawValue: displayMode) ?? .timeline
                         )
                         .tag(offset)
                         .scrollTransition(.interactive, axis: .horizontal) { content, phase in
@@ -73,8 +80,28 @@ struct HomeView: View {
                 )
             )
             .scrollTargetBehavior(.paging)
-            .ignoresSafeArea(edges: [.top, .bottom])
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    WorkScopePicker(selection: scopeBinding, organizations: organizations,
+                                    identifier: "timeline.scope")
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    Menu {
+                        Picker("View mode", selection: $displayMode) {
+                            Label("Timeline", systemImage: "calendar.day.timeline.left")
+                                .tag(MyDayDisplayMode.timeline.rawValue)
+                                .accessibilityIdentifier("timeline.mode.timeline")
+                            Label("List", systemImage: "list.bullet")
+                                .tag(MyDayDisplayMode.list.rawValue)
+                                .accessibilityIdentifier("timeline.mode.list")
+                        }
+                    } label: {
+                        Image(systemName: displayMode == MyDayDisplayMode.list.rawValue
+                              ? "list.bullet" : "calendar.day.timeline.left")
+                    }
+                    .accessibilityLabel("View mode")
+                    .accessibilityIdentifier("timeline.mode")
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Button {
                         activeSheet = .createLog
@@ -83,6 +110,8 @@ struct HomeView: View {
                             .symbolRenderingMode(.hierarchical)
                             .font(.title3)
                     }
+                    .accessibilityLabel("Create Log")
+                    .accessibilityIdentifier("timeline.log.new")
                 }
 
                 ToolbarItem(placement: .navigation) {
@@ -96,6 +125,7 @@ struct HomeView: View {
             .toolbarBackground(.hidden, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
             .sensoryFeedback(.selection, trigger: dayOffset)
+            .onChange(of: todayRequest) { _, _ in dayOffset = 0 }
         }
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
@@ -114,11 +144,13 @@ struct HomeView: View {
             }
         }
     }
+
 }
 
 struct TimeLineDisplayer: View {
     let offset: Int
     let currentOffset: Int
+    let mode: MyDayDisplayMode
 
     private var date: Date {
         Calendar.current.date(byAdding: .day, value: offset, to: .now) ?? .now
@@ -127,7 +159,7 @@ struct TimeLineDisplayer: View {
     var body: some View {
         ZStack {
             if abs(offset - currentOffset) <= 1 {
-                TimeLineView(selectedDate: date)
+                MyDayEntriesView(selectedDate: date, mode: mode)
             } else {
                 Color.clear
             }

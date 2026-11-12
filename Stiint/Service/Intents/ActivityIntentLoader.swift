@@ -38,20 +38,16 @@ struct ActivityQuery: EntityQuery {
     }
 
     func entities(for identifiers: [UUID]) async throws -> [ActivityEntity] {
-        let activities = await activityActor.getAllAvaibleActivitys()
-        return activities
-            .compactMap { activity in
-                guard activity.archived != true, let id = activity.id,
-                      let name = activity.name, identifiers.contains(id) else { return nil }
-                return ActivityEntity(id: id, name: name)
-            }
+        try await suggestedEntities().filter { identifiers.contains($0.id) }
     }
 
     func suggestedEntities() async throws -> [ActivityEntity] {
-        let activities = await activityActor.getAllAvaibleActivitys()
-        return activities.compactMap { activity in
-            guard activity.archived != true, let id = activity.id,
-                  let name = activity.name else { return nil }
+        let snapshots = try await activityActor.getStartableActivitySnapshots()
+        return snapshots.compactMap { snapshot in
+            guard let task = snapshot.task, let id = task.id else { return nil }
+            let location = [snapshot.organization?.name, snapshot.client?.name, snapshot.project?.name]
+                .compactMap { $0 }.joined(separator: " / ")
+            let name = location.isEmpty ? task.name : "\(task.name) — \(location)"
             return ActivityEntity(id: id, name: name)
         }
     }

@@ -16,6 +16,61 @@ class AnalyticsDataProvider {
 
         return dataFrame
     }
+
+    func loadWorkReport(
+        filterData: FilterData,
+        hierarchyFilters: WorkReportFilters,
+        groupings: [WorkReportGrouping],
+        metric: WorkReportMetric,
+        sorting: [WorkReportSort]
+    ) async throws -> WorkReportLoad {
+        let capturedNow = Date.now
+        let calendar = Calendar.current
+        let entries = try await PersistenceManager.shared.activityLogActor.getReportLogs(
+            start: filterData.startDate,
+            end: filterData.endDate,
+            now: capturedNow
+        )
+        let query = WorkReportQuery(
+            startDate: filterData.startDate,
+            endDateExclusive: filterData.endDate,
+            capturedNow: capturedNow,
+            calendar: calendar,
+            filters: hierarchyFilters,
+            groupings: groupings,
+            metric: metric,
+            sorting: sorting
+        )
+        let report = WorkReportEngine.build(entries: entries, query: query)
+        var chartFilter = filterData
+        if !isAny(hierarchyFilters.organizations) || !isAny(hierarchyFilters.clients)
+            || !isAny(hierarchyFilters.projects) || !isAny(hierarchyFilters.tasks) {
+            chartFilter.showFreeTime = false
+        }
+        let charts = TimeFrameData(
+            filterData: chartFilter,
+            report: report,
+            calendar: calendar
+        )
+        return WorkReportLoad(
+            timeFrameData: charts,
+            chartFilterData: chartFilter,
+            report: report,
+            options: WorkReportEngine.options(from: entries)
+        )
+    }
+
+    private func isAny(_ selection: WorkReportSelection<UUID>) -> Bool {
+        if case .any = selection { return true }
+        return false
+    }
+}
+
+struct WorkReportLoad {
+    let timeFrameData: TimeFrameData
+    let chartFilterData: FilterData
+    let report: WorkReportResult
+    let options: WorkReportOptions
 }
 
 struct DataPoint: Identifiable, Equatable {
@@ -69,6 +124,15 @@ class TimeFrameData {
     var dataSeries: [DataSeriesPoint]
     let filterData: FilterData
     let calendar: Calendar
+    private var chartEndDate: Date? = nil
+
+    var seriesStyles: [(name: String, color: Color)] {
+        var seenNames = Set<String>()
+        return dataSeries.compactMap { point in
+            guard let name = point.activity.name, seenNames.insert(name).inserted else { return nil }
+            return (name: name, color: point.activity.color)
+        }
+    }
 
     var timeSpendOnActivities: Double {
         var timeSpend: Double = 0
@@ -80,7 +144,8 @@ class TimeFrameData {
 
     var timeOverall: Double {
         guard isFiniteDate(filterData.startDate), isFiniteDate(filterData.endDate) else { return 0 }
-        let duration = filterData.endDate.timeIntervalSince(filterData.startDate)
+        let effectiveEnd = min(chartEndDate ?? filterData.endDate, filterData.endDate)
+        let duration = effectiveEnd.timeIntervalSince(filterData.startDate)
         return duration.isFinite && duration > 0 ? duration : 0
     }
 
@@ -125,6 +190,51 @@ class TimeFrameData {
             for slice in dailySlices {
                 insertSeries(activity: interval.activity, slice: slice)
             }
+        }
+    }
+
+    /// Builds all five chart inputs from the same clipped report result used by
+    /// the table. Stable group keys ensure a log appears once in each requested
+    /// category even when it spans local calendar days.
+    init(
+        filterData: FilterData,
+        report: WorkReportResult,
+        calendar: Calendar
+    ) {
+        self.filterData = filterData
+        self.calendar = calendar
+        chartEndDate = min(report.capturedNow, filterData.endDate)
+
+        var activitiesByKey: [String: ActivityItem] = [:]
+        func activity(for key: WorkReportGroupKey, displayName: String? = nil) -> ActivityItem {
+            if let cached = activitiesByKey[key.id] { return cached }
+            let style = key.components.reversed().compactMap { component -> WorkReportEntityValue? in
+                guard case .entity(let value) = component.value else { return nil }
+                return value
+            }.first
+            let value = ActivityItem(
+                name: displayName ?? key.displayName,
+                color: Color(hex: style?.colorHex),
+                sfSymbolName: style?.sfSymbolName
+            )
+            activitiesByKey[key.id] = value
+            return value
+        }
+
+        dataPoints = report.rows.map { row in
+            DataPoint(
+                activity: activity(for: row.key, displayName: row.displayName),
+                timeSpend: row.durationSeconds,
+                filterData: filterData,
+                calendar: calendar
+            )
+        }
+        dataSeries = report.series.map { point in
+            DataSeriesPoint(
+                activity: activity(for: point.key, displayName: point.displayName),
+                timeSpend: point.durationSeconds,
+                date: point.date
+            )
         }
     }
 

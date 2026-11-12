@@ -9,6 +9,8 @@ import SwiftUI
 import SwiftData
 
 struct CreateLogView: View {
+    @Environment(\.modelContext) private var modelContext
+    @AppStorage("work.organizationScope") private var organizationScope = "all"
     @Environment(\.dismiss) private var dismiss
     @State private var saving = false
     @State private var saveError: String?
@@ -20,11 +22,38 @@ struct CreateLogView: View {
     @State private var maxEndtime: Date
     
     
-    @State private var activity: ActivityItem?
+    @State private var selectedTaskID: UUID?
+    @State private var taskEditor: WorkEditorRequest?
+    @State private var didSetInitialTask = false
     
     
     
     @Query private var activities: [ActivityItem]
+    @Query private var organizations: [WorkOrganization]
+    @Query private var clients: [WorkClient]
+    @Query private var projects: [WorkProject]
+
+    private var availableTasks: [ActivityItem] {
+        // Querying the graph also invalidates this list after hierarchy edits.
+        _ = organizations.count + clients.count + projects.count
+        let scope = WorkScope(rawValue: organizationScope).normalized(in: organizations)
+        return activities.filter { task in
+            guard let snapshot = try? WorkHierarchy.resolve(task: task, in: modelContext,
+                                                            requireAvailable: true) else { return false }
+            // Keep a task just created here selected even if its Location was
+            // changed to another organization in the editor.
+            return task.id == selectedTaskID || scope.matches(task: task, snapshot: snapshot)
+        }.sorted { ($0.name ?? "").localizedStandardCompare($1.name ?? "") == .orderedAscending }
+    }
+
+    private func taskLabel(_ task: ActivityItem) -> String {
+        guard let snapshot = try? WorkHierarchy.resolve(task: task, in: modelContext) else {
+            return task.name ?? "Unnamed task"
+        }
+        let path = [snapshot.organization?.name, snapshot.client?.name, snapshot.project?.name]
+            .compactMap { $0 }.joined(separator: " / ")
+        return path.isEmpty ? task.name ?? "Unnamed task" : "\(task.name ?? "Unnamed task") — \(path)"
+    }
     
     
    
@@ -111,12 +140,26 @@ struct CreateLogView: View {
         NavigationStack {
             Form {
                 
-                Section("Activity") {
-                    Picker("Activity", selection: $activity) {
-                        ForEach(activities.filter { $0.archived != true }) { activity in
-                            Text(activity.name ?? "Unnamed")
-                                .tag(activity as ActivityItem?)
+                Section("Task") {
+                    Picker("Task", selection: $selectedTaskID) {
+                        Text("Choose a task").tag(nil as UUID?)
+                        ForEach(availableTasks) { activity in
+                            Text(taskLabel(activity))
+                                .tag(activity.id)
                         }
+                    }
+                    .accessibilityIdentifier("log.task")
+                    Button("New Task", systemImage: "plus") {
+                        taskEditor = WorkEditorRequest(
+                            kind: .task,
+                            defaultParent: WorkScope(rawValue: organizationScope)
+                                .defaultTaskParent(in: organizations)
+                        )
+                    }
+                    .accessibilityIdentifier("log.task.new")
+                    if availableTasks.isEmpty {
+                        Text("Create a task here to record time for it.")
+                            .font(.footnote).foregroundStyle(.secondary)
                     }
                 }
                 Section("Time"){
@@ -126,7 +169,9 @@ struct CreateLogView: View {
                         selection: $defaultDate,
                         in: ...maxEndtime,
                         displayedComponents: .date
-                    ) .onChange(of: defaultDate) { old, newValue in
+                    )
+                    .accessibilityIdentifier("log.date")
+                    .onChange(of: defaultDate) { old, newValue in
                         calcBounds()
                     }
                     DatePicker(
@@ -135,6 +180,7 @@ struct CreateLogView: View {
                         in: ...endTime,
                         displayedComponents: .hourAndMinute
                     )
+                    .accessibilityIdentifier("log.start")
                     
                     DatePicker(
                         "End Time",
@@ -142,6 +188,7 @@ struct CreateLogView: View {
                         in: startTime...maxEndtime,
                         displayedComponents: .hourAndMinute
                     )
+                    .accessibilityIdentifier("log.end")
                     
                 }
                 Section("Duration") {
@@ -152,9 +199,12 @@ struct CreateLogView: View {
                         duration,
                         format: .units(allowed: [.hours, .minutes])
                     )
+                    .accessibilityIdentifier("log.duration")
                 }
             }.disabled(saving).onAppear(){
-                activity = activities.first { $0.archived != true }
+                guard !didSetInitialTask else { return }
+                didSetInitialTask = true
+                selectedTaskID = availableTasks.first?.id
             }        .navigationTitle("Create Log")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
@@ -166,13 +216,18 @@ struct CreateLogView: View {
                                 return
                             }
                             
-                            guard activity != nil else {
+                            guard selectedTaskID != nil else {
                                 return
                             }
                             
                             saveLog()
                         }
-                        .disabled(saving || activity?.id == nil || activity?.archived == true || endTime <= startTime)
+                        .disabled(saving || !availableTasks.contains(where: { $0.id == selectedTaskID }) || endTime <= startTime)
+                        .accessibilityIdentifier("log.create")
+                    }
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") { dismiss() }
+                            .disabled(saving)
                     }
                 }
                 .interactiveDismissDisabled(saving)
@@ -181,11 +236,17 @@ struct CreateLogView: View {
                 )) {
                     Button("OK") { saveError = nil }
                 } message: { Text(saveError ?? "") }
+                .sheet(item: $taskEditor) { request in
+                    WorkEntityEditor(request: request, onTaskCreated: { id in
+                        selectedTaskID = id
+                    })
+                }
         }
     }
 
     private func saveLog() {
-        guard !saving, let activityId = activity?.id else { return }
+        guard !saving, let activityId = selectedTaskID,
+              availableTasks.contains(where: { $0.id == activityId }) else { return }
         saving = true
         let start = startTime
         let end = endTime

@@ -1,16 +1,187 @@
 # Active context
 
-Last updated: 2026-11-11
+Last updated: 2026-11-12 UTC
 
 ## Goal
 
 Revive the archived Stiint iOS time tracker as **Minutide**, an independently maintained, fully free, open-source app under Elaren Studio. Keep the original Xcode app target named `Stiint` and retain Liam Wittig's original MIT copyright notice. The user explicitly authorized the Minutide rename and publication under the Elaren GitHub organization on 2026-11-11.
 
+## Current internal beta — 0.2.3 (5) available in TestFlight
+
+### Resume and new identity
+
+- Added Resume Timer near the top of completed-entry details. It creates a new
+  interval with the saved snapshot, preserves the old entry and gap, blocks
+  unsaved edits/paused tracking/unavailable tasks, and confirms a running switch.
+  The actor transaction preserves one timer and fresh location policy; same-task
+  identical-snapshot repeats are idempotent. No stored-model change.
+- New flowing aqua M on midnight blue is saved on the SSD and selected by the
+  app's `MinutideIcon` asset catalog and welcome image. Built-in image-generation
+  prompt and original/1024px asset paths are recorded in `BRANDING.md`.
+- XcodeBuildMCP build/run passed without warnings on iPhone 17 / iOS 26.5.
+  The compiled Info.plist selects `MinutideIcon`. Final focused run
+  `ResumeBrandFocused-2.xcresult` passed 87 unit tests plus the Resume UI case,
+  zero failures/skips, with `content_size=accessibility-medium`. The prior run
+  passed 86 units and Resume at normal text size, before the final fresh-reader
+  regression. Published source `c8def1d4c7fbc3a6ba03b6538330a09d9b50d2e9` matches
+  all 141 candidate-file hashes (125 product files). Final hosted
+  [run 43162400317](https://github.com/elaren-studio/minutide/actions/runs/43162400317)
+  passed **98 tests (87 unit, 11 UI), zero failures/skips**, on that exact source;
+  `TEST SUCCEEDED` at **2026-11-12 06:01:55 UTC**. Normal and larger-text
+  screenshots were visually reviewed, as was
+  the installed Home Screen icon in `build/ResumeBrandHomeScreen-installed.jpg`.
+- Both signed bundles and the manual-export IPA passed signatures, profiles,
+  non-debug/beta entitlements, version/build, IDs, iOS 26.1, four notices,
+  `CA92.1`, and `MinutideIcon` primary-icon metadata. IPA: 4,153,776 bytes,
+  SHA-256 `ce8ca72139c6f16c16df8f91ef81bc59eea946f2f62fafee48583b432378c7ec`.
+  Receipt: `build/Verification/minutide-0.2.3-5.json`.
+- Apple validation/upload succeeded without errors. Delivery/build
+  `cd4ad8e6-1f70-4763-b599-3e6238277e7d` is `VALID` / `IN_BETA_TESTING`.
+  Assignment and English notes were independently read back at
+  **2026-11-12 05:41:51 UTC**. Same internal group, sole intended maintainer,
+  public link disabled and Mac/Vision disabled. Fresh readback after final CI
+  reconfirms availability. Physical build-5 acceptance and email delivery remain
+  unverified. Subsequent commits update documentation only; signed source is unchanged.
+
+## Previous internal beta — 0.2.2 (4), historical
+
+- Maintainer screenshots showed oversized/top tracking controls, a bottom timer
+  without Stop, sparse Live Activity details, a missing completed brief entry,
+  Reports collisions, and a request for a My Day list view.
+- Root cause of hidden brief entries: `shouldRenderSegment` discarded completed
+  intervals at five pixels or less. A separate captured-now query also excluded
+  new open intervals after the view appeared. The shared day projection now
+  validates/clips at live now, renders brief markers/readable recent entries,
+  and feeds a persisted Timeline/List choice with daily totals and detail taps.
+- Implemented one native bottom Start/running accessory with matching-task Stop,
+  richer snapshot-based Live Activity details and backward-compatible attributes,
+  and measured Reports cards with wrapped legends and seconds below a minute.
+  Existing stored models, UUIDs, dependencies, and raw CSV semantics are unchanged.
+- Version/build is 0.2.2 (4), final source `59a1f12f498f4befb28d7bb764300694ca846d22`.
+  App build/run succeeded on iPhone 17 / iOS 26.5. Focused run
+  `MyDayDetailsFocused-2.xcresult` passed all 76 units plus three user-flow cases,
+  and a separate task-owned cleanup case (not product coverage). First failed
+  evidence is retained separately. Published source removes that temporary helper.
+- Full local run `MyDayDetailsFull-1.xcresult` and hosted run 43154616269 passed
+  **86 tests (76 unit, ten UI), zero failures/skips** on `00def43`. Accessibility
+  tests passed My Day after scrolling to its offscreen detail field. Visual
+  review caught a separate Reports sorting collision missed by the original
+  assertions; final source stacks those controls and adds a geometry check.
+  `MyDayDetailsAccessibility-3.xcresult` passes that correction. Final hosted
+  [run 43157603328](https://github.com/elaren-studio/minutide/actions/runs/43157603328)
+  passed **86 tests (76 unit, ten UI), zero failures/skips**, on exact final
+  source `59a1f12`; `TEST SUCCEEDED` at **2026-11-12 05:16:14 UTC**. This is the
+  final complete-suite evidence. Candidate-2 manifests fingerprint 139 files,
+  including 124 product files. Default/larger-text screenshots are retained
+  under `build/MyDayDetailsReview-2` and `build/MyDayDetailsAccessibilityReview-*`.
+  The first signed candidate was preserved as superseded and never uploaded.
+  Final archive and manual-export IPA passed both signatures, distribution
+  profiles/entitlements, IDs/version/build, iOS 26.1, four notices and `CA92.1`.
+  IPA: 7,125,052 bytes, SHA-256
+  `a0513d810cced28aae554633e09abfe323334d67e3b847e1385f89f585b7fc97`.
+- Apple validation/upload succeeded without errors. Delivery/build
+  `9717a731-94ea-43e5-9cd2-c1c0c7a1db0f` is `VALID` / `IN_BETA_TESTING`.
+  Assignment and English notes were independently read back at
+  **2026-11-12 04:59:17 UTC**. The existing internal group still has only the
+  intended maintainer, public link disabled, and Mac/Vision disabled. Receipt:
+  `build/Verification/minutide-0.2.2-4.json`. Final Reports accessibility run
+  `MyDayDetailsAccessibility-4.xcresult` passed and its plot/legend screenshots
+  were visually reviewed. Physical build-4 acceptance remains open.
+
+## Previous internal beta — 0.2.1 (3), historical
+
+- The maintainer supplied screenshots of the appearance editor, Tasks scope
+  menu, and Create Log, requesting simpler styling, removal of the nested scope
+  capsule, inline task creation, and manual timer start from My Day. Screenshots
+  are user observations, not a completed physical acceptance matrix.
+- Implemented Color/Icon rows with visual choosers and separate parent/default
+  resets, one native scope surface, New Task in Create Log with UUID selection
+  and preserved dates, and My Day Start Timer / Switch Task / Stop controls.
+  Inline creation returns without the automation prompt. Tracking starts now
+  and returns to Today; the manual chooser has a local scope and search.
+- No stored model or schema changes. Version/build is 0.2.1 (3); the app and
+  extension IDs and iOS 26.1 minimum are unchanged.
+- XcodeBuildMCP build/run succeeded without warnings at 03:10 UTC on
+  2026-11-12 (iPhone 17 / iOS 26.5). The My Day screenshot shows the Start Timer
+  control above the timeline. The full dark-mode run passed 70/73 (65 unit,
+  five UI), with three UI failures. Corrected the timer chooser to pin its newly
+  created task above long lists, and corrected test navigation/search for
+  offscreen report options and the chooser's actual Back button. All three
+  corrected cases passed at 03:31 UTC in `build/UIPolishFocusedResults-1.xcresult`,
+  zero failures/skips.
+- Source `a6e629a26faca5b0dd4834b02bd192ca15508aba` is pushed. All 135 source
+  fingerprints match `build/Verification/ui-polish-candidate-2.json`. Signed
+  archive and manual-export IPA are verified: 6,992,929 bytes, SHA-256
+  `7ddd1cefe419a1d9a273167037df1ff7229cbda2b3311f79441f79b840fa0572`.
+  Both distribution signatures, profiles, identifiers, version/build, iOS 26.1,
+  four bundled notices, and `CA92.1` passed. Existing signing assets were reused.
+- Apple validation and upload succeeded without errors. Delivery/build
+  `cb6b3643-c3b3-4996-a24d-845d319fed13` is `VALID` / `IN_BETA_TESTING` for
+  **0.2.1 (3)**. Group assignment and English notes were read back twice;
+  availability was verified at **2026-11-12 03:38:49 UTC**. The existing group
+  still has only the intended maintainer, no public link, and Mac/Vision disabled.
+  Receipt: `build/Verification/minutide-0.2.1-3.json`. Physical build-3 acceptance
+  and email delivery are not claimed.
+- Final hosted [run 43148292343](https://github.com/elaren-studio/minutide/actions/runs/43148292343)
+  passed all **73 tests (65 unit, eight UI), zero failures/skips**, on the exact
+  released source with Xcode 26.6. `TEST SUCCEEDED` was recorded at 03:50:38 UTC.
+  This clean full-suite result supersedes the earlier local full/focused sequence.
+  Log, metadata, and checksum are retained in the release receipt.
+
+## Previous feature milestone — 0.2.0 (2), historical
+
+- The maintainer confirms TestFlight **0.1.0 (1)** installs and launches on his
+  iPhone. Its remaining physical acceptance matrix is separate.
+- Current branch: `feature/workspaces-reporting`. The hierarchy/migration and
+  work-management milestone is published as `a107f6d`; reporting is now integrated.
+- Implemented local organizations → clients → projects with optional task
+  locations, independent color/icon inheritance, archive/restore, and scope
+  switching. The global running timer and Stop control stay above the task list.
+- Entries capture immutable hierarchy IDs/names/styles. Legacy history is
+  migrated without inventing ancestry; date edits/splits preserve snapshots,
+  while explicit reclassification uses the task's current assignment.
+- Reports combine OR-within/AND-across work filters, roll up one or more levels
+  or day, sort, and export summary/detail CSV. All five charts remain free.
+  Date and work filter sheets apply local drafts only on confirmation.
+- Validation covers **65 unit + 5 UI regression cases**. The complete run
+  `build/WorkReportsFullResults-3.xcresult` passed 69/70 with one native-search
+  toolbar failure; the corrected combined hierarchy/report case passed in
+  `build/WorkReportsCombinedUIResults-2.xcresult` at 02:14:29 UTC on 2026-11-12.
+  The sole app-source delta after that complete run is `WorkReportView.swift`;
+  the focused rerun verifies it. No known test failure remains. This is not a
+  claim that the earlier complete result bundle itself is green.
+- The on-disk V1 migration/reopen, history invariants, combined filters, DST,
+  CSV, timer recovery, all free charts, date cancellation, and pinned timer
+  behavior have executed evidence. The candidate-5 SHA-256 manifest matches all
+  132 source files. Original MIT notice and dependency pins are unchanged.
+- Delivered **0.2.0 (2)** from source `edf830598a033136028d690a2c0e167d14289a86`,
+  published on the feature branch and [PR #2](https://github.com/elaren-studio/minutide/pull/2)
+  (ready for review, stacked on initial-source PR #1). No merge is performed.
+- Signed archive `build/Archives/Minutide-0.2.0-2.xcarchive` and manual-export IPA
+  `build/Exports/Minutide-0.2.0-2-manual/Stiint.ipa` are verified: 6,869,853 bytes,
+  SHA-256 `8f67daa55ec475e563ad02e04012d4332784af7e6e50fa66a69c60b4eef179c6`. Both distribution signatures,
+  identifiers/version/minimum OS, non-debug entitlements, four notices, and
+  privacy reason `CA92.1` were checked. No new certificate or access grant.
+- Apple validation/upload succeeded without errors. Build/delivery `0cbd1652-c1a3-41ba-b704-82901d5e4c5d`
+  is `VALID` and `IN_BETA_TESTING`, assigned to `Minutide Internal`; fresh API
+  readback verified availability at **2026-11-12 02:43:11 UTC**. The group still
+  has only the intended maintainer, no public link, and Mac/Vision disabled.
+  English beta notes are verified. No build-2 installation or email delivery is claimed.
+- Receipt: `build/Verification/minutide-0.2.0-2.json`. Hosted [run 43141785036](https://github.com/elaren-studio/minutide/actions/runs/43141785036)
+  **passed all 70 tests (65 unit, five UI), zero failures/skips**, on the exact
+  shipped source with Xcode 26.6. The clean hosted run supersedes the local
+  complete-plus-focused validation as the final full-suite result. Log/metadata
+  are retained under `build/logs/` and `build/Verification/`.
+- Physical 0.2 upgrade/features and minimum-runtime acceptance remain separate
+  from internal delivery. The maintainer has not yet reported those results.
+- Public App Store submission, external testers, and new legal agreements are
+  outside this authorization. See [WORK_HIERARCHY.md](WORK_HIERARCHY.md).
+
 ## Verified orientation
 
 - Working checkout: `/Volumes/Felix-SSD-1/Cursor Projects/Elaren/products/minutide`. The SSD baseline test run used source revision `607d5b3164545177777ed22f45bed8187d9887a9`; later release-readiness changes are in progress and are not covered by that baseline result.
 - Starting source: upstream commit `a6f10f2d6637e9b3b330c56b818fb537357329b0` from `Liam1506/Stiint`.
-- Verified remote state: `upstream` points to `https://github.com/Liam1506/Stiint.git`; `origin` points to `https://github.com/elaren-studio/minutide.git`. Current development branch: `feature/minutide-testflight`.
+- Verified remote state: `upstream` points to `https://github.com/Liam1506/Stiint.git`; `origin` points to `https://github.com/elaren-studio/minutide.git`. Current development branch: `feature/workspaces-reporting`.
 - The canonical checkout is on the verified external APFS volume. Migration receipt: `build/history/pre-ssd/migration-verification.json`. All 788 retained project, build, and result files (74,358,536 bytes) matched their SHA-256 manifest. The copied Git object store has no alternates; refs were validated from `build/history/pre-ssd/git-state.bundle` (SHA-256 `259dea147df577983bef1c8d37ad52788162d29ad259ff67bc9b17504a3e6580`).
 - App, Live Activity extension, and test targets use iOS 26.1. The internal app target is `Stiint`; display name is `Minutide` and extension display name is `Minutide Live Activity`.
 - Bundle identifiers are `com.elaren.minutide`, `com.elaren.minutide.liveactivity`, `com.elaren.minutide.tests`, and `com.elaren.minutide.uitests`. Apple registration and signing are not part of source publication. The new identifier uses a separate container from prior local community builds; no cross-container migration is implemented.
@@ -59,12 +230,12 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
 
 ## Next work
 
-1. Internal delivery is verified. Have the maintainer install the invited TestFlight build and record physical acceptance separately.
-2. Use the TestFlight install for physical Shortcuts, GPS permission, reboot/recovery, and minimum-runtime acceptance. Keep these separate from archive signature, IPA upload, and processing evidence.
-3. Rerun app tests if any source changes follow the notice additions; the 39-test result predates those acknowledgement/resource changes.
-4. Check the live outcome of hosted Actions and any pull-request checks. Actions is enabled and the workflow is active; the older workflow-dispatch run was queued, and no PR check/run was observed for PR #1. The cause is not established.
+1. Update the existing TestFlight install to 0.2.3 (5) without deleting it. Record physical upgrade/history/Resume and new-icon acceptance separately.
+2. Review Resume with recorded details, cancellation/switching/paused/unavailable behavior and the new icon, plus the prior My Day/Reports/appearance flows. Exercise hardware Shortcuts/GPS/recovery and minimum-runtime behavior using `DEVICE_ACCEPTANCE.md`.
+3. Review the stacked source PRs #1 and #2. Final exact-source hosted run 43162400317 passed all 98 tests; no merge has been performed.
+4. Before a later stored-model change, freeze the shipped V2 schema and extend the ordered migration/disk fixtures.
 5. Keep production App Store submission and acceptance of Apple's legal agreement as future gates.
-6. Private reporting is verified at the repository's Security tab. Keep personal support addresses and response-time commitments unset unless explicitly chosen.
+6. Keep private vulnerability reporting and the canonical SSD source/build paths; do not invent support-address or response-time commitments.
 
 ## Handoff rules
 

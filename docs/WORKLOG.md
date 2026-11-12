@@ -143,3 +143,326 @@ Append dated entries. Record what changed and what evidence was actually collect
 - Hosted CI remains unverified. Physical acceptance is the next user step. No Apple legal agreement or production release was performed.
 
 - Source PR #1 is now ready for review; its title and description record the completed internal TestFlight delivery and pending physical acceptance. No merge or production release was performed.
+
+
+## 2026-11-11 — Work hierarchy and reporting begun
+
+- The maintainer confirms installation and launch of TestFlight 0.1.0 (1) on his iPhone. This does not complete the remaining physical acceptance matrix.
+- Created `feature/workspaces-reporting` from `2f5ee39878fef4bca4e9dc378553437733cb4bf8`. The user authorized organizations, clients, projects, optional task assignment, independent appearance, combined reports, tests/docs, remote commits, and the next internal beta.
+- Recorded the implementation and acceptance contract in `WORK_HIERARCHY.md`: one task Location picker, strict organization/client/project hierarchy, a global timer independent of scope, independent appearance inheritance, immutable historical snapshots, and OR-within/AND-across report filters.
+- The SSD disconnected during read-only planning. After the user reconnected it, macOS and the canonical clean repository were verified again. No fallback internal checkout or build was created. Storage/migration, UI, and reporting implementation are assigned separately; implementation and validation remain pending.
+
+
+## 2026-11-12 UTC — Work hierarchy and migration milestone
+
+- Implemented strict local organization → client → project structure with optional one-parent task locations, archive/restore, scoped duplicate-name validation, and independently inherited color/icon. Added a shared organization switcher and retained one global timer across scope changes.
+- Preserved ActivityItem IDs and added immutable per-entry hierarchy/name/style snapshots. New and explicitly reassigned entries capture current ancestry; date-only edits and split tails retain history. Legacy entries are backfilled with task metadata and no invented ancestry. Raw CSV retains its first eight columns and rows, then appends captured metadata. Timeline, raw-log display/search, manual editing, and Shortcuts use these semantics.
+- Froze the deployed V1 stored fields, added an ordered lightweight V2 migration and synchronous idempotent bootstrap, and kept the default store location. The real disk test seeds the released unversioned schema, upgrades/reopens it, and verifies identities, dates, relationships, archive flags, coordinates, malformed/orphan history, and an open timer.
+- The first two compile attempts found a missing report-model return, an overly complex CSV expression, and default MainActor isolation warnings in actor-agnostic helpers. Corrected those before tests ran. The third run passed **50 unit tests, 0 failures/skips**, on iPhone 17 / iOS 26.5, independently confirmed by xcresulttool. Finish: 01:11:02.286 UTC. Result: `build/WorkStorageResults-3.xcresult`; log: `build/work-storage-tests-3.log`.
+- The first new hierarchy UI run failed at organization navigation. Manage Work now opens a dedicated sheet with its own typed NavigationStack; the test taps row buttons and asserts each destination. The rebuilt regression passed at 01:21:06 UTC, covering full hierarchy/task creation, scope isolation without stopping the project timer, relaunch, and stop. Result: `build/WorkHierarchyUIResults-2.xcresult`. The exact original navigation cause remains an inference; the corrected flow is executed evidence.
+- Prepared version 0.2.0 build 2 after checking that Apple has only build 1. The combined reporting implementation, final full suite, archive/export/upload, and internal availability are still pending. No physical acceptance beyond the maintainer's build-1 installation/launch is claimed.
+
+
+## 2026-11-12 UTC — Combined reporting validated
+
+- Added an immutable report boundary and pure engine for hierarchy AND/OR filters, explicit missing/empty selections, clipped intervals using one clock, calendar-day/DST slicing, multi-level rollups, distinct entry counts, stable sorting, and captured metadata. Canonical labels/styles now come only from matching valid entries, preventing another organization's newer assignment from relabeling filtered history.
+- Integrated searchable work filters, confirmed local drafts for date and hierarchy sheets, latest-request protection, summary before all five free charts, matched chart color domains, and summary/detail CSV. Date-only custom end dates include their whole local day; synthetic free time stops at the captured clock and never inflates tracked report totals.
+- The complete simulator run `build/WorkReportsFullResults-3.xcresult` passed **69/70: all 65 unit tests and four of five UI tests**, with zero skips. The remaining combined report UI case exposed native search hiding Done. Kept the toolbar visible using the installed SDK's search-presentation behavior; the focused case passed at **02:14:29.769 UTC**, `build/WorkReportsCombinedUIResults-2.xcresult`. The sole app-source delta between those runs is `WorkReportView.swift`; source fingerprints were checked. All 70 distinct regression cases now have passing coverage; the earlier complete bundle still records its original failure.
+- Earlier UI failures found the timer controls could scroll off a long list. The running card is now pinned above it. A temporary exact-name UI utility stopped only this session's failed-test timer; it was removed before candidate publication and is not counted as a regression. Tests also use task search and native Picker accessibility labels rather than expecting offscreen or overridden identifiers.
+- Original upstream MIT bytes and dependency pins are unchanged. Candidate manifest `build/Verification/work-report-candidate-5.json` matches 132 source files. No app-source change follows the focused pass at this checkpoint. Requested native workers were Luna xhigh and Sol high; independent runtime routing metadata was not exposed, so no verified model-cost claim is made.
+- Reporting source commit/push, signed Release artifact, and next internal TestFlight availability remain pending. No new physical acceptance, external tester, production release, or legal-agreement acceptance is claimed.
+
+
+## 2026-11-12 UTC — 0.2.0 (2) internal TestFlight available
+
+- Published the reporting candidate as `edf830598a033136028d690a2c0e167d14289a86` on `feature/workspaces-reporting`. Draft PR #2 is stacked on initial-source PR #1: https://github.com/elaren-studio/minutide/pull/2 . Neither PR was merged.
+- The signed Release archive succeeded and both bundles/signatures were verified. Manual App Store export reused the existing local distribution certificate/profiles. IPA: `build/Exports/Minutide-0.2.0-2-manual/Stiint.ipa`, **6,869,853 bytes**, SHA-256 `8f67daa55ec475e563ad02e04012d4332784af7e6e50fa66a69c60b4eef179c6`. Verified app/extension IDs, 0.2.0 build 2, iOS 26.1 minimum, `get-task-allow=false`, beta reports active, four notices, and privacy reason `CA92.1`. No signing access grant or certificate was created.
+- Apple validation succeeded at 02:33:09 UTC and upload at 02:33:57 UTC, without errors. Delivery/build `0cbd1652-c1a3-41ba-b704-82901d5e4c5d` processed as `VALID` for pre-release version 0.2.0. Published reviewed English beta notes and added only this build to the existing internal group.
+- Fresh readback at **02:43:11 UTC** confirmed `IN_BETA_TESTING`, group/build assignment, sole intended maintainer membership, disabled public link, and disabled Mac/Vision availability. Receipt: `build/Verification/minutide-0.2.0-2.json`. New-build installation and email delivery are not claimed; physical upgrade/features remain open.
+- Dispatched hosted workflow run 43141785036 on the exact source. It is in progress as last read; no hosted pass is claimed. Local validation remains the recorded 65-unit/five-UI coverage across the complete run plus final focused rerun.
+- All source/build/archive/export/result evidence remains on the SSD. No public App Store submission, external tester, or Apple legal-agreement acceptance was performed.
+
+
+## 2026-11-12 UTC — Hosted suite green and source ready for review
+
+- Hosted Actions run **43141785036** completed successfully on exact artifact source `edf830598a033136028d690a2c0e167d14289a86`, using Xcode 26.6. Its log independently reports **65 unit tests and five UI tests passed, zero failures/skips**, then `TEST SUCCEEDED` at 02:47:31 UTC. This clean 70-test hosted result is the final complete-suite validation, beyond the earlier local complete/focused sequence.
+- Retained log `build/logs/hosted-ci-43141785036.log`, metadata `build/Verification/hosted-ci-43141785036.json`, and the updated release receipt. PR #2 is ready for review; neither stacked PR is merged.
+- Updated README, roadmap, active context, TestFlight runbook, and acceptance ledger to reflect the shipped internal build and green CI. App source and the verified IPA are unchanged. Physical build-2 upgrade/features remain open; no production release or legal-agreement acceptance occurred.
+
+## 2026-11-12 UTC — UI follow-up candidate
+
+- Addressed the maintainer's screenshot feedback with Color/Icon rows and visual
+  choosers, separate default/parent resets, and a single native toolbar surface
+  for scope selection. Preserved independent inheritance and existing symbols.
+- Added inline task creation/UUID selection to Create Log, preserving draft
+  date/time and avoiding the automation prompt. Added My Day Start Timer,
+  Switch Task, and Stop using the existing serialized global timer path. New
+  tasks in the chooser require an explicit start tap; tracking returns to Today.
+- Version/build is 0.2.1 (3); no stored models, dependencies, license notices,
+  bundle identifiers, or minimum deployment targets changed.
+- Build/run succeeded without warnings at 03:10 UTC on iPhone 17 / iOS 26.5.
+  The My Day screenshot shows the Start Timer control above the timeline.
+  Three new UI regressions are included. The complete dark-mode suite is
+  running; there is no pass or signed-delivery claim for this candidate yet.
+- Bounded native workers were requested as Luna/xhigh for appearance and UI
+  regressions. Spawn metadata did not expose actual model routing; cost/routing
+  is unverified. Root reviewed their diffs and owns integration and execution.
+
+## 2026-11-12 UTC — Long-list usability and UI test correction
+
+- The full dark-mode run on candidate `f282b9d` recorded **70 passed, three
+  failed, zero skipped** (65 unit and eight UI cases). Inline task creation
+  preserved log fields and persisted the selected task. Migration, timer
+  recovery, report engine, exports, and five UI cases passed.
+- Pinned the just-created task first in the timer chooser so it stays available
+  above accumulated tasks, including when its assignment is outside the local
+  scope. Reports and stored data are unchanged.
+- Corrected the UI test to search uniquely named organization/client/project
+  filter options, scroll to managed tasks in long lists, and tap the specific
+  chooser BackButton. The previous generic first toolbar button targeted an
+  underlying sheet's Cancel button, as the captured hierarchy confirms.
+- Retained the failed full bundle as `build/TestResults.xcresult`, log
+  `build/logs/ui-polish-full-1.log`, and exported attachments under
+  `build/UIReview-1-all`. After all tests ended, stopped only the optional
+  `simctl diagnose` child (ten-minute timeout) to finalize the result bundle.
+  The focused rerun disables verbose diagnostics; UI attachments remain enabled.
+- Reviewed dark-mode screenshots of the labeled palette and single scope
+  surface. The three affected UI cases are being rerun; no green/full or new
+  internal-delivery claim is made at this checkpoint.
+
+## 2026-11-12 UTC — UI follow-up available in internal TestFlight
+
+- Corrected source `a6e629a26faca5b0dd4834b02bd192ca15508aba` is published on
+  `feature/workspaces-reporting`. All three affected UI cases passed in the
+  focused rerun at 03:31 UTC, zero failures/skips. The 135 source fingerprints
+  match `ui-polish-candidate-2.json`; screenshots are retained in `UIReview-final`.
+- Signed Release archive and manual App Store export reused the existing
+  signing assets. Both bundle signatures, distribution profiles/entitlements,
+  IDs, 0.2.1 build 3, iOS 26.1, four notices, and privacy reason `CA92.1` passed.
+  IPA: **6,992,929 bytes**, SHA-256
+  `7ddd1cefe419a1d9a273167037df1ff7229cbda2b3311f79441f79b840fa0572`.
+- Validation passed at 03:35:30 UTC and upload at 03:36:19 UTC without errors.
+  Delivery/build `cb6b3643-c3b3-4996-a24d-845d319fed13` processed as `VALID`;
+  reviewed English notes were published and only this build was added to the
+  existing internal group. Independent readback at **03:38:49 UTC** confirms
+  `IN_BETA_TESTING`, correct group assignment/notes, one intended maintainer,
+  disabled public link, and disabled Mac/Vision availability.
+- Receipt: `build/Verification/minutide-0.2.1-3.json`. Hosted full-suite run
+  43148292343 is still running; the superseded run was canceled by workflow
+  concurrency. No hosted pass, physical build-3 acceptance, email delivery,
+  production release, new access grant, or legal-agreement acceptance is claimed.
+
+## 2026-11-12 UTC — UI follow-up full suite green
+
+- Hosted [run 43148292343](https://github.com/elaren-studio/minutide/actions/runs/43148292343)
+  completed successfully on exact released source
+  `a6e629a26faca5b0dd4834b02bd192ca15508aba`, using Xcode 26.6 (17F113).
+  The log independently reports **65 unit and eight UI tests passed, zero
+  failures/skips**, then `TEST SUCCEEDED` at **03:50:38 UTC**. This clean 73-test
+  full run is the final validation beyond the earlier local full/focused sequence.
+- Retained `build/logs/hosted-ci-43148292343.log` (SHA-256
+  `4dbbe5f318533cf741353b36501b85a2fa16062182ce85c476b9e5c59e161fc7`),
+  metadata `build/Verification/hosted-ci-43148292343.json`, and the updated beta
+  receipt. Dark-mode focused screenshots were visually reviewed; simulator
+  appearance was restored to its prior light setting after the run.
+- Updated current-context, roadmap, README, TestFlight runbook, and device
+  acceptance evidence/checklist. Compiled source and the uploaded IPA are
+  unchanged. PR #2 remains stacked on #1; neither is merged. Physical build-3
+  review and stable/public release acceptance remain separate.
+
+## 2026-11-12 UTC — My Day, bottom tracking, Live Activity and Reports follow-up
+
+- Addressed six maintainer observations: top Start Timer spacing/location, bottom
+  Stop, sparse Live Activity information, hidden completed brief work, Reports
+  collisions, and a list alternative to the day calendar.
+- Replaced the top tracking panel with the native tab bottom accessory: idle
+  Start on My Day; one global task/context/time/Switch/Stop row while running.
+  Individual controls are separate accessibility targets; Stop targets the shown
+  task and remains usable when tracking is paused.
+- Found completed segments at five pixels or less were explicitly hidden; the
+  open-log query also captured a stale clock. The shared projection clips valid
+  intervals to live day boundaries (including DST), feeds Timeline and List,
+  shows brief markers plus up to three recent rows, and preserves true durations.
+- Added optional backward-compatible ActivityKit hierarchy attributes from the
+  immutable log snapshot. Compact Lock Screen/expanded Island show context,
+  start, status, elapsed; old attributes decode with nil hierarchy names. A
+  simulator Lock Screen check displayed the enriched content within its space.
+- Reports use measured text sections, bounded plots, compact Sankey tags with
+  wrapped full legends, and separate adaptive export actions. Subminute positive
+  display values keep seconds, including <1s; calculations and CSV are unchanged.
+- Initial compile exposed a missing SwiftData import; the next build succeeded.
+  Fixed an actor-isolation warning on the Sendable DTO initializer. First tests
+  exposed Swift Testing optional numeric inference in a DST assertion and a
+  bottom-accessory identifier propagated over child controls. Corrected the
+  assertion with exact typed Double operands and exposed the controls separately.
+- Focused run `MyDayDetailsFocused-2.xcresult` passed **76 unit and three user-flow
+  UI cases**, no failures/skips. It also ran one narrowly guarded temporary
+  cleanup for this run's failed synthetic timer; that helper was removed before
+  publication and is not counted as a product regression. Full validation is
+  pending. Version/build: **0.2.2 (4)**; no stored schema/dependency/license changes.
+- Raised hosted job timeout to 35 minutes: the prior 73-test run took 22 minutes;
+  this suite adds two UI cases and 11 units. Keep full results on the SSD and
+  distinguish the future clean hosted run from failed earlier local evidence.
+- Native workers were requested as Sol/high for My Day and Luna/xhigh for
+  Reports/Live Activity. Runtime model routing was not exposed. Root reviewed
+  their diffs and owns integration, executed tests, signing and external actions.
+
+## 2026-11-12 UTC — Full local day-view/details suite green
+
+- Published source `00def433ee652833be67874499d98dbe177fc217` on the existing
+  feature branch/PR #2. Hosted run 43154616269 is running on that exact source.
+- Full local `MyDayDetailsFull-1.xcresult` passed **86 tests (76 unit, ten UI),
+  zero failures/skips**, with source fingerprints unchanged across all 139 files.
+  Retained log `build/logs/myday-details-full-1.log` and independent summary
+  `build/Verification/myday-details-full-summary.json`.
+- Visually reviewed focused screenshots of bottom Stop, short completed entries,
+  the persisted List, long report summary labels, and the separated Sankey
+  description/plot/wrapping legend. All recorded data is synthetic.
+- Started `MyDayDetailsAccessibility-1.xcresult` for the new day/report flows
+  with simulator `content_size=accessibility-medium`; normal setting was `large`.
+  Its result and signing/internal delivery remain pending at this checkpoint.
+
+## 2026-11-12 UTC — Accessibility visual review and final candidate
+
+- Hosted run 43154616269 passed all 86 tests (76 unit, ten UI), zero failures/
+  skips, on `00def43`. Local full results cover the same source.
+- My Day's accessibility run passed bottom Stop/list/seconds, then initially
+  failed a direct lookup of the offscreen Edit Log duration. Its corrected
+  scroll navigation passed in `MyDayDetailsAccessibility-2.xcresult`.
+- Reports' initial accessibility assertions passed, but screenshot inspection
+  revealed sorting controls colliding with the explanatory text. Stacked those
+  controls with measured labels, added a geometry regression and an explicit
+  plot-scroll action for screenshots. The app correction passed the larger-text
+  Reports test in `MyDayDetailsAccessibility-3.xcresult`; screenshots visibly
+  separate controls, explanation, summary, and export actions.
+- Published final source `59a1f12f498f4befb28d7bb764300694ca846d22`; hosted run
+  43157603328 is in progress. Root retained this small integration correction
+  because it depended on the just-reviewed UI evidence and release fingerprints.
+- Preserved the first signed archive/export/receipt as candidate 1, superseded
+  before upload. Final fingerprints are `myday-details-candidate-2.json` (139
+  files) and `myday-details-app-source-2.json` (124 product files). A new final
+  archive is built; export verification and internal delivery remain pending.
+
+## 2026-11-12 UTC — Final signed day-view/details build uploaded
+
+- Final Reports accessibility test, including bringing the plot into view,
+  passed in `MyDayDetailsAccessibility-4.xcresult`; screenshots show separate
+  sorting/explanation/export rows and a contained plot with wrapping full-name
+  legend. Restored simulator content size `large` and light appearance.
+- Final archive/export from `59a1f12` passed both signatures, distribution
+  profiles/entitlements, IDs, 0.2.2 (4), minimum iOS 26.1, all four notices, and
+  privacy reason `CA92.1`. IPA: 7,125,052 bytes, SHA-256
+  `a0513d810cced28aae554633e09abfe323334d67e3b847e1385f89f585b7fc97`.
+- Apple validation and upload succeeded without errors. Delivery UUID:
+  `9717a731-94ea-43e5-9cd2-c1c0c7a1db0f`. Processing/internal availability and
+  final hosted run 43157603328 remain pending at this checkpoint. Earlier
+  candidate 1 was never uploaded. Receipt: `build/Verification/minutide-0.2.2-4.json`.
+
+## 2026-11-12 UTC — Build 4 available internally
+
+- Apple processing reached `VALID`. Added only build 0.2.2 (4) and the reviewed
+  English beta notes to the existing `Minutide Internal` group; fresh independent
+  readback confirms `IN_BETA_TESTING` at **04:59:17 UTC**. Delivery/build UUID
+  matches `9717a731-94ea-43e5-9cd2-c1c0c7a1db0f`.
+- Verified the same sole intended maintainer, disabled public link, and disabled
+  Mac/Vision availability. No external tester, new certificate/access grant,
+  public submission, or legal-agreement acceptance. Physical build-4 acceptance
+  and email delivery are not claimed. Final hosted CI is still running.
+
+## 2026-11-12 UTC — Final build-4 source passes complete hosted CI
+
+- Final hosted run 43157603328 succeeded on exact app/test source
+  `59a1f12f498f4befb28d7bb764300694ca846d22`. Logs independently confirm
+  **76 unit and ten UI tests passed, zero failures/skips**, followed by
+  `TEST SUCCEEDED` at **05:16:14 UTC**. This is the final clean full-suite result.
+- Retained metadata and `build/logs/hosted-ci-43157603328.log`, SHA-256
+  `3cac1b9f022e5e0e659666d3f35caa474958d2325698ca692ad19aae9398ad48`,
+  and updated the build-4 receipt. Fresh API readback reconfirms `VALID` /
+  `IN_BETA_TESTING`, exact intended internal group, one tester, no public link,
+  and Mac/Vision disabled. The signed IPA and 139-file source manifest remain
+  unchanged; subsequent commits contain documentation only.
+- Updated README, active context, roadmap, TestFlight/acceptance records and PR
+  #2 around the final behavior and verified delivery. Hierarchy specification
+  and local-storage runbook remain applicable because stored models and build
+  paths did not change. Durable UI choices are in `DECISIONS.md`. Physical
+  build-4, minimum-runtime, Shortcuts/GPS/restart acceptance remains open.
+
+## 2026-11-12 UTC — Resume entry and new Minutide identity
+
+- Added Resume Timer to completed-entry details. Saved details create a new
+  interval now; the old entry and its timestamps remain intact. The UI blocks
+  unsaved drafts, paused tracking, and unavailable tasks; switching an existing
+  timer requires confirmation. Errors remain visible in the editor.
+- A native worker requested as Sol/high implemented the serialized manager API,
+  atomic snapshot-preserving resume transaction, coherent fresh-context timer
+  reads, and ten initial unit regressions. Runtime model routing was not exposed.
+  Root owns UI, logo, integration, builds, release, and review. A root review
+  found the CSV read also needed fresh-context coverage; that follow-up is in
+  progress. No schema, identifier, dependency, or license change.
+- Generated the flowing aqua M on midnight blue with built-in image generation,
+  saved the 1254px master and opaque 1024px icon/welcome assets on the SSD. No
+  creative edits were applied after generation; `sips` resampled asset dimensions.
+  `BRANDING.md` retains the exact prompt and asset paths. Original upstream icon
+  source is retained, while the app target selects `MinutideIcon`.
+- Bumped app/extension/tests to 0.2.3 (5). XcodeBuildMCP build/run passed without
+  warnings on iPhone 17 / iOS 26.5 at 05:29 UTC. Compiled primary-icon metadata
+  confirms `MinutideIcon`. Runtime tests and internal delivery remain pending.
+
+## 2026-11-12 UTC — Resume and fresh-reader focused checks pass
+
+- First focused run passed 86 units plus the Resume UI flow, zero failures/skips.
+  Final `ResumeBrandFocused-2.xcresult` passed **87 units plus one UI case**,
+  zero failures/skips, at accessibility-medium text size. The new CSV regression
+  verifies that warmed export/analytics reads see later resume/switch/stop dates
+  and retain recorded details. All three legacy timer readers now use fresh
+  contexts, preserving coherent CSV, analytics and previous-timer queries.
+- Resume UI coverage starts/stops, opens the completed record, resumes it,
+  verifies the running bottom timer, stops again and finds two distinct entries
+  with the original retained. Normal screenshots are in `build/ResumeBrandReview-1`.
+  Full hosted CI, archive verification and internal delivery are next.
+
+## 2026-11-12 UTC — Resume/logo source published and signed
+
+- Published `c8def1d4c7fbc3a6ba03b6538330a09d9b50d2e9` on the existing feature
+  branch. Candidate manifest covers 141 files (125 product files); all hashes
+  match Git and the signed candidate. Hosted run 43162400317 is in progress on
+  this exact app/test source; expected full coverage is 87 unit plus 11 UI cases.
+- Visually reviewed normal/accessibility-size Resume screenshots and the new
+  installed Home Screen icon. Restored simulator text size `large` and light
+  appearance. All activity data used in checks is synthetic.
+- Archive/export verified for both bundles, profiles/entitlements, IDs, version
+  0.2.3 (5), minimum iOS 26.1, notices/privacy reason, and `MinutideIcon` metadata.
+  IPA: 4,153,776 bytes, SHA-256
+  `ce8ca72139c6f16c16df8f91ef81bc59eea946f2f62fafee48583b432378c7ec`.
+  Existing signing assets were reused. Apple validation/upload and full hosted
+  CI are running; internal availability is not yet claimed.
+
+## 2026-11-12 UTC — Build 5 available internally
+
+- Apple validation/upload passed without errors; delivery/build
+  `cd4ad8e6-1f70-4763-b599-3e6238277e7d` reached `VALID` / `IN_BETA_TESTING`.
+  Added only this build and reviewed English notes to the existing internal
+  group, then independently verified assignment/notes at **05:41:51 UTC**.
+- Same sole intended maintainer, disabled public link and Mac/Vision availability.
+  No external tester, new certificate/access grant, public submission or legal
+  agreement acceptance. Receipt: `build/Verification/minutide-0.2.3-5.json`.
+  Physical build-5 acceptance and email delivery are unverified. Exact-source
+  hosted run 43162400317 remains in progress.
+
+## 2026-11-12 UTC — Final Resume/logo source passes complete hosted CI
+
+- Hosted run 43162400317 succeeded on exact app/test source
+  `c8def1d4c7fbc3a6ba03b6538330a09d9b50d2e9`. Logs independently confirm
+  **87 unit and 11 UI tests passed, zero failures/skips**, then `TEST SUCCEEDED`
+  at **06:01:55 UTC**. This is the final full-suite result for build 5.
+- Retained metadata and `build/logs/hosted-ci-43162400317.log`, SHA-256
+  `a0d9913ffba8340916c3513df08d36e8a116ce633d00f9744ccc680324f20b72`.
+  Updated the build-5 receipt; fresh readback reconfirms `VALID` /
+  `IN_BETA_TESTING` in the same intended internal group with one tester and
+  disabled public link/Mac/Vision. Signed IPA and candidate hashes are unchanged.
+- README, active context, roadmap, TestFlight/acceptance records, branding
+  provenance and PR #2 describe the final behavior and verified delivery.
+  `LOCAL_DEVELOPMENT.md`, hierarchy specification and dependency notices remain
+  applicable: paths, stored models, dependencies and original license did not
+  change. Subsequent commits are documentation only. Physical build-5 review,
+  minimum-runtime, Shortcuts/GPS/restart acceptance remains open.

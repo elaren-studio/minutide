@@ -8,7 +8,7 @@
 import SwiftUI
 
 extension Color {
-    init(hex: String?) {
+    nonisolated init(hex: String?) {
         guard let hex = hex else {
             self = .blue // default fallback color
             return
@@ -30,7 +30,7 @@ extension Color {
         self.init(red: r, green: g, blue: b)
     }
 
-    func toHex() -> String? {
+    nonisolated func toHex() -> String? {
         #if os(macOS)
             typealias NativeColor = NSColor
         #else

@@ -12,27 +12,39 @@ import SwiftUI
 @ModelActor
 public actor ActivityActor {
     public func addActivity(name: String, color: Color = .blue, icon: String? = nil, weekdays: Set<Weekday> = [], storeLocation: Bool = false) {
-        if getActivityByName(from: name) != nil {
-            return
+        let context = ModelContext(modelContainer)
+        context.autosaveEnabled = false
+        do {
+            _ = try WorkMutations.saveTask(in: context, id: nil, name: name, parent: nil,
+                colorHex: color.toHex(), sfSymbolName: icon, weekdays: weekdays, storeLocation: storeLocation)
+            try context.save()
+        } catch {
+            context.rollback()
         }
-        let activity = ActivityItem(name: name, color: color, sfSymbolName: icon, weekdays: weekdays, storeLocation: storeLocation)
-        modelContext.insert(activity)
-        try? modelContext.save()
     }
 
     public func editActivityById(activityId: UUID, newName: String? = nil, newColor: Color? = nil, newIcon: String? = nil, weekdays: Set<Weekday> = [], storeLocation: Bool = false) {
-        let fetchDescriptor = FetchDescriptor<ActivityItem>(
-            predicate: #Predicate { $0.id == activityId }
-        )
-        guard let activity = try? modelContext.fetch(fetchDescriptor).first else { return }
+        let context = ModelContext(modelContainer)
+        context.autosaveEnabled = false
+        do {
+            let activity = try WorkHierarchy.task(id: activityId, in: context)
+            _ = try WorkMutations.saveTask(in: context, id: activityId, name: newName ?? activity.name ?? "",
+                parent: activity.workParent, colorHex: newColor?.toHex() ?? activity.colorHex,
+                sfSymbolName: newIcon, weekdays: weekdays, storeLocation: storeLocation)
+            try context.save()
+        } catch {
+            context.rollback()
+        }
+    }
 
-        activity.name = newName
-        activity.color = newColor ?? activity.color
-        activity.sfSymbolName = newIcon
-        activity.weekdays = weekdays
-        activity.storeLocation = storeLocation
-
-        try? modelContext.save()
+    /// Shortcuts uses committed graph state, including archived ancestors.
+    public func getStartableActivitySnapshots() throws -> [WorkSnapshot] {
+        let context = ModelContext(modelContainer)
+        return try context.fetch(FetchDescriptor<ActivityItem>(sortBy: [SortDescriptor(\.createdDate)]))
+            .compactMap { activity in
+                guard activity.id != nil, activity.name != nil else { return nil }
+                return try? WorkHierarchy.resolve(task: activity, in: context, requireAvailable: true)
+            }
     }
 
     public func getAllAvaibleActivitys() -> [ActivityItem] {

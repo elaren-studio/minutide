@@ -11,7 +11,9 @@ struct RawDataView: View {
     private var searchedLogs: [ActivityLog] {
         guard !searchTerm.isEmpty else { return logs }
         return logs.filter {
-            ($0.activity?.name ?? "Unknown activity").localizedCaseInsensitiveContains(searchTerm)
+            let snapshot = $0.workSnapshot
+            return [snapshot.task?.name, snapshot.organization?.name, snapshot.client?.name, snapshot.project?.name]
+                .compactMap { $0 }.joined(separator: " / ").localizedCaseInsensitiveContains(searchTerm)
         }
     }
 
@@ -31,9 +33,14 @@ struct RawDataView: View {
         List(searchedLogs) { log in
             VStack(alignment: .leading) {
                 HStack {
-                    Text(log.activity?.name ?? "Unknown activity")
+                    Text(log.workSnapshot.task?.name ?? "Unknown task")
                         .frame(maxWidth: .infinity, alignment: .leading)
                     Text(durationText(log)).font(.footnote)
+                }
+                let path = [log.workSnapshot.organization?.name, log.workSnapshot.client?.name,
+                            log.workSnapshot.project?.name].compactMap { $0 }.joined(separator: " / ")
+                if !path.isEmpty {
+                    Text(path).font(.caption).foregroundStyle(.secondary)
                 }
                 HStack {
                     Text(dateText(log.startTime))

@@ -2,6 +2,73 @@
 
 Durable choices for Minutide, the independent Stiint continuation. Add a dated entry when a decision changes; keep implementation status in `ACTIVE_CONTEXT.md` and `WORKLOG.md`.
 
+## 2026-11-11 — Resume completed work and Minutide identity
+
+- Resume starts a separate interval at the current time from the saved entry's
+  immutable task/assignment/color/icon snapshot. It never reopens an old entry
+  or counts the time between entries. An already-running identical task and
+  snapshot stays one timer; switching another timer shares one atomic boundary.
+- Keep Resume near the top of Edit Log. Save draft changes before resuming;
+  confirm a switch when a timer is running. Tracking pause and unavailable tasks
+  block Resume. Historical coordinates are not copied; current location opt-in
+  governs fresh location capture.
+- Use the flowing aqua M on midnight blue for the app icon and welcome image.
+  Keep its generation provenance/master and asset paths in `BRANDING.md`.
+  This changes the visual identity, not bundle identifiers or stored models.
+
+## 2026-11-11 — My Day views, bottom tracking, and compact information
+
+- My Day supports a persisted Timeline/List choice over the same day, scope,
+  and validated day-clipped intervals. Show seconds for brief positive work.
+  Calendar markers preserve true interval positions; the latest three compact
+  entries have readable rows and a Show list action for the complete history.
+- Put idle Start Timer in the native tab bottom accessory on My Day. One global
+  running accessory provides task/context, elapsed time, Switch, and Stop on all
+  tabs. Keep Stop available while tracking is paused. A delayed Stop targets
+  the displayed task rather than stopping a different task started meanwhile.
+- Live Activities use optional, backward-compatible hierarchy metadata from the
+  entry snapshot, plus the existing captured start time. Present richer details
+  within system height limits, keeping compact/minimal content concise.
+- Report cards measure headings/descriptions separately from bounded plots;
+  full labels wrap in legends. Keep chart labels inside their plot and export
+  actions on a separate adaptable row. Display formatting does not change CSV
+  values or report calculations. No stored-model/schema change is required.
+
+## 2026-11-11 — Manual tracking and contextual task creation
+
+- My Day offers a visible Start Timer action, plus Switch Task and Stop while
+  tracking. Starting always records the current time and returns to Today;
+  Create Log remains the separate action for past time.
+- Create Log and the manual timer chooser can create tasks in place. Saving
+  returns to the originating flow without an automation prompt. A new task is
+  selected in Create Log; the timer chooser requires an explicit task tap to
+  start. Canceling task creation leaves the original log dates and task intact.
+- Appearance uses labeled Color and Icon rows with visual choosers and an
+  independent default/parent reset for each property. Preserve inheritance and
+  saved history; no store schema change is needed.
+- Use the system toolbar surface for work scope; do not nest a material capsule
+  inside the native toolbar's glass background.
+
+## 2026-11-11 — Local work hierarchy and immutable entry assignment
+
+- Organizations contain clients, and clients contain projects. Only tasks are
+  startable timers. A task chooses one optional parent (organization, client,
+  project, or none); derive ancestors rather than store conflicting selections.
+- Organization switching scopes work; it leaves the one global timer running.
+  These are local work contexts, without accounts, teammates, or cloud sync.
+- Color and icon inherit independently from the nearest configured ancestor.
+  Preserve existing task styles and identities.
+- Capture hierarchy IDs, names, and effective appearance on each new entry.
+  Task edits affect future entries. Date-only edits and splits preserve history;
+  explicit entry reclassification is user initiated. Legacy entries receive no
+  invented historical organization/client/project assignment.
+- Report filters use OR within a dimension and AND across dimensions. Group
+  matching time without double counting, retain missing-level buckets, and keep
+  synthetic free time outside tracked totals. See `WORK_HIERARCHY.md`.
+- The user authorized tests/docs, remote commits during development, and the
+  next internal TestFlight build for the existing maintainer group. External
+  testers, public App Store submission, and new legal agreements remain separate.
+
 ## 2026-11-11 — Independent community fork (initial name and identifiers)
 
 - Initial working product name: **Stiint Community**. This name and the identifiers below were superseded by the later Minutide decision.

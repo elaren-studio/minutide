@@ -2,6 +2,41 @@
 
 The goal is a free, open-source self-build, an eventual free App Store release, and an initial processed internal TestFlight build for the maintainer. A milestone is complete only when its evidence is recorded in `ACTIVE_CONTEXT.md` and `WORKLOG.md`.
 
+## Current priority: work hierarchy and combined reporting — internal beta delivered
+
+Follow-up **0.2.3 (5)** is processed and available to the existing internal group:
+Resume Timer from completed entries and a new Minutide logo/app icon. Resume
+preserves recorded details in a separate interval; no stored-model change.
+Final exact-source hosted run 43162400317 passed **98 tests (87 unit, 11 UI),
+zero failures/skips**; Resume also passed at larger accessibility text size.
+Physical acceptance remains open.
+
+Follow-up **0.2.2 (4)** is processed and available in the existing internal group:
+bottom tracking/Stop, richer Live Activity, brief-entry visibility, My Day
+Timeline/List modes, and adaptive Reports cards/sorting. Final exact-source
+hosted run 43157603328 passed **86 tests (76 unit, ten UI), zero failures/skips**;
+larger-text My Day and Reports checks also passed. No stored-schema change.
+Physical acceptance remains open; see `ACTIVE_CONTEXT.md` and `DEVICE_ACCEPTANCE.md`.
+
+Follow-up **0.2.1 (3)** is processed and available to the existing internal group:
+simpler appearance choosers, one native scope surface, inline task creation in
+Create Log, and manual tracking from My Day. Final hosted run 43148292343 passed
+all **73 tests (65 unit, eight UI), zero failures/skips**, on the released source.
+Physical acceptance is the next product gate.
+
+The maintainer confirms the first TestFlight build launches on his iPhone. The
+next authorized internal beta adds organizations, clients, projects, optional
+task locations, independent appearance/inheritance, organization scope, and
+combined report filtering/grouping/sorting. Preserve the existing store and
+prove its migration on disk. See [WORK_HIERARCHY.md](WORK_HIERARCHY.md) for the
+behavior and acceptance contract. The source implementation and 65 unit plus
+five UI regression cases are validated, with the final search fix verified in a
+focused rerun. Source `edf8305` is published in ready-for-review PR #2; signed **0.2.0 (2)**
+is processed and available to the existing internal maintainer group. Physical
+upgrade/features and minimum-runtime acceptance remain open. Hosted CI for the
+exact shipped source passed all **70 tests (65 unit, five UI), zero failures/skips**;
+run 43141785036 is the final complete-suite evidence.
+
 ## 1. Establish a clear, free community fork — source published; hosted check pending
 
 - Subscription and paywall source paths are removed in the current worktree; verify the integrated diff and test behavior.

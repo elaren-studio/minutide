@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftData
+import SwiftUI
 import CoreLocation
 import os
 
@@ -28,7 +29,8 @@ public actor ActivityLogActor {
     /// All destructive overlap changes and their replacement share one fresh
     /// context and one save. A rejected target or failed save leaves history intact.
     @discardableResult
-    public func saveCompletedLog(logId: UUID? = nil, activityId: UUID?, startTime: Date, endTime: Date) throws -> UUID {
+    public func saveCompletedLog(logId: UUID? = nil, activityId: UUID?, startTime: Date, endTime: Date,
+                                 refreshAssignment: Bool = false) throws -> UUID {
         guard startTime.timeIntervalSinceReferenceDate.isFinite,
               endTime.timeIntervalSinceReferenceDate.isFinite,
               startTime < endTime, endTime <= Date.now else {
@@ -52,7 +54,7 @@ public actor ActivityLogActor {
             if let activityId {
                 guard let activity = try context.fetch(FetchDescriptor<ActivityItem>(
                     predicate: #Predicate { $0.id == activityId }
-                )).first, activity.archived != true || editedLog?.activity?.id == activityId else {
+                )).first, activity.archived != true || (editedLog?.activity?.id == activityId && !refreshAssignment) else {
                     throw ManualLogError.unavailableActivity
                 }
                 target = activity
@@ -74,6 +76,14 @@ public actor ActivityLogActor {
 
             let replacement = editedLog ?? ActivityLog(startTime: startTime, endTime: endTime, activity: target)
             guard let replacementId = replacement.id else { throw ManualLogError.unavailableLog }
+            let reassign = editedLog == nil || editedLog?.activity?.id != activityId || refreshAssignment
+            let snapshot: WorkSnapshot
+            if reassign, let target {
+                do { snapshot = try WorkHierarchy.resolve(task: target, in: context, requireAvailable: true) }
+                catch { throw ManualLogError.unavailableActivity }
+            } else {
+                snapshot = replacement.workSnapshot
+            }
             try applyTimeFrameClear(startDate: startTime, endDate: endTime,
                                     logId: replacementId, currentActivityStartDate: nil, context: context)
             if editedLog == nil { context.insert(replacement) }
@@ -88,6 +98,7 @@ public actor ActivityLogActor {
             replacement.startTime = startTime
             replacement.endTime = endTime
             replacement.activity = target
+            replacement.workSnapshot = snapshot
             try context.save()
             return replacementId
         } catch {
@@ -101,10 +112,81 @@ public actor ActivityLogActor {
         public let activity: ActivityDTO
     }
 
+    public enum ResumeLogError: LocalizedError, Equatable {
+        case trackingPaused, unavailableLog, invalidInterval, unavailableActivity
+
+        public var errorDescription: String? {
+            switch self {
+            case .trackingPaused: "Unpause tracking in Settings before resuming an entry."
+            case .unavailableLog: "This completed entry is unavailable. Close and reopen its details."
+            case .invalidInterval: "This entry has invalid dates and cannot be resumed."
+            case .unavailableActivity: "Restore this task and its current work location before resuming it."
+            }
+        }
+    }
+
+    /// Resume records a separate interval now, preserving the selected entry's
+    /// captured assignment and appearance. Validation and all timer changes share
+    /// one save; the completed source and its coordinates are never modified.
+    public func resumeCompletedLog(logId: UUID, preferredLogId: UUID? = nil) throws -> RunningActivity {
+        let context = ModelContext(modelContainer)
+        context.autosaveEnabled = false
+        do {
+            let now = Date.now
+            guard let source = try context.fetch(FetchDescriptor<ActivityLog>(
+                predicate: #Predicate { $0.id == logId })).first,
+                  let end = source.endTime else { throw ResumeLogError.unavailableLog }
+            guard let start = source.startTime,
+                  start.timeIntervalSinceReferenceDate.isFinite,
+                  end.timeIntervalSinceReferenceDate.isFinite,
+                  start < end, end <= now else { throw ResumeLogError.invalidInterval }
+            guard let taskID = source.activity?.id,
+                  let task = try context.fetch(FetchDescriptor<ActivityItem>(
+                    predicate: #Predicate { $0.id == taskID })).first,
+                  WorkHierarchy.isAvailable(task: task, in: context) else {
+                throw ResumeLogError.unavailableActivity
+            }
+            let snapshot = source.workSnapshot
+            let previous = try recoverOpenLog(in: context, preferredLogId: preferredLogId, now: now)
+            if previous?.activity?.id == taskID, previous?.workSnapshot == snapshot,
+               let running = previous.flatMap({ runningActivity(for: $0) }) {
+                try context.save()
+                return running
+            }
+            let boundary = max(now, previous?.startTime ?? now)
+            previous?.endTime = boundary
+            let log = ActivityLog(startTime: boundary, activity: task, previousActivityLogId: previous?.id)
+            log.workSnapshot = snapshot
+            context.insert(log)
+            guard let running = runningActivity(for: log) else { throw ResumeLogError.unavailableLog }
+            try context.save()
+            captureTimerLocations(previous: previous, started: log)
+            return running
+        } catch {
+            context.rollback()
+            throw error
+        }
+    }
+
     /// The database owns timer state. Preferences are only a recovery hint.
     /// Historical unfinished rows are closed, never deleted, when recovering.
     public func recoverRunningActivity(preferredLogId: UUID? = nil) throws -> RunningActivity? {
-        let logs = try modelContext.fetch(FetchDescriptor<ActivityLog>(
+        // Timer operations use fresh contexts so manual edits and a preceding
+        // resume transaction cannot leave registered open rows stale.
+        let context = ModelContext(modelContainer)
+        context.autosaveEnabled = false
+        do {
+            let current = try recoverOpenLog(in: context, preferredLogId: preferredLogId, now: .now)
+            if context.hasChanges { try context.save() }
+            return current.flatMap { runningActivity(for: $0) }
+        } catch {
+            context.rollback()
+            throw error
+        }
+    }
+
+    private func recoverOpenLog(in context: ModelContext, preferredLogId: UUID?, now: Date) throws -> ActivityLog? {
+        let logs = try context.fetch(FetchDescriptor<ActivityLog>(
             predicate: #Predicate { $0.endTime == nil }
         ))
         let ordered = logs.sorted {
@@ -119,13 +201,9 @@ public actor ActivityLogActor {
 
         for (index, log) in ordered.enumerated() where log !== current {
             let nextStart = ordered.dropFirst(index + 1).compactMap(\.startTime).first
-            log.endTime = max(log.startTime ?? .distantPast, nextStart ?? Date.now)
+            log.endTime = max(log.startTime ?? .distantPast, nextStart ?? now)
         }
-        if modelContext.hasChanges {
-            do { try modelContext.save() }
-            catch { modelContext.rollback(); throw error }
-        }
-        return current.flatMap { runningActivity(for: $0) }
+        return current
     }
 
     /// Validation, closing the previous timer, and insertion happen before any
@@ -133,34 +211,44 @@ public actor ActivityLogActor {
     public func startOrSwitchActivity(activityId: UUID, preferredLogId: UUID? = nil) async throws -> RunningActivity? {
         // Other model contexts (the editor and ActivityActor) can archive an
         // already-registered activity. Validate against a fresh store read.
-        let validationContext = ModelContext(modelContainer)
-        guard let savedActivity = try validationContext.fetch(FetchDescriptor<ActivityItem>(
+        let context = ModelContext(modelContainer)
+        context.autosaveEnabled = false
+        guard let activity = try context.fetch(FetchDescriptor<ActivityItem>(
             predicate: #Predicate { $0.id == activityId }
-        )).first, savedActivity.archived != true else { return nil }
-        guard let activity = try modelContext.fetch(FetchDescriptor<ActivityItem>(
-            predicate: #Predicate { $0.id == activityId }
-        )).first, activity.archived != true, activity.name != nil else { return nil }
+        )).first, activity.archived != true, activity.name != nil,
+              let snapshot = try? WorkHierarchy.resolve(task: activity, in: context,
+                                                        requireAvailable: true) else { return nil }
 
-        let current = try recoverRunningActivity(preferredLogId: preferredLogId)
-        if current?.activity.id == activityId { return current }
+        do {
+            let previous = try recoverOpenLog(in: context, preferredLogId: preferredLogId, now: .now)
+            if previous?.activity?.id == activityId {
+                try context.save()
+                return previous.flatMap { runningActivity(for: $0) }
+            }
+            let now = max(Date.now, previous?.startTime ?? .distantPast)
+            previous?.endTime = now
+            let log = ActivityLog(startTime: now, activity: activity, previousActivityLogId: previous?.id)
+            log.workSnapshot = snapshot
+            context.insert(log)
+            try context.save()
+            let result = runningActivity(for: log)
+            captureTimerLocations(previous: previous, started: log)
+            return result
+        } catch {
+            context.rollback()
+            throw error
+        }
+    }
 
-        let now = max(Date.now, current?.activity.startTime ?? .distantPast)
-        let previous = current.flatMap { getActivityLogById(from: $0.logId) }
-        previous?.endTime = max(previous?.startTime ?? now, now)
-        let log = ActivityLog(startTime: now, activity: activity, previousActivityLogId: current?.logId)
-        modelContext.insert(log)
-        do { try modelContext.save() }
-        catch { modelContext.rollback(); throw error }
-
-        let result = runningActivity(for: log)
+    private func captureTimerLocations(previous: ActivityLog?, started log: ActivityLog) {
         if previous?.activity?.storeLocation == true, let id = previous?.id,
            let previousActivityId = previous?.activity?.id, let boundary = previous?.endTime {
             Task { await captureLocation(activityLogId: id, activityId: previousActivityId, boundary: boundary, isStart: false) }
         }
-        if activity.storeLocation == true, let id = log.id, let boundary = log.startTime {
+        if log.activity?.storeLocation == true, let activityId = log.activity?.id,
+           let id = log.id, let boundary = log.startTime {
             Task { await captureLocation(activityLogId: id, activityId: activityId, boundary: boundary, isStart: true) }
         }
-        return result
     }
 
     // Optional metadata must never hold up starting/stopping a timer or its UI.
@@ -198,7 +286,7 @@ public actor ActivityLogActor {
     }
 
     private func runningActivity(for log: ActivityLog) -> RunningActivity? {
-        guard let id = log.id, let dto = getActivtyLogDTO(activityLogId: id) else { return nil }
+        guard let id = log.id, let dto = activityDTO(for: log) else { return nil }
         return RunningActivity(logId: id, activity: dto)
     }
 
@@ -212,11 +300,13 @@ public actor ActivityLogActor {
         startTime: Date,
         endTime: Date
     ){
+        let context = ModelContext(modelContainer)
         let fetchDescriptor = FetchDescriptor<ActivityItem>(
             predicate: #Predicate { $0.id == activityId }
         )
-        guard let activity = try? modelContext.fetch(fetchDescriptor).first,
-              activity.archived != true else { return }
+        guard let activity = try? context.fetch(fetchDescriptor).first,
+              let snapshot = try? WorkHierarchy.resolve(task: activity, in: context,
+                                                        requireAvailable: true) else { return }
         
         
         let activityLog = ActivityLog(
@@ -225,8 +315,9 @@ public actor ActivityLogActor {
             activity: activity
         )
         
-        modelContext.insert(activityLog)
-        try? modelContext.save()
+        activityLog.workSnapshot = snapshot
+        context.insert(activityLog)
+        try? context.save()
     }
 
     
@@ -370,6 +461,9 @@ public actor ActivityLogActor {
                 startTime: endDate, endTime: originalEnd, activity: log.activity,
                 previousActivityLogId: log.previousActivityLogId
             )
+            tail.workSnapshot = log.workSnapshot
+            // Freeze the retained head as well if this is an unbootstrapped fixture.
+            if log.hierarchySnapshotVersion == nil { log.workSnapshot = tail.workSnapshot }
             tail.endLatitude = log.endLatitude
             tail.endLongitude = log.endLongitude
             context.insert(tail)
@@ -441,6 +535,7 @@ public actor ActivityLogActor {
     }
 
     public func getActivityLogsForTimeFrame(filterData: FilterData) -> [ActivityLog] {
+        let context = ModelContext(modelContainer)
         let defaultDate = Date.distantPast
         let now = Date.now
         let startDate = filterData.startDate
@@ -467,7 +562,7 @@ public actor ActivityLogActor {
 
         // Fetch with proper error handling
         do {
-            let data = try modelContext.fetch(fetchDescriptor)
+            let data = try context.fetch(fetchDescriptor)
             return data.filter { log in
                 guard let activityId = log.activity?.id else { return false }
                 return selectedIds.contains(activityId)
@@ -479,13 +574,34 @@ public actor ActivityLogActor {
     }
 
     public func getAllActivityLogs() -> [ActivityLog] {
+        let context = ModelContext(modelContainer)
         let fetchDescriptor = FetchDescriptor<ActivityLog>()
         do {
-            let data = try modelContext.fetch(fetchDescriptor)
+            let data = try context.fetch(fetchDescriptor)
             return data
         } catch {
             print("Database fetch failed: \(error)")
             return []
+        }
+    }
+
+    /// Immutable actor boundary for reports; a single captured now controls open-log inclusion.
+    public func getReportLogs(start: Date, end: Date, now: Date) throws -> [WorkReportEntry] {
+        guard start.timeIntervalSinceReferenceDate.isFinite, end.timeIntervalSinceReferenceDate.isFinite,
+              now.timeIntervalSinceReferenceDate.isFinite, start < end else { return [] }
+        let context = ModelContext(modelContainer)
+        let distantPast = Date.distantPast
+        let logs = try context.fetch(FetchDescriptor<ActivityLog>(predicate: #Predicate {
+            ($0.startTime ?? distantPast) < end && ($0.endTime ?? now) > start
+        }))
+        return logs.compactMap { log in
+            guard let id = log.id, let began = log.startTime,
+                  began.timeIntervalSinceReferenceDate.isFinite,
+                  (log.endTime ?? now).timeIntervalSinceReferenceDate.isFinite,
+                  began < end, (log.endTime ?? now) > start else { return nil }
+            return WorkReportEntry(id: id, startTime: log.startTime, endTime: log.endTime,
+                workSnapshot: log.workSnapshot, startLatitude: log.startLatitude,
+                startLongitude: log.startLongitude, endLatitude: log.endLatitude, endLongitude: log.endLongitude)
         }
     }
 
@@ -494,6 +610,11 @@ public actor ActivityLogActor {
               log.activity?.archived != true,
               runningActivity(for: log) != nil else { return nil }
         do {
+            let context = ModelContext(modelContainer)
+            guard let taskID = log.activity?.id,
+                  let task = try context.fetch(FetchDescriptor<ActivityItem>(
+                    predicate: #Predicate { $0.id == taskID })).first,
+                  WorkHierarchy.isAvailable(task: task, in: context) else { return nil }
             let current = try recoverRunningActivity()
             if let current, current.logId != activityLogId { return nil }
             log.endTime = nil
@@ -506,37 +627,46 @@ public actor ActivityLogActor {
     }
 
     public func getPreviousActivtyLogID(activityLogId: UUID) -> UUID? {
+        let context = ModelContext(modelContainer)
         let fetchDescriptor = FetchDescriptor<ActivityLog>(
             predicate: #Predicate { $0.id == activityLogId }
         )
-        let activityLog = try? modelContext.fetch(fetchDescriptor).first
+        let activityLog = try? context.fetch(fetchDescriptor).first
 
         return activityLog?.previousActivityLogId
     }
 
     public func getActivtyLogDTO(activityLogId: UUID) -> ActivityDTO? {
+        let context = ModelContext(modelContainer)
         let fetchDescriptor = FetchDescriptor<ActivityLog>(
             predicate: #Predicate { $0.id == activityLogId }
         )
-        let activityLog = try? modelContext.fetch(fetchDescriptor).first
+        guard let log = try? context.fetch(fetchDescriptor).first else { return nil }
+        return activityDTO(for: log)
+    }
 
-        guard let activityLog = activityLog,
-              let activity = activityLog.activity,
+    private func activityDTO(for activityLog: ActivityLog) -> ActivityDTO? {
+        guard let activity = activityLog.activity,
               let activityId = activity.id,
-              let activityName = activity.name,
               let startTime = activityLog.startTime
         else {
             return nil
         }
 
+        let snapshot = activityLog.workSnapshot
+        let task = snapshot.task
+        guard let activityName = task?.name ?? activity.name else { return nil }
         return ActivityDTO(
             id: activityId,
             name: activityName,
             startTime: startTime,
-            icon: activity.sfSymbolName ?? "questionmark.circle.fill",
-            color: activity.color,
+            icon: task?.sfSymbolName ?? activity.sfSymbolName ?? "questionmark.circle.fill",
+            color: Color(hex: task?.colorHex ?? activity.colorHex),
             weekdays: activity.weekdays ?? [],
-            endTime: activityLog.endTime
+            endTime: activityLog.endTime,
+            organizationName: snapshot.organization?.name,
+            clientName: snapshot.client?.name,
+            projectName: snapshot.project?.name
         )
     }
 
@@ -559,11 +689,14 @@ public actor ActivityLogActor {
     }
 
     private func finishActivity(activityLogId: UUID) throws {
-        guard let activityLog = getActivityLogById(from: activityLogId),
+        let context = ModelContext(modelContainer)
+        context.autosaveEnabled = false
+        guard let activityLog = try context.fetch(FetchDescriptor<ActivityLog>(
+            predicate: #Predicate { $0.id == activityLogId })).first,
               activityLog.endTime == nil else { return }
         activityLog.endTime = max(activityLog.startTime ?? .distantPast, Date.now)
-        do { try modelContext.save() }
-        catch { modelContext.rollback(); throw error }
+        do { try context.save() }
+        catch { context.rollback(); throw error }
 
         if activityLog.activity?.storeLocation == true,
            let activityId = activityLog.activity?.id, let boundary = activityLog.endTime {

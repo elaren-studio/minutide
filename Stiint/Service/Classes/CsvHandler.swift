@@ -3,6 +3,10 @@ import Foundation
 final class CsvHandler {
     func exportDataAsCsv(logs: [ActivityLog], destinationURL: URL? = nil) async throws -> URL {
         let headers = ["Activity", "Start Date", "End Date", "Duration", "Start Latitude", "Start Longitude", "End Latitude", "End Longitude"]
+            + ["Task ID", "Task Name", "Task Color", "Task Icon",
+               "Organization ID", "Organization Name", "Organization Color", "Organization Icon",
+               "Client ID", "Client Name", "Client Color", "Client Icon",
+               "Project ID", "Project Name", "Project Color", "Project Icon", "Assignment Version"]
         let dateFormatter = ISO8601DateFormatter()
         var rows = [headers.joined(separator: ",")]
 
@@ -15,8 +19,9 @@ final class CsvHandler {
             } else {
                 duration = ""
             }
-            let fields = [
-                log.activity?.name ?? "Unknown activity",
+            let snapshot = log.workSnapshot
+            var fields: [String] = [
+                snapshot.task?.name ?? log.activity?.name ?? "Unknown activity",
                 start.map { dateFormatter.string(from: $0) } ?? "",
                 end.map { dateFormatter.string(from: $0) } ?? "",
                 duration,
@@ -25,6 +30,14 @@ final class CsvHandler {
                 coordinate(log.endLatitude),
                 coordinate(log.endLongitude),
             ]
+            let nodes: [WorkNodeSnapshot?] = [snapshot.task, snapshot.organization, snapshot.client, snapshot.project]
+            for node in nodes {
+                fields.append(node?.id?.uuidString ?? "")
+                fields.append(node?.name ?? "")
+                fields.append(node?.colorHex ?? "")
+                fields.append(node?.sfSymbolName ?? "")
+            }
+            fields.append(log.hierarchySnapshotVersion.map { String($0) } ?? "")
             rows.append(fields.map(escape).joined(separator: ","))
         }
 

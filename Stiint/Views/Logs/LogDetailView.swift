@@ -5,11 +5,19 @@ import SwiftUI
 struct LogDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("pauseTracking") private var pauseTracking = false
     @Bindable var log: ActivityLog
     @Query private var activities: [ActivityItem]
+    @Query private var organizations: [WorkOrganization]
+    @Query private var clients: [WorkClient]
+    @Query private var projects: [WorkProject]
     @State private var showDeleteConfirmation = false
     @State private var saveError: String?
     @State private var saving = false
+    @State private var resuming = false
+    @State private var showResumeConfirmation = false
+    @State private var errorTitle = "Unable to save log"
+    @State private var refreshAssignment = false
     @State private var startTime: Date
     @State private var endTime: Date
     @State private var activity: ActivityItem?
@@ -32,31 +40,90 @@ struct LogDetailView: View {
     }
 
     private var canSave: Bool {
-        guard hasCompleteClosedDates, log.id != nil, !saving,
+        guard hasCompleteClosedDates, log.id != nil, !busy,
               activity != nil || log.activity == nil else { return false }
         let latestEnd = DtoManager.shared.activityDTO?.startTime ?? Date.now
         return endTime > startTime && endTime <= latestEnd
     }
 
+    private var busy: Bool { saving || resuming }
+
+    private var hasUnsavedChanges: Bool {
+        startTime != log.startTime || endTime != log.endTime
+            || activity?.persistentModelID != log.activity?.persistentModelID || refreshAssignment
+    }
+
+    private var canResume: Bool {
+        guard hasCompleteClosedDates, log.id != nil, !busy, !pauseTracking,
+              !hasUnsavedChanges, let task = log.activity else { return false }
+        return WorkHierarchy.isAvailable(task: task, in: modelContext)
+    }
+
+    private var resumeExplanation: String {
+        if pauseTracking { return "Resume tracking in Settings before starting a timer." }
+        if hasUnsavedChanges { return "Save your changes with Done before resuming." }
+        if let task = log.activity, WorkHierarchy.isAvailable(task: task, in: modelContext) {
+            return "Start a new entry now with this recorded task, assignment, color, and icon. This entry stays unchanged."
+        }
+        return "This task is archived or unavailable. Restore it, or select an active task and save with Done."
+    }
+
     private var selectableActivities: [ActivityItem] {
-        activities.filter { $0.archived != true || $0.persistentModelID == log.activity?.persistentModelID }
+        _ = organizations.count + clients.count + projects.count
+        return activities.filter {
+            $0.persistentModelID == log.activity?.persistentModelID
+                || WorkHierarchy.isAvailable(task: $0, in: modelContext)
+        }
     }
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("Activity") {
-                    Picker("Activity", selection: $activity) {
-                        Text("Choose an activity").tag(Optional<ActivityItem>.none)
+                if hasCompleteClosedDates {
+                    Section {
+                        Button {
+                            if DtoManager.shared.activityDTO != nil {
+                                showResumeConfirmation = true
+                            } else {
+                                resume()
+                            }
+                        } label: {
+                            Label(resuming ? "Resuming…" : "Resume Timer", systemImage: "play.fill")
+                                .font(.headline)
+                                .frame(maxWidth: .infinity, minHeight: 44)
+                        }
+                        .disabled(!canResume)
+                        .accessibilityIdentifier("log.resume")
+                    } footer: {
+                        Text(resumeExplanation)
+                    }
+                }
+                Section("Task") {
+                    Picker("Task", selection: $activity) {
+                        Text("Choose a task").tag(Optional<ActivityItem>.none)
                         ForEach(selectableActivities) { item in
-                            Text(item.name ?? "Unnamed").tag(Optional(item))
+                            Text(taskLabel(item)).tag(Optional(item))
                         }
                     }
-                    .disabled(!hasCompleteClosedDates || saving)
+                    .disabled(!hasCompleteClosedDates || busy)
                     if log.activity == nil {
                         Text("This log's activity is unavailable. You can keep its missing assignment or choose an existing activity. The saved log is preserved until you tap Done.")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
+                    }
+                }
+                Section("Recorded assignment") {
+                    let snapshot = log.workSnapshot
+                    LabeledContent("Task", value: snapshot.task?.name ?? "Unavailable task")
+                    LabeledContent("Organization", value: snapshot.organization?.name ?? "Unassigned")
+                    LabeledContent("Client", value: snapshot.client?.name ?? "No client")
+                    LabeledContent("Project", value: snapshot.project?.name ?? "No project")
+                    if hasCompleteClosedDates, activity?.id != nil {
+                        Toggle("Use task’s current assignment", isOn: $refreshAssignment)
+                            .accessibilityIdentifier("log.refreshAssignment")
+                            .disabled(busy)
+                        Text("Date changes keep the recorded assignment. Changing the task, or enabling this option, captures its current location and appearance when you save.")
+                            .font(.footnote).foregroundStyle(.secondary)
                     }
                 }
                 Section("Time") {
@@ -78,12 +145,13 @@ struct LogDetailView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
-                .disabled(saving)
+                .disabled(busy)
 
                 if hasCompleteClosedDates, endTime >= startTime {
                     Section("Duration") {
                         Text(Duration.seconds(endTime.timeIntervalSince(startTime)),
-                             format: .units(allowed: [.hours, .minutes]))
+                             format: .units(allowed: [.hours, .minutes, .seconds]))
+                            .accessibilityIdentifier("log.detail.duration")
                     }
                 }
 
@@ -108,13 +176,13 @@ struct LogDetailView: View {
 
                 Section {
                     Button("Delete Log", role: .destructive) { showDeleteConfirmation = true }
-                        .disabled(log.endTime == nil || saving)
+                        .disabled(log.endTime == nil || busy)
                 }
             }
             .navigationTitle("Edit Log")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(saving) }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(busy) }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { save() }.disabled(!canSave)
                 }
@@ -129,18 +197,33 @@ struct LogDetailView: View {
             } message: {
                 Text("Are you sure you want to delete this log? This action cannot be undone.")
             }
-            .alert("Unable to save log", isPresented: Binding(
+            .confirmationDialog("Resume this task?", isPresented: $showResumeConfirmation, titleVisibility: .visible) {
+                Button("Resume Timer") { resume() }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("If another timer is running, it will stop. The previous entry stays unchanged.")
+            }
+            .alert(errorTitle, isPresented: Binding(
                 get: { saveError != nil }, set: { if !$0 { saveError = nil } }
             )) {
                 Button("OK") { saveError = nil }
             } message: { Text(saveError ?? "") }
-            .interactiveDismissDisabled(saving)
+            .interactiveDismissDisabled(busy)
+            .disabled(resuming)
         }
+    }
+
+    private func taskLabel(_ item: ActivityItem) -> String {
+        let snapshot = try? WorkHierarchy.resolve(task: item, in: modelContext)
+        let location = [snapshot?.organization?.name, snapshot?.client?.name, snapshot?.project?.name]
+            .compactMap { $0 }.joined(separator: " / ")
+        return location.isEmpty ? item.name ?? "Unnamed task" : "\(item.name ?? "Unnamed task") — \(location)"
     }
 
     private func save() {
         guard canSave, let id = log.id else { return }
         saving = true
+        errorTitle = "Unable to save log"
         let selectedActivityId = activity?.id
         let start = startTime
         let end = endTime
@@ -148,8 +231,24 @@ struct LogDetailView: View {
             defer { saving = false }
             do {
                 try await PersistenceManager.shared.activityLogActor.saveCompletedLog(
-                    logId: id, activityId: selectedActivityId, startTime: start, endTime: end
+                    logId: id, activityId: selectedActivityId, startTime: start, endTime: end,
+                    refreshAssignment: refreshAssignment
                 )
+                dismiss()
+            } catch {
+                saveError = error.localizedDescription
+            }
+        }
+    }
+
+    private func resume() {
+        guard canResume, let id = log.id else { return }
+        resuming = true
+        errorTitle = "Unable to resume timer"
+        Task {
+            defer { resuming = false }
+            do {
+                _ = try await RunningManager.shared.resumeCompletedLog(logId: id)
                 dismiss()
             } catch {
                 saveError = error.localizedDescription

@@ -20,6 +20,24 @@ public final class ActivityItem {
     public var archived: Bool?
     public var weekdays: Set<Weekday>?
     public var storeLocation: Bool?
+    public var workParentKindRaw: String?
+    public var workParentID: UUID?
+
+    public var workParent: WorkParent? {
+        get {
+            guard let id = workParentID else { return nil }
+            switch workParentKindRaw {
+            case "organization": return .organization(id)
+            case "client": return .client(id)
+            case "project": return .project(id)
+            default: return nil
+            }
+        }
+        set {
+            workParentID = newValue?.id
+            workParentKindRaw = newValue?.kind.rawValue
+        }
+    }
 
     public init(
         id: UUID? = nil,

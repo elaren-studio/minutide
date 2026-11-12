@@ -1,59 +1,56 @@
-
-//
-//  AreaDiagramView.swift
-//  Stiint
-//
-//  Created by Wittig, Liam on 15.12.25.
-//
-
 import Charts
 import SwiftUI
 
 struct AreaDiagramView: View {
-    let calendar = Calendar.current
-
     let data: TimeFrameData
 
+    private var legendItems: [AnalyticsChartLegendItem] {
+        data.seriesStyles.enumerated().map { index, style in
+            AnalyticsChartLegendItem(id: "area-\(index)", label: style.name, color: style.color)
+        }
+    }
+
     var body: some View {
-        VStack(alignment: .leading) {
-            Text("Daily Time Spent")
-                .font(.headline)
-            Text("Each point represents the total time spent on activities for that day over the selected period.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .padding(.bottom, 10)
-            if data.dataSeries.isEmpty == false {
-                Chart {
-                    ForEach(data.dataSeries) { point in
-                        AreaMark(
-                            x: .value("Date", point.date),
-                            y: .value("Time Spent", point.timeSpend),
-                            stacking: .unstacked
-                        )
-                        .foregroundStyle(by: .value("Activity", point.activity.name!)) // separate line for each activity
+        AnalyticsChartCard(
+            title: "Daily Time Spent",
+            description: "Areas show each activity's recorded time for every day in the selected period."
+        ) {
+            if data.dataSeries.isEmpty {
+                ContentUnavailableView("Nothing to display", systemImage: "questionmark.app")
+                    .frame(maxWidth: .infinity, minHeight: 220)
+            } else {
+                VStack(alignment: .leading, spacing: 14) {
+                    Chart {
+                        ForEach(data.dataSeries) { point in
+                            AreaMark(
+                                x: .value("Date", point.date),
+                                y: .value("Time Spent", point.timeSpend),
+                                stacking: .unstacked
+                            )
+                            .foregroundStyle(by: .value("Activity", point.activity.name ?? "Unknown task"))
+                        }
                     }
-                }
-                .chartYScale(domain: 0 ... 24 * 60 * 60)
-                .chartYAxis {
-                    AxisMarks(position: .leading) { value in
-                        AxisValueLabel {
-                            if let time = value.as(Double.self) {
-                                Text(TimeHandler().secondsToLocalizedDuration(time))
+                    .chartYScale(domain: 0 ... 24 * 60 * 60)
+                    .chartYAxis {
+                        AxisMarks(position: .leading) { value in
+                            AxisValueLabel {
+                                if let time = value.as(Double.self) {
+                                    Text(ReportDurationText.string(from: time))
+                                }
                             }
                         }
                     }
+                    .chartForegroundStyleScale(
+                        domain: data.seriesStyles.map { $0.name },
+                        range: data.seriesStyles.map { $0.color }
+                    )
+                    .chartLegend(.hidden)
+                    .frame(height: 260)
+                    .clipped()
+
+                    AnalyticsChartLegend(items: legendItems)
                 }
-                .chartForegroundStyleScale(
-                    range: data.dataSeries.map { $0.activity.color }
-                )
-
-            } else {
-                ContentUnavailableView("Nothing to display", systemImage: "questionmark.app")
             }
-
-        }.padding(15)
-            .frame(height: 400)
-            .background(.regularMaterial)
-            .cornerRadius(12)
+        }
     }
 }

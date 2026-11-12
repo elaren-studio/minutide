@@ -1,80 +1,84 @@
-//
-//  SankyDiagramView.swift
-//  Stiint
-//
-//  Created by Wittig, Liam on 13.12.25.
-//
-
 import Sankey
 import SwiftUI
 
 struct SankyDiagramView: View {
     let data: TimeFrameData
-
     let filterData: FilterData
 
-    private func updateSancy() {
-        sankeyData = calcSampleData(timeFrameData: data)
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @ScaledMetric(relativeTo: .caption) private var labelFontSize: CGFloat = 12
+    @State private var sankeyData = SankeyData(nodes: [], links: [])
+
+    private var freeTimeAverage: Double {
+        max(0, data.timeOverallAvg - data.timeSpendOnActivitiesAvg)
     }
 
-    private func calcSampleData(timeFrameData: TimeFrameData) -> SankeyData {
+    private var chartHeight: CGFloat {
+        let nodeCount = max(1, data.dataPoints.count + (filterData.showFreeTime ? 1 : 0))
+        let rowHeight = max(38, labelFontSize * 2.5)
+        let minimumHeight: CGFloat = dynamicTypeSize.isAccessibilitySize ? 250 : 190
+        return max(minimumHeight, CGFloat(nodeCount) * rowHeight + 48)
+    }
+
+    private var legendItems: [AnalyticsChartLegendItem] {
+        let activities = data.dataPoints.enumerated().map { index, point in
+            AnalyticsChartLegendItem(
+                id: point.id.uuidString,
+                label: "\(index + 1). \(point.activity.name ?? "Unknown task") · \(ReportDurationText.string(from: point.timeAvg))",
+                color: point.activity.color
+            )
+        }
+
+        guard filterData.showFreeTime else { return activities }
+        return activities + [AnalyticsChartLegendItem(
+            id: "free-time",
+            label: "Free time · \(ReportDurationText.string(from: freeTimeAverage))",
+            color: .accentColor
+        )]
+    }
+
+    private func updateSankey() {
+        let sourceID = "total"
+        var nodes = [SankeyNode(sourceID, label: "Total", color: .accentColor)]
         var links: [SankeyLink] = []
-        let day: Double = 24 * 60 * 60
-        let keyFrom = ""
 
-        var nodes: [SankeyNode] = [SankeyNode(keyFrom, color: .accentColor)]
-
-        for point in timeFrameData.dataPoints {
-            let name = "\(point.activity.name!) (\(TimeHandler().secondsToLocalizedDuration(point.timeAvg)))"
-            nodes.append(SankeyNode(name, color: point.activity.color))
-            links.append(SankeyLink(point.timeAvg, from: keyFrom, to: name))
+        for (index, point) in data.dataPoints.enumerated() {
+            let activityID = "activity-\(index)"
+            nodes.append(SankeyNode(activityID, label: "#\(index + 1)", color: point.activity.color))
+            links.append(SankeyLink(point.timeAvg, from: sourceID, to: activityID))
         }
-        let freeTimeKey = "Free Time (\(TimeHandler().secondsToLocalizedDuration(day - timeFrameData.timeSpendOnActivitiesAvg)))"
+
         if filterData.showFreeTime {
-            nodes.append(SankeyNode(freeTimeKey, color: .accentColor))
-            print("Free time: \(timeFrameData.timeOverall - timeFrameData.timeSpendOnActivitiesAvg)")
-
-            links.append(SankeyLink(day - timeFrameData.timeSpendOnActivitiesAvg, from: keyFrom, to: freeTimeKey))
+            let freeTimeID = "free-time"
+            nodes.append(SankeyNode(freeTimeID, label: "Free", color: .accentColor))
+            links.append(SankeyLink(freeTimeAverage, from: sourceID, to: freeTimeID))
         }
 
-        return SankeyData(nodes: nodes, links: links)
+        sankeyData = SankeyData(nodes: nodes, links: links)
     }
-
-    @State var sankeyData = SankeyData(
-        nodes: [
-        ],
-        links: [
-        ]
-    )
 
     var body: some View {
-        VStack(alignment: .leading) {
-            Text("Avg. Time per Day")
-                .font(.headline)
-            Text("The diagram illustrates the average amount of time you spend each day over a given period.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-            SankeyDiagram(sankeyData)
-                .nodeOpacity(1)
-                .linkColorMode(.target)
-                .frame(height: 400)
-            /* NavigationLink("Learn more"){
-                 if(data != nil){
-                     DetailsDiagramView(data:  data!.dataPoints)
-                 }else{
-                     Text("Data error")
-                 }
+        AnalyticsChartCard(
+            title: "Avg. Time per Day",
+            description: "The diagram compares each activity's average daily time over the selected period."
+        ) {
+            VStack(alignment: .leading, spacing: 14) {
+                SankeyDiagram(sankeyData)
+                    .nodeOpacity(1)
+                    .nodePadding(Double(max(8, labelFontSize)))
+                    .linkColorMode(.target)
+                    .labelPadding(5)
+                    .labelFontSize(Double(labelFontSize))
+                    .frame(height: chartHeight)
+                    .clipped()
+                    .accessibilityIdentifier("analytics.sankey.plot")
 
-             } */
+                AnalyticsChartLegend(items: legendItems)
+                    .accessibilityIdentifier("analytics.sankey.legend")
+            }
         }
-
-        .padding(15)
-        .background(.regularMaterial)
-        .cornerRadius(12)
-        .onAppear {
-            updateSancy()
-        }.onChange(of: data.dataPoints) { _, _ in
-            updateSancy()
-        }
+        .onAppear(perform: updateSankey)
+        .onChange(of: data.dataPoints) { _, _ in updateSankey() }
+        .onChange(of: filterData.showFreeTime) { _, _ in updateSankey() }
     }
 }

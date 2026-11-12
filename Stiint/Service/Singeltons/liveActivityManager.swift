@@ -25,6 +25,9 @@ public final class LiveActivityManager {
             $0.attributes.name == dto.name &&
             $0.attributes.icon == dto.icon &&
             $0.attributes.color == color &&
+            $0.attributes.organizationName == dto.organizationName &&
+            $0.attributes.clientName == dto.clientName &&
+            $0.attributes.projectName == dto.projectName &&
             ($0.activityState == .active || $0.activityState == .stale)
         }
 
@@ -39,7 +42,10 @@ public final class LiveActivityManager {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
         let attributes = LiveActivityDTO(
             id: dto.id, name: dto.name, startTime: dto.startTime,
-            icon: dto.icon, color: color
+            icon: dto.icon, color: color,
+            organizationName: dto.organizationName,
+            clientName: dto.clientName,
+            projectName: dto.projectName
         )
         do {
             _ = try Activity<LiveActivityDTO>.request(

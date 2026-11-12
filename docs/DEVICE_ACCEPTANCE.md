@@ -6,11 +6,176 @@ The project currently targets iOS 26.1. Simulator checks help with layout and co
 
 The first internal TestFlight build is intended to support the maintainer's physical-device acceptance run. Record those results separately from Apple processing and tester availability; physical acceptance is a gate for stable public release readiness.
 
-## Current TestFlight delivery status — 2026-11-11
+## Initial TestFlight delivery status — 2026-11-11, historical
 
 - The signed 0.1.0 build 1 archive and manual-export IPA are verified; the artifact receipt is `build/Verification/minutide-0.1.0-1.json`.
 - Validation and upload succeeded without errors. Apple processing is `VALID` for **0.1.0 (1)**, build/delivery `591b8c17-694a-41ce-80bd-39c16a27e4a6`; internal state is `IN_BETA_TESTING`. The build is assigned to `Minutide Internal`, whose sole intended tester is `INVITED`. The website independently shows this version/build, group, and one invitation. Expiry: 2027-02-09. Installation and email delivery are not claimed.
-- Physical acceptance remains open. Install this invited build for Shortcuts, location permission, reboot/recovery, accessibility, upgrade, and minimum-runtime checks.
+- The maintainer confirms that 0.1.0 (1) is installed and launches on his iPhone.
+  Device model and OS were not supplied. Shortcuts, location permission,
+  reboot/recovery, accessibility, upgrade, and minimum-runtime checks remain open.
+
+## Work hierarchy beta acceptance — local validation complete; physical checks pending
+
+### Resume and identity (0.2.3 build 5, available internally)
+
+Source `c8def1d4c7fbc3a6ba03b6538330a09d9b50d2e9` adds Resume Timer to the top
+of completed-entry details and selects the new Minutide app/welcome icon.
+`ResumeBrandFocused-2.xcresult` passed **87 unit tests plus the Resume UI case**,
+zero failures/skips, at accessibility-medium text size. The prior focused run
+passed Resume at normal size. Unit coverage includes preserved snapshots and
+source dates/coordinates, current availability, idempotent/concurrent timers,
+same-actor start/resume/recover/stop, fresh CSV/analytics reads, and real CSV
+values. Final exact-source
+[hosted run 43162400317](https://github.com/elaren-studio/minutide/actions/runs/43162400317)
+passed **98 tests (87 unit, 11 UI), zero failures/skips**; `TEST SUCCEEDED` at
+**2026-11-12 06:01:55 UTC**. This is the final complete-suite result.
+
+Normal and larger-text editor screenshots were visually reviewed; the installed
+Home Screen icon was checked at native size. Evidence is in
+`build/ResumeBrandReview-1`, `build/ResumeBrandReview-2` and
+`build/ResumeBrandHomeScreen-installed.jpg`. Signed archive/IPA checks passed;
+Apple validation/upload passed without errors. Delivery/build
+`cd4ad8e6-1f70-4763-b599-3e6238277e7d` is `VALID` / `IN_BETA_TESTING`, independently
+verified at **2026-11-12 05:41:51 UTC** in the intended internal group. Receipt:
+`build/Verification/minutide-0.2.3-5.json`.
+
+Physical checks after updating without deleting the app:
+
+1. Verify the new Home Screen icon and existing history. Open an older completed
+   entry, tap Resume Timer, and stop it. Confirm two entries remain and the gap
+   between them is not counted.
+2. Resume an entry whose task has since moved or changed appearance. Confirm
+   the new entry and Live Activity use its recorded assignment/name/style.
+3. While another timer runs, cancel Resume once and confirm it once; verify
+   cancellation leaves the timer alone and confirmation keeps one running timer.
+4. Check paused tracking, archived/unavailable tasks, and unsaved edits. Confirm
+   the guidance is clear. Review larger text and dark/tinted icon appearances
+   on hardware; location opt-in must capture new coordinates, never old ones.
+
+Physical build-5 acceptance remains unverified. Apple processing and internal
+availability are verified separately from these hardware checks.
+
+### Day views and tracking details (0.2.2 build 4, available internally)
+
+Final source `59a1f12f498f4befb28d7bb764300694ca846d22` adds bottom Start/running
+controls with independent Stop, My Day Timeline/List modes with clipped daily
+totals and brief-entry rows, richer captured-context Live Activity details, and
+measured Reports cards with wrapped legends. No stored models changed.
+
+Focused run `MyDayDetailsFocused-2.xcresult` passed all 76 units and three
+user-flow UI cases (plus one temporary exact-owned-timer cleanup, excluded from
+product coverage and removed before publication). The full local
+`MyDayDetailsFull-1.xcresult` passed **86 tests (76 unit, ten UI), zero failures/
+skips**, on `00def43`; hosted run 43154616269 passed the same 86 cases on that
+source. Subsequent final changes stack Reports sorting controls and strengthen
+test navigation/geometry. Final hosted
+[run 43157603328](https://github.com/elaren-studio/minutide/actions/runs/43157603328)
+passed **86 tests (76 unit, ten UI), zero failures/skips**, on exact final source
+`59a1f12`; `TEST SUCCEEDED` at **2026-11-12 05:16:14 UTC**. This is the final
+complete-suite evidence; prior failed bundles remain retained as historical results.
+Default-size dark screenshots under `build/MyDayDetailsReview-2` were visually
+reviewed for bottom positioning, readable list entries, and report separation.
+A simulator Lock Screen showed the richer task/status/start/elapsed presentation.
+New DTO tests verify legacy attribute decoding and immutable hierarchy projection.
+
+Larger-text (`accessibility-medium`) My Day passed in
+`MyDayDetailsAccessibility-2.xcresult` after scrolling to the offscreen detail
+duration. Screenshot review caught a Reports sorting collision missed by the
+initial assertions; the final controls, explanation, exports, plot, and wrapping
+legend were visually reviewed after correction. Final Reports UI case passed
+in `MyDayDetailsAccessibility-4.xcresult`, zero failures/skips. Simulator text
+size and appearance were restored to `large` / light. Screenshots are under
+`build/MyDayDetailsAccessibilityReview-4`.
+
+Both final signed bundles and the export were verified; Apple validation and
+upload succeeded without errors. Build/delivery
+`9717a731-94ea-43e5-9cd2-c1c0c7a1db0f` is `VALID` / `IN_BETA_TESTING` in
+the existing internal group, independently verified at **2026-11-12 04:59:17 UTC**.
+Receipt: `build/Verification/minutide-0.2.2-4.json`. Physical build-4 acceptance
+has not been performed.
+
+Physical checks after the update:
+
+1. Verify Start Timer sits above the tab bar. Start, switch, and stop from the
+   bottom timer across tabs; verify entries are saved and a late Stop does not
+   affect a different task.
+2. Complete a brief task. Verify its recent row/marker, seconds, daily total,
+   and the same entry in List. Reopen its details and relaunch to verify mode
+   persistence. Switch days and organization scopes in both modes.
+3. Check Lock Screen and expanded Dynamic Island with long task and hierarchy
+   names; verify captured context, start and elapsed times remain readable.
+4. Check long report labels, CSV actions, all charts/free-time toggles, narrow
+   display and larger text; verify display changes do not alter exported values.
+
+### UI follow-up (0.2.1 build 3)
+
+The full dark-mode local run passed 70/73 tests (65 unit, five UI), then all
+three affected UI cases passed in `UIPolishFocusedResults-1.xcresult` at 03:31 UTC
+on 2026-11-12. The sole app-source correction after the full run pins newly
+created tasks first in the timer chooser. Test fixes search long report lists
+and use the chooser's specific BackButton. The failed complete bundle remains
+failed; final hosted [run 43148292343](https://github.com/elaren-studio/minutide/actions/runs/43148292343)
+passed all **73 tests (65 unit, eight UI), zero failures/skips**, on the exact
+released source with Xcode 26.6. The clean hosted result supersedes the local
+full/focused sequence. Build **0.2.1 (3)** is
+`VALID` / `IN_BETA_TESTING` in the intended internal group, independently
+verified at **2026-11-12 03:38:49 UTC**. Receipt:
+`build/Verification/minutide-0.2.1-3.json`.
+
+Executed UI coverage now includes inline task creation/cancel/save with
+unchanged log fields and persisted task assignment; My Day start/switch/stop
+and saved timers, including new tasks outside the chooser scope; and custom
+appearance save/reopen with independent default resets. Dark-mode screenshots
+of the single scope surface, timer controls, palette, and icon grid are retained
+under `build/UIReview-final` and `build/UIReview-1-all`. Physical checks of these
+flows and large-text/minimum-runtime behavior remain open.
+
+For physical review, update without deleting the app, then check:
+
+1. Open an organization/task editor. Choose a color and icon, save/reopen, then
+   reset each independently; verify the expected parent/default style returns.
+2. Open Tasks and switch All Work/Unassigned/organization; verify there is one
+   scope surface and the running timer stays available.
+3. Open My Day → + → Create Log → New Task. Cancel once, then save a new task;
+   verify the log dates remain and the saved task is selected and recorded.
+4. Open My Day → Start Timer, create/select a task, then switch and stop it.
+   Verify both completed entries, the current Live Activity, and that starting
+   while viewing another day returns to Today.
+
+### Hierarchy/reporting (0.2.0 build 2)
+
+The 0.2.0 (2) candidate has 65 unit and five UI regression cases covered on
+an iPhone 17 / iOS 26.5 simulator. `WorkReportsFullResults-3.xcresult` passed
+69/70; the remaining searched-task selection case passed after its fix in
+`WorkReportsCombinedUIResults-2.xcresult` (02:14:29 UTC, 2026-11-12). Only the
+report filter UI changed between those runs. The complete bundle retains its
+original failure; the focused pass resolves that case.
+
+The final hosted run [43141785036](https://github.com/elaren-studio/minutide/actions/runs/43141785036)
+passed all **70 tests (65 unit, five UI), zero failures/skips**, on the shipped
+source with Xcode 26.6. Its clean full-suite result supersedes the local
+complete-plus-focused sequence; it does not complete physical acceptance.
+
+Coverage includes a real unversioned V1 disk migration/reopen, retained IDs and
+running timer, appearance inheritance, immutable history, combined filters,
+DST/grouping conservation, CSV, date cancellation, and pinned timer controls.
+Build **0.2.0 (2)** is now `VALID` / `IN_BETA_TESTING` for the existing maintainer
+group, verified at 2026-11-12 02:43:11 UTC. Source `edf830598a033136028d690a2c0e167d14289a86`, signed artifact
+receipt `build/Verification/minutide-0.2.0-2.json`. This is delivery evidence;
+physical installation and feature/upgrade acceptance of build 2 are not claimed.
+Update through TestFlight without deleting the app, then check:
+
+1. Install the update without deleting the app. Verify existing tasks and time
+   entries remain, and an existing running timer retains its start time.
+2. Create two organizations, clients, projects, and both assigned and unassigned
+   tasks. Switch scope while timing and verify the current timer continues.
+3. Customize color and icon independently; verify inheritance and custom values.
+4. Move or rename a task. Old entries should keep their recorded assignment;
+   new entries should use the current one. Reclassify an old entry explicitly.
+5. Combine filters across levels, group by each level, and compare totals.
+   Export summary, detail, and raw CSV to a chosen destination.
+6. Verify Shortcuts disambiguate repeated task names, and archived ancestors
+   block new starts while keeping old time available in reports.
 
 | Check | Simulator | Physical iPhone | Expected result | Status / evidence |
 |---|---:|---:|---|---|

@@ -16,7 +16,7 @@ final class StiintUITestsLaunchTests: XCTestCase {
     func testLaunchShowsWelcomeOrMainTabs() {
         let app = XCUIApplication()
         app.launch()
-        let mainTabs = app.tabBars.buttons["Timers"]
+        let mainTabs = app.tabBars.buttons["Tasks"]
         let welcome = app.buttons["Let's Start"]
         XCTAssertTrue(mainTabs.waitForExistence(timeout: 5) || welcome.waitForExistence(timeout: 5),
                       "Launch must show the app's main tabs or its onboarding welcome.")
