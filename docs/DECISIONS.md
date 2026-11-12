@@ -2,6 +2,26 @@
 
 Durable choices for Minutide, the independent Stiint continuation. Add a dated entry when a decision changes; keep implementation status in `ACTIVE_CONTEXT.md` and `WORKLOG.md`.
 
+## 2026-11-11 — Local work hierarchy and immutable entry assignment
+
+- Organizations contain clients, and clients contain projects. Only tasks are
+  startable timers. A task chooses one optional parent (organization, client,
+  project, or none); derive ancestors rather than store conflicting selections.
+- Organization switching scopes work; it leaves the one global timer running.
+  These are local work contexts, without accounts, teammates, or cloud sync.
+- Color and icon inherit independently from the nearest configured ancestor.
+  Preserve existing task styles and identities.
+- Capture hierarchy IDs, names, and effective appearance on each new entry.
+  Task edits affect future entries. Date-only edits and splits preserve history;
+  explicit entry reclassification is user initiated. Legacy entries receive no
+  invented historical organization/client/project assignment.
+- Report filters use OR within a dimension and AND across dimensions. Group
+  matching time without double counting, retain missing-level buckets, and keep
+  synthetic free time outside tracked totals. See `WORK_HIERARCHY.md`.
+- The user authorized tests/docs, remote commits during development, and the
+  next internal TestFlight build for the existing maintainer group. External
+  testers, public App Store submission, and new legal agreements remain separate.
+
 ## 2026-11-11 — Independent community fork (initial name and identifiers)
 
 - Initial working product name: **Stiint Community**. This name and the identifiers below were superseded by the later Minutide decision.

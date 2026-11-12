@@ -2,6 +2,16 @@
 
 The goal is a free, open-source self-build, an eventual free App Store release, and an initial processed internal TestFlight build for the maintainer. A milestone is complete only when its evidence is recorded in `ACTIVE_CONTEXT.md` and `WORKLOG.md`.
 
+## Current priority: work hierarchy and combined reporting — in progress
+
+The maintainer confirms the first TestFlight build launches on his iPhone. The
+next authorized internal beta adds organizations, clients, projects, optional
+task locations, independent appearance/inheritance, organization scope, and
+combined report filtering/grouping/sorting. Preserve the existing store and
+prove its migration on disk. See [WORK_HIERARCHY.md](WORK_HIERARCHY.md) for the
+behavior and acceptance contract. Commit/push reviewed increments, then test,
+sign, upload, and verify the next build in the existing internal group.
+
 ## 1. Establish a clear, free community fork — source published; hosted check pending
 
 - Subscription and paywall source paths are removed in the current worktree; verify the integrated diff and test behavior.

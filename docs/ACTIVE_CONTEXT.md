@@ -6,11 +6,32 @@ Last updated: 2026-11-11
 
 Revive the archived Stiint iOS time tracker as **Minutide**, an independently maintained, fully free, open-source app under Elaren Studio. Keep the original Xcode app target named `Stiint` and retain Liam Wittig's original MIT copyright notice. The user explicitly authorized the Minutide rename and publication under the Elaren GitHub organization on 2026-11-11.
 
+## Current feature milestone — implementation in progress
+
+- The maintainer confirms that TestFlight **0.1.0 (1)** launches on his iPhone.
+  This confirms installation and launch, not the remaining physical acceptance matrix.
+- Current branch: `feature/workspaces-reporting`, based on delivered-source
+  handoff commit `2f5ee39878fef4bca4e9dc378553437733cb4bf8`.
+- Authorized work: optional task assignment under organizations → clients →
+  projects, independent appearance/inheritance, organization switching, combined
+  report filtering/grouping/sorting, tests/docs, remote commits, and the next
+  internal TestFlight build. Specification: [WORK_HIERARCHY.md](WORK_HIERARCHY.md).
+- Existing UUIDs and history must survive migration. Historical assignment is
+  captured per entry; later task moves must not recategorize earlier time.
+- Storage/migration, task management UI, and reporting have separate ownership.
+  Root owns integration, release checks, Git publication, and internal delivery.
+- The SSD disappeared during the initial read-only review. After the user's
+  reconnection, its mount and canonical clean repository were verified again.
+  Implementation and builds remain on the SSD; no internal fallback is used.
+- Feature implementation, disk migration proof, integrated simulator checks,
+  and the next TestFlight delivery are pending. The older test results below
+  cover the previous build and do not validate these new features.
+
 ## Verified orientation
 
 - Working checkout: `/Volumes/Felix-SSD-1/Cursor Projects/Elaren/products/minutide`. The SSD baseline test run used source revision `607d5b3164545177777ed22f45bed8187d9887a9`; later release-readiness changes are in progress and are not covered by that baseline result.
 - Starting source: upstream commit `a6f10f2d6637e9b3b330c56b818fb537357329b0` from `Liam1506/Stiint`.
-- Verified remote state: `upstream` points to `https://github.com/Liam1506/Stiint.git`; `origin` points to `https://github.com/elaren-studio/minutide.git`. Current development branch: `feature/minutide-testflight`.
+- Verified remote state: `upstream` points to `https://github.com/Liam1506/Stiint.git`; `origin` points to `https://github.com/elaren-studio/minutide.git`. Current development branch: `feature/workspaces-reporting`.
 - The canonical checkout is on the verified external APFS volume. Migration receipt: `build/history/pre-ssd/migration-verification.json`. All 788 retained project, build, and result files (74,358,536 bytes) matched their SHA-256 manifest. The copied Git object store has no alternates; refs were validated from `build/history/pre-ssd/git-state.bundle` (SHA-256 `259dea147df577983bef1c8d37ad52788162d29ad259ff67bc9b17504a3e6580`).
 - App, Live Activity extension, and test targets use iOS 26.1. The internal app target is `Stiint`; display name is `Minutide` and extension display name is `Minutide Live Activity`.
 - Bundle identifiers are `com.elaren.minutide`, `com.elaren.minutide.liveactivity`, `com.elaren.minutide.tests`, and `com.elaren.minutide.uitests`. Apple registration and signing are not part of source publication. The new identifier uses a separate container from prior local community builds; no cross-container migration is implemented.

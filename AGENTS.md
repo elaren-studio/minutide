@@ -16,9 +16,9 @@
 - The fork's product direction is fully free and open source. Do not restore subscriptions, paid feature gates, tracking SDKs, or account/server sync without an explicit decision recorded in `docs/DECISIONS.md`.
 - Treat activity names, timestamps, location coordinates, exports, credentials, and signing material as sensitive. Use synthetic test data and do not commit personal records or secrets.
 - Do not claim a build, test, physical acceptance, CI run, App Store release, or public repository publication without current evidence for that exact state.
-- The user explicitly authorized a first processed internal TestFlight build for the Minutide maintainer. That scope includes preparation, signing, upload, and verification for the intended internal tester after the release candidate passes its review gates. It does not include external testers or a public App Store submission.
+- The maintainer confirmed that TestFlight 0.1.0 (1) launches on his iPhone. The user then authorized organization/client/project/task management, combined reporting, tests, documentation, remote commits during development, and the next internal TestFlight build. See `docs/WORK_HIERARCHY.md`. Preserve existing data with an executed disk migration test before upload. This scope does not include external testers or a public App Store submission.
 - Verify the Apple team, app record, bundle identifiers, intended internal group, archive, and IPA before credentialed actions. App Store Connect processing and actual internal availability are separate readback checks.
-- Do not commit or push incidentally. Public App Store submission, changes to release pricing, or any distribution outside the initial internal TestFlight scope remain future gates requiring their own explicit authorization and target check.
+- Reviewed commits and pushes along the current feature work are explicitly authorized. Verify branch and destination each time. Public App Store submission, changes to release pricing, or distribution outside the intended internal TestFlight group remain separate gates.
 
 ## Documentation discipline
 

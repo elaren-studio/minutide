@@ -143,3 +143,11 @@ Append dated entries. Record what changed and what evidence was actually collect
 - Hosted CI remains unverified. Physical acceptance is the next user step. No Apple legal agreement or production release was performed.
 
 - Source PR #1 is now ready for review; its title and description record the completed internal TestFlight delivery and pending physical acceptance. No merge or production release was performed.
+
+
+## 2026-11-11 — Work hierarchy and reporting begun
+
+- The maintainer confirms installation and launch of TestFlight 0.1.0 (1) on his iPhone. This does not complete the remaining physical acceptance matrix.
+- Created `feature/workspaces-reporting` from `2f5ee39878fef4bca4e9dc378553437733cb4bf8`. The user authorized organizations, clients, projects, optional task assignment, independent appearance, combined reports, tests/docs, remote commits, and the next internal beta.
+- Recorded the implementation and acceptance contract in `WORK_HIERARCHY.md`: one task Location picker, strict organization/client/project hierarchy, a global timer independent of scope, independent appearance inheritance, immutable historical snapshots, and OR-within/AND-across report filters.
+- The SSD disconnected during read-only planning. After the user reconnected it, macOS and the canonical clean repository were verified again. No fallback internal checkout or build was created. Storage/migration, UI, and reporting implementation are assigned separately; implementation and validation remain pending.
