@@ -2,6 +2,21 @@
 
 Durable choices for Minutide, the independent Stiint continuation. Add a dated entry when a decision changes; keep implementation status in `ACTIVE_CONTEXT.md` and `WORKLOG.md`.
 
+## 2026-11-11 — Manual tracking and contextual task creation
+
+- My Day offers a visible Start Timer action, plus Switch Task and Stop while
+  tracking. Starting always records the current time and returns to Today;
+  Create Log remains the separate action for past time.
+- Create Log and the manual timer chooser can create tasks in place. Saving
+  returns to the originating flow without an automation prompt. A new task is
+  selected in Create Log; the timer chooser requires an explicit task tap to
+  start. Canceling task creation leaves the original log dates and task intact.
+- Appearance uses labeled Color and Icon rows with visual choosers and an
+  independent default/parent reset for each property. Preserve inheritance and
+  saved history; no store schema change is needed.
+- Use the system toolbar surface for work scope; do not nest a material capsule
+  inside the native toolbar's glass background.
+
 ## 2026-11-11 — Local work hierarchy and immutable entry assignment
 
 - Organizations contain clients, and clients contain projects. Only tasks are

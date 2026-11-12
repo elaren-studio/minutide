@@ -193,7 +193,7 @@ struct TimerView: View {
     }
 }
 
-private struct RunningTaskSnapshotCard: View {
+struct RunningTaskSnapshotCard: View {
     let activity: ActivityDTO
 
     @Query private var openLogs: [ActivityLog]

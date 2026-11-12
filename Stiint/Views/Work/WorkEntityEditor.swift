@@ -15,11 +15,9 @@ struct WorkEditorRequest: Identifiable {
     }
 }
 
-private enum AppearanceMode: String, CaseIterable, Identifiable {
-    case inherit = "Inherit"
-    case custom = "Custom"
-
-    var id: String { rawValue }
+private enum AppearanceMode: Equatable {
+    case inherit
+    case custom
 }
 
 private enum WorkEditorAlert: Identifiable {
@@ -56,6 +54,193 @@ private struct WorkIconChoice: Identifiable {
     var id: String { name }
 }
 
+private struct WorkColorChoice: Identifiable {
+    let name: String
+    let hex: String
+
+    var id: String { hex }
+}
+
+private struct WorkColorChooser: View {
+    @Binding var mode: AppearanceMode
+    @Binding var color: Color
+
+    let inheritedColorHex: String
+    let inheritedSourceName: String?
+
+    private let columns = [GridItem(.adaptive(minimum: 64), spacing: 12)]
+    private let colors = [
+        WorkColorChoice(name: "Blue", hex: "#3478F6"),
+        WorkColorChoice(name: "Teal", hex: "#20A89A"),
+        WorkColorChoice(name: "Green", hex: "#32A852"),
+        WorkColorChoice(name: "Yellow", hex: "#E0A91B"),
+        WorkColorChoice(name: "Orange", hex: "#EE7A27"),
+        WorkColorChoice(name: "Red", hex: "#E34B4B"),
+        WorkColorChoice(name: "Pink", hex: "#D64A91"),
+        WorkColorChoice(name: "Purple", hex: "#8959D5"),
+        WorkColorChoice(name: "Indigo", hex: "#535AC8"),
+        WorkColorChoice(name: "Gray", hex: "#77808C")
+    ]
+
+    private var inheritedLabel: String {
+        if let inheritedSourceName { return "Use \(inheritedSourceName)'s color" }
+        return "Use default color"
+    }
+
+    var body: some View {
+        Form {
+            Section {
+                Button {
+                    mode = .inherit
+                } label: {
+                    HStack {
+                        Label(inheritedLabel, systemImage: "arrow.uturn.backward")
+                        Spacer()
+                        if mode == .inherit {
+                            Image(systemName: "checkmark")
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.tint)
+                        }
+                        Circle()
+                            .fill(Color(hex: inheritedColorHex))
+                            .frame(width: 20, height: 20)
+                            .overlay(Circle().strokeBorder(.primary.opacity(0.12), lineWidth: 1))
+                            .accessibilityHidden(true)
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("work.appearance.color.source")
+            }
+
+            Section("Colors") {
+                LazyVGrid(columns: columns, spacing: 14) {
+                    ForEach(colors) { choice in
+                        let isSelected = mode == .custom && color.toHex() == choice.hex
+                        Button {
+                            color = Color(hex: choice.hex)
+                            mode = .custom
+                        } label: {
+                            VStack(spacing: 7) {
+                                Circle()
+                                    .fill(Color(hex: choice.hex))
+                                    .frame(width: 34, height: 34)
+                                    .overlay {
+                                        if isSelected {
+                                            Image(systemName: "checkmark")
+                                                .font(.caption.weight(.bold))
+                                                .foregroundStyle(.white)
+                                        }
+                                    }
+                                Text(choice.name)
+                                    .font(.caption)
+                                    .foregroundStyle(.primary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 5)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(choice.name)
+                        .accessibilityAddTraits(isSelected ? .isSelected : [])
+                    }
+                }
+                .padding(.vertical, 4)
+
+                ColorPicker(
+                    "Choose another color",
+                    selection: Binding(
+                        get: { color },
+                        set: { newColor in
+                            color = newColor
+                            mode = .custom
+                        }
+                    ),
+                    supportsOpacity: false
+                )
+                .accessibilityIdentifier("work.appearance.color.custom")
+            }
+        }
+        .navigationTitle("Color")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+private struct WorkIconChooser: View {
+    @Binding var mode: AppearanceMode
+    @Binding var symbolName: String
+
+    let inheritedSourceName: String?
+    let choices: [WorkIconChoice]
+
+    private let columns = [GridItem(.adaptive(minimum: 88), spacing: 12)]
+
+    private var inheritedLabel: String {
+        if let inheritedSourceName { return "Use \(inheritedSourceName)'s icon" }
+        return "Use default icon"
+    }
+
+    var body: some View {
+        Form {
+            Section {
+                Button {
+                    mode = .inherit
+                } label: {
+                    HStack {
+                        Label(inheritedLabel, systemImage: "arrow.uturn.backward")
+                        Spacer()
+                        if mode == .inherit {
+                            Image(systemName: "checkmark")
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.tint)
+                        }
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("work.appearance.icon.source")
+            }
+
+            Section("Icons") {
+                LazyVGrid(columns: columns, spacing: 14) {
+                    ForEach(choices) { choice in
+                        let isSelected = mode == .custom && symbolName == choice.name
+                        Button {
+                            symbolName = choice.name
+                            mode = .custom
+                        } label: {
+                            VStack(spacing: 8) {
+                                Image(systemName: choice.name)
+                                    .font(.title3)
+                                    .frame(height: 28)
+                                Text(choice.title)
+                                    .font(.caption)
+                                    .multilineTextAlignment(.center)
+                                    .lineLimit(2)
+                            }
+                            .frame(maxWidth: .infinity, minHeight: 68)
+                            .padding(6)
+                            .background {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(isSelected ? Color.accentColor.opacity(0.13) : Color.clear)
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(choice.title)
+                        .accessibilityAddTraits(isSelected ? .isSelected : [])
+                        .accessibilityIdentifier("work.appearance.icon.custom.\(choice.name)")
+                    }
+                }
+                .padding(.vertical, 4)
+                .accessibilityIdentifier("work.appearance.icon.custom")
+            }
+        }
+        .navigationTitle("Icon")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
 struct WorkEntityEditor: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -66,6 +251,7 @@ struct WorkEntityEditor: View {
     @Query private var tasks: [ActivityItem]
 
     let request: WorkEditorRequest
+    var onTaskCreated: ((UUID) -> Void)? = nil
 
     @State private var name = ""
     @State private var didLoadValues = false
@@ -269,12 +455,30 @@ struct WorkEntityEditor: View {
 
     private var colorSourceName: String {
         if colorMode == .custom { return "Custom" }
-        return ancestorSources.first(where: { $0.colorHex != nil })?.name ?? "Minutide default"
+        return inheritedColorSourceName ?? "Minutide default"
     }
 
     private var iconSourceName: String {
         if iconMode == .custom { return "Custom" }
-        return ancestorSources.first(where: { $0.symbolName != nil })?.name ?? "Minutide default"
+        return inheritedIconSourceName ?? "Minutide default"
+    }
+
+    private var inheritedColorSourceName: String? {
+        ancestorSources.first(where: { $0.colorHex != nil })?.name
+    }
+
+    private var inheritedIconSourceName: String? {
+        ancestorSources.first(where: { $0.symbolName != nil })?.name
+    }
+
+    private var colorSummary: String {
+        if colorMode == .custom { return "Custom" }
+        return inheritedColorSourceName.map { "Same as \($0)" } ?? "Default"
+    }
+
+    private var iconSummary: String {
+        if iconMode == .custom { return "Custom" }
+        return inheritedIconSourceName.map { "Same as \($0)" } ?? "Default"
     }
 
     private var availableSymbols: [WorkIconChoice] {
@@ -308,41 +512,57 @@ struct WorkEntityEditor: View {
                     .accessibilityValue("Color from \(colorSourceName), icon from \(iconSourceName)")
                     .accessibilityIdentifier("work.appearance.preview")
 
-                    Picker("Color", selection: $colorMode) {
-                        ForEach(AppearanceMode.allCases) { mode in
-                            Text(mode.rawValue).tag(mode)
+                    NavigationLink {
+                        WorkColorChooser(
+                            mode: $colorMode,
+                            color: $customColor,
+                            inheritedColorHex: inheritedColorHex,
+                            inheritedSourceName: inheritedColorSourceName
+                        )
+                    } label: {
+                        HStack(spacing: 12) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Color")
+                                    .foregroundStyle(.primary)
+                                Text(colorSummary)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Circle()
+                                .fill(Color(hex: resolvedColorHex))
+                                .frame(width: 24, height: 24)
+                                .overlay(Circle().strokeBorder(.primary.opacity(0.12), lineWidth: 1))
+                                .accessibilityHidden(true)
                         }
                     }
-                    .pickerStyle(.segmented)
                     .accessibilityIdentifier("work.appearance.color.mode")
 
-                    if colorMode == .custom {
-                        ColorPicker("Custom color", selection: $customColor, supportsOpacity: false)
-                            .accessibilityIdentifier("work.appearance.color.custom")
-                    } else {
-                        LabeledContent("Color inherited from", value: colorSourceName)
-                            .accessibilityIdentifier("work.appearance.color.source")
-                    }
-
-                    Picker("Icon", selection: $iconMode) {
-                        ForEach(AppearanceMode.allCases) { mode in
-                            Text(mode.rawValue).tag(mode)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .accessibilityIdentifier("work.appearance.icon.mode")
-
-                    if iconMode == .custom {
-                        Picker("Custom icon", selection: $customSymbolName) {
-                            ForEach(availableSymbols) { symbol in
-                                Label(symbol.title, systemImage: symbol.name).tag(symbol.name)
+                    NavigationLink {
+                        WorkIconChooser(
+                            mode: $iconMode,
+                            symbolName: $customSymbolName,
+                            inheritedSourceName: inheritedIconSourceName,
+                            choices: availableSymbols
+                        )
+                    } label: {
+                        HStack(spacing: 12) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Icon")
+                                    .foregroundStyle(.primary)
+                                Text(iconSummary)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                             }
+                            Spacer()
+                            Image(systemName: resolvedSymbolName)
+                                .font(.title3)
+                                .foregroundStyle(Color(hex: resolvedColorHex))
+                                .frame(width: 28, height: 28)
+                                .accessibilityHidden(true)
                         }
-                        .accessibilityIdentifier("work.appearance.icon.custom")
-                    } else {
-                        LabeledContent("Icon inherited from", value: iconSourceName)
-                            .accessibilityIdentifier("work.appearance.icon.source")
                     }
+                    .accessibilityIdentifier("work.appearance.icon.mode")
                 }
 
                 if isTask {
@@ -548,6 +768,7 @@ struct WorkEntityEditor: View {
                 let symbolName = iconMode == .custom ? customSymbolName : nil
                 let actor = PersistenceManager.shared.workHierarchyActor
 
+                var createdTaskID: UUID?
                 switch request.kind {
                 case .organization:
                     _ = try await actor.saveOrganization(
@@ -579,7 +800,7 @@ struct WorkEntityEditor: View {
                         sfSymbolName: symbolName
                     )
                 case .task:
-                    _ = try await actor.saveTask(
+                    createdTaskID = try await actor.saveTask(
                         id: request.entityID,
                         name: name,
                         parent: selectedParent,
@@ -592,7 +813,12 @@ struct WorkEntityEditor: View {
 
                 isSaving = false
                 if isTask && isNew {
-                    activeAlert = .automation
+                    if let createdTaskID, let onTaskCreated {
+                        onTaskCreated(createdTaskID)
+                        dismiss()
+                    } else {
+                        activeAlert = .automation
+                    }
                 } else {
                     dismiss()
                 }

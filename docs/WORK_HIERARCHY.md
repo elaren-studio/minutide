@@ -32,7 +32,21 @@ Every level can customize its color and SF Symbol independently. An unset
 property inherits from the nearest ancestor with that property, then falls back
 to the app default. Choosing a custom icon does not force a custom color.
 Existing tasks retain their saved appearance. Editors show the effective
-appearance and offer Inherit / Custom choices.
+appearance in Color and Icon rows that open visual choosers, with a
+default/parent reset in each chooser. Independent inheritance is unchanged.
+
+## Manual tracking and contextual task creation
+
+My Day offers Start Timer, with Stop and Switch Task when a timer is running.
+Choose an available task or create one without leaving the chooser. Tracking
+starts at the current time and brings My Day back to Today. A local scope menu
+and search help find work; changing that chooser's scope leaves the timeline's
+scope alone. Saving a new task returns to the chooser; tapping the task starts it.
+
+Create Log offers New Task alongside its task picker. Saving creates and selects
+that task while preserving the draft log dates; canceling leaves the draft alone.
+The new task may be assigned anywhere, including outside the current scope.
+Neither inline flow interrupts task creation with the Shortcuts automation prompt.
 
 ## History and migration
 

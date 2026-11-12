@@ -14,6 +14,7 @@ struct HomeView: View {
     enum ActiveSheet: Identifiable {
         case createLog
         case selectDate
+        case startTimer
         var id: Int { hashValue }
     }
 
@@ -81,6 +82,9 @@ struct HomeView: View {
             )
             .scrollTargetBehavior(.paging)
             .ignoresSafeArea(edges: [.top, .bottom])
+            .safeAreaInset(edge: .top, spacing: 0) {
+                trackingControls
+            }
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     WorkScopePicker(selection: scopeBinding, organizations: organizations,
@@ -94,6 +98,8 @@ struct HomeView: View {
                             .symbolRenderingMode(.hierarchical)
                             .font(.title3)
                     }
+                    .accessibilityLabel("Create Log")
+                    .accessibilityIdentifier("timeline.log.new")
                 }
 
                 ToolbarItem(placement: .navigation) {
@@ -122,8 +128,43 @@ struct HomeView: View {
                     dayRange: dayRange
                 )
                 .presentationDetents([.medium])
+            case .startTimer:
+                StartTimerView {
+                    dayOffset = 0
+                }
             }
         }
+    }
+
+    private var trackingControls: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            if let activity = DtoManager.shared.activityDTO {
+                HStack {
+                    Text("Now tracking")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Button("Switch Task") { activeSheet = .startTimer }
+                        .font(.subheadline.weight(.semibold))
+                        .accessibilityIdentifier("timeline.timer.switch")
+                }
+                RunningTaskSnapshotCard(activity: activity)
+            } else {
+                Button {
+                    activeSheet = .startTimer
+                } label: {
+                    Label("Start Timer", systemImage: "play.fill")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity, minHeight: 36)
+                }
+                .buttonStyle(.borderedProminent)
+                .accessibilityIdentifier("timeline.timer.start")
+            }
+        }
+        .padding(14)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18))
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
     }
 }
 

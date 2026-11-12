@@ -60,10 +60,7 @@ struct WorkScopePicker: View {
                     .font(.caption.weight(.semibold))
             }
             .font(.subheadline.weight(.semibold))
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(.thinMaterial, in: Capsule())
-            .contentShape(Capsule())
+            .contentShape(Rectangle())
         }
         .accessibilityLabel("Work scope, \(scopeTitle)")
         .accessibilityHint("Choose all work, unassigned tasks, or an organization")

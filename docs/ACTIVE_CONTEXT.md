@@ -8,6 +8,24 @@ Revive the archived Stiint iOS time tracker as **Minutide**, an independently ma
 
 ## Current feature milestone — 0.2.0 (2) available in internal TestFlight
 
+### Follow-up UI corrections — 0.2.1 (3) in validation
+
+- The maintainer supplied screenshots of the appearance editor, Tasks scope
+  menu, and Create Log, requesting simpler styling, removal of the nested scope
+  capsule, inline task creation, and manual timer start from My Day. Screenshots
+  are user observations, not a completed physical acceptance matrix.
+- Implemented Color/Icon rows with visual choosers and separate parent/default
+  resets, one native scope surface, New Task in Create Log with UUID selection
+  and preserved dates, and My Day Start Timer / Switch Task / Stop controls.
+  Inline creation returns without the automation prompt. Tracking starts now
+  and returns to Today; the manual chooser has a local scope and search.
+- No stored model or schema changes. Version/build is 0.2.1 (3); the app and
+  extension IDs and iOS 26.1 minimum are unchanged.
+- XcodeBuildMCP build/run succeeded without warnings at 03:10 UTC on
+  2026-11-12 (iPhone 17 / iOS 26.5). The My Day screenshot shows the Start Timer
+  control above the timeline. Regression tests and delivery are still pending;
+  0.2.0 (2) remains the latest verified internal beta below.
+
 - The maintainer confirms TestFlight **0.1.0 (1)** installs and launches on his
   iPhone. Its remaining physical acceptance matrix is separate.
 - Current branch: `feature/workspaces-reporting`. The hierarchy/migration and

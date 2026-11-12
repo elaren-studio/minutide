@@ -26,12 +26,19 @@ The project uses SwiftUI, SwiftData, App Intents, and Swift Package Manager. The
 Open **Tasks → Manage Work** to add an organization, then clients inside it and
 projects inside a client. A task has one **Location** picker: Unassigned, an
 organization, a client, or a project. Selecting a project fills in its ancestors.
-Color and icon each offer Inherit or Custom; existing task appearance is kept.
+Tap **Color** or **Icon** to choose a style, or use the default/parent style.
+Each can follow its parent independently; existing task appearance is kept.
 
 Use the organization menu to switch between All Work, Unassigned, and an
 organization. The running timer stays available while you switch scope, and
 choosing another task switches the timer. Archive and restore items from Manage
 Work; archived work remains in history.
+
+In **My Day**, tap **Start Timer** and choose a task, or create one there.
+Tracking starts now and returns to Today even when you were viewing an older
+day. Use **Switch Task** or **Stop** on the running timer. To add past time,
+tap **+** for **Create Log**; **New Task** creates and selects a task without
+leaving your log or changing its dates.
 
 In **Reports**, select dates and combine work filters. Selecting two clients
 includes either client; adding a project filter narrows that set further.

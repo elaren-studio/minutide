@@ -135,6 +135,188 @@ final class StiintUITests: XCTestCase {
     }
 
     @MainActor
+    func testMyDayManualLogCanCreateTaskInlineWithoutChangingItsTimes() throws {
+        let app = launchReadyApp()
+        app.tabBars.buttons["My Day"].tap()
+        app.buttons["timeline.log.new"].tap()
+        XCTAssertTrue(app.navigationBars["Create Log"].waitForExistence(timeout: 10))
+
+        let originalFields = logFieldSignatures(in: app)
+        let task = "UI Inline Log \(UUID().uuidString)"
+
+        app.buttons["log.task.new"].tap()
+        let taskEditor = app.navigationBars["New Task"]
+        XCTAssertTrue(taskEditor.waitForExistence(timeout: 10))
+        taskEditor.buttons["Cancel"].tap()
+        XCTAssertTrue(app.navigationBars["Create Log"].waitForExistence(timeout: 10),
+                      "Canceling the nested task editor must leave Create Log open.")
+        XCTAssertEqual(logFieldSignatures(in: app), originalFields,
+                       "Canceling task creation must preserve the selected date, times, and duration.")
+
+        app.buttons["log.task.new"].tap()
+        XCTAssertTrue(app.navigationBars["New Task"].waitForExistence(timeout: 10))
+        createTaskInNestedEditor(named: task, in: app)
+        XCTAssertTrue(app.navigationBars["Create Log"].waitForExistence(timeout: 10),
+                      "Saving an inline task must return to the open manual log form.")
+        XCTAssertFalse(app.alerts["What would you like to do?"].exists,
+                       "Creating a task inside a manual log should not open the Shortcuts automation prompt.")
+        XCTAssertEqual(logFieldSignatures(in: app), originalFields,
+                       "Creating a task must preserve the selected date, times, and duration.")
+        assertManualLogTaskSelected(named: task, in: app)
+
+        let create = app.buttons["log.create"]
+        XCTAssertTrue(create.waitForExistence(timeout: 5))
+        XCTAssertTrue(create.isEnabled, "The newly created task should be selected for this log.")
+        create.tap()
+        XCTAssertTrue(app.navigationBars["Create Log"].waitForNonExistence(timeout: 10))
+
+        app.tabBars.buttons["Settings"].tap()
+        app.buttons["Export"].tap()
+        XCTAssertTrue(app.navigationBars["Raw Data"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts[task].waitForExistence(timeout: 10),
+                      "The manual log must be saved under the task created inside its form.")
+    }
+
+    @MainActor
+    func testMyDayCanStartSwitchAndStopTimerFromScopedTaskPicker() throws {
+        let app = launchReadyApp()
+        try requireAvailableTimer(in: app)
+
+        let suffix = String(UUID().uuidString.prefix(8))
+        let organization = "UI Timer Org \(suffix)"
+        app.buttons["work.manage"].tap()
+        createWorkEntity(named: organization, addIdentifier: "work.organization.add", in: app)
+        let organizationID = workEntityID(named: organization, kind: "organization", in: app)
+        app.buttons["work.done"].tap()
+
+        let firstTask = "UI Timer First \(suffix)"
+        let secondTask = "UI Timer Second \(suffix)"
+        app.tabBars.buttons["My Day"].tap()
+        app.buttons["timeline.timer.start"].tap()
+        XCTAssertTrue(app.navigationBars["Start Timer"].waitForExistence(timeout: 10))
+        chooseTimerScope("unassigned", in: app)
+        app.buttons["timer.picker.new"].tap()
+        XCTAssertTrue(app.navigationBars["New Task"].waitForExistence(timeout: 10))
+        app.descendants(matching: .any).matching(identifier: "task.location").firstMatch.tap()
+        let organizationChoice = app.descendants(matching: .any)
+            .matching(identifier: "task.location.organization.\(organizationID)").firstMatch
+        XCTAssertTrue(organizationChoice.waitForExistence(timeout: 5))
+        organizationChoice.tap()
+        createTaskInNestedEditor(named: firstTask, in: app)
+        XCTAssertTrue(app.navigationBars["Start Timer"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.alerts["What would you like to do?"].exists)
+        XCTAssertFalse(app.staticTexts["timer.running.name"].exists,
+                       "Saving a new task must return to the picker; the user starts it by tapping its row.")
+
+        let firstChoice = startTimerChoice(named: firstTask, in: app)
+        XCTAssertTrue(firstChoice.waitForExistence(timeout: 10),
+                      "The just-created task must remain visible even though its organization is outside Unassigned scope.")
+        attachScreenshot(named: "Task picker shows a newly created out-of-scope task", in: app)
+        firstChoice.tap()
+        assertRunningActivity(named: firstTask, in: app)
+        attachScreenshot(named: "My Day shows the running timer", in: app)
+
+        app.buttons["timeline.timer.switch"].tap()
+        XCTAssertTrue(app.navigationBars["Start Timer"].waitForExistence(timeout: 10))
+        let scope = app.buttons["timer.picker.scope"]
+        XCTAssertTrue(scope.waitForExistence(timeout: 5))
+        scope.tap()
+        let allWork = app.buttons["timer.picker.scope.all"]
+        XCTAssertTrue(allWork.waitForExistence(timeout: 5))
+        allWork.tap()
+        app.buttons["timer.picker.new"].tap()
+        XCTAssertTrue(app.navigationBars["New Task"].waitForExistence(timeout: 10))
+        createTaskInNestedEditor(named: secondTask, in: app)
+        XCTAssertTrue(app.navigationBars["Start Timer"].waitForExistence(timeout: 10))
+        startTimerChoice(named: secondTask, in: app).tap()
+        assertRunningActivity(named: secondTask, in: app)
+        XCTAssertEqual(app.staticTexts.matching(identifier: "timer.running.name").count, 1,
+                       "Switching a task must leave exactly one active timer visible.")
+
+        app.buttons["timer.running.stop"].tap()
+        XCTAssertTrue(app.buttons["timer.running.stop"].waitForNonExistence(timeout: 10))
+        app.tabBars.buttons["Settings"].tap()
+        app.buttons["Export"].tap()
+        XCTAssertTrue(app.navigationBars["Raw Data"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts[firstTask].waitForExistence(timeout: 10),
+                      "Switching away must finish and save the first task's timer.")
+        XCTAssertTrue(app.staticTexts[secondTask].waitForExistence(timeout: 10),
+                      "Stopping must finish and save the second task's timer.")
+    }
+
+    @MainActor
+    func testWorkAppearanceCustomValuesAndIndependentResets() throws {
+        let app = launchReadyApp()
+        try requireAvailableTimer(in: app)
+        let task = "UI Appearance \(UUID().uuidString)"
+
+        app.tabBars.buttons["My Day"].tap()
+        app.buttons["timeline.timer.start"].tap()
+        XCTAssertTrue(app.navigationBars["Start Timer"].waitForExistence(timeout: 10))
+        app.buttons["timer.picker.new"].tap()
+        XCTAssertTrue(app.navigationBars["New Task"].waitForExistence(timeout: 10))
+        assertAppearance(named: "Minutide default", icon: "Minutide default", in: app)
+
+        app.buttons["work.appearance.color.mode"].tap()
+        XCTAssertTrue(app.navigationBars["Color"].waitForExistence(timeout: 10))
+        attachScreenshot(named: "Work color chooser", in: app)
+        let green = app.buttons["Green"]
+        XCTAssertTrue(green.waitForExistence(timeout: 5))
+        green.tap()
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+
+        app.buttons["work.appearance.icon.mode"].tap()
+        XCTAssertTrue(app.navigationBars["Icon"].waitForExistence(timeout: 10))
+        attachScreenshot(named: "Work icon chooser", in: app)
+        let readingIcon = app.buttons["work.appearance.icon.custom.book.fill"]
+        XCTAssertTrue(readingIcon.waitForExistence(timeout: 5))
+        readingIcon.tap()
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        assertAppearance(named: "Custom", icon: "Custom", in: app)
+
+        createTaskInNestedEditor(named: task, in: app)
+        XCTAssertTrue(app.navigationBars["Start Timer"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.alerts["What would you like to do?"].exists,
+                       "The inline task editor should return its task without opening the automation prompt.")
+        app.navigationBars["Start Timer"].buttons["Cancel"].tap()
+
+        app.tabBars.buttons["Tasks"].tap()
+        app.buttons["work.manage"].tap()
+        let row = app.buttons.matching(NSPredicate(
+            format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "work.task.", task)).firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 10), "The customized task should be saved in Work Management.")
+        row.tap()
+        XCTAssertTrue(app.navigationBars["Edit Task"].waitForExistence(timeout: 10))
+        assertAppearance(named: "Custom", icon: "Custom", in: app)
+
+        app.buttons["work.appearance.color.mode"].tap()
+        XCTAssertTrue(app.navigationBars["Color"].waitForExistence(timeout: 10))
+        let useDefaultColor = app.buttons["work.appearance.color.source"]
+        XCTAssertTrue(useDefaultColor.waitForExistence(timeout: 5))
+        useDefaultColor.tap()
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        assertAppearance(named: "Minutide default", icon: "Custom", in: app)
+
+        app.buttons["work.appearance.icon.mode"].tap()
+        XCTAssertTrue(app.navigationBars["Icon"].waitForExistence(timeout: 10))
+        let useDefaultIcon = app.buttons["work.appearance.icon.source"]
+        XCTAssertTrue(useDefaultIcon.waitForExistence(timeout: 5))
+        useDefaultIcon.tap()
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        assertAppearance(named: "Minutide default", icon: "Minutide default", in: app)
+        app.buttons["task.save"].tap()
+        XCTAssertTrue(app.navigationBars["Manage Work"].waitForExistence(timeout: 10))
+
+        let persistedRow = app.buttons.matching(NSPredicate(
+            format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "work.task.", task)).firstMatch
+        XCTAssertTrue(persistedRow.waitForExistence(timeout: 10))
+        persistedRow.tap()
+        XCTAssertTrue(app.navigationBars["Edit Task"].waitForExistence(timeout: 10))
+        assertAppearance(named: "Minutide default", icon: "Minutide default", in: app)
+        app.navigationBars["Edit Task"].buttons["Cancel"].tap()
+    }
+
+    @MainActor
     func testReportDateCancelPreservesAppliedWindow() {
         let app = launchReadyApp()
         app.tabBars.buttons["Reports"].tap()
@@ -200,6 +382,75 @@ final class StiintUITests: XCTestCase {
         field.typeText(name)
         app.buttons["work.entity.save"].tap()
         XCTAssertTrue(app.staticTexts[name].firstMatch.waitForExistence(timeout: 10))
+    }
+
+    @MainActor
+    private func workEntityID(named name: String, kind: String, in app: XCUIApplication) -> String {
+        let row = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label BEGINSWITH %@",
+                                                   "work.\(kind).", name)).firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 10))
+        return row.identifier.replacingOccurrences(of: "work.\(kind).", with: "")
+    }
+
+    @MainActor
+    private func createTaskInNestedEditor(named name: String, in app: XCUIApplication) {
+        let field = app.textFields["task.name"]
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap()
+        field.typeText(name)
+        app.buttons["task.save"].tap()
+    }
+
+    @MainActor
+    private func logFieldSignatures(in app: XCUIApplication) -> [String] {
+        ["log.date", "log.start", "log.end", "log.duration"].map { identifier in
+            let field = app.descendants(matching: .any).matching(identifier: identifier).firstMatch
+            XCTAssertTrue(field.waitForExistence(timeout: 5), "Missing manual log field \(identifier).")
+            let value = field.value.map { String(describing: $0) } ?? ""
+            return "\(field.label)|\(value)"
+        }
+    }
+
+    @MainActor
+    private func assertManualLogTaskSelected(named name: String, in app: XCUIApplication) {
+        let picker = app.descendants(matching: .any).matching(identifier: "log.task").firstMatch
+        XCTAssertTrue(picker.waitForExistence(timeout: 5))
+        let exposed = "\(picker.label) \(picker.value.map { String(describing: $0) } ?? "")"
+        XCTAssertTrue(exposed.localizedCaseInsensitiveContains(name),
+                      "The task created inside Create Log must be selected; found: \(exposed)")
+    }
+
+    @MainActor
+    private func chooseTimerScope(_ scope: String, in app: XCUIApplication) {
+        let picker = app.buttons["timer.picker.scope"]
+        XCTAssertTrue(picker.waitForExistence(timeout: 5))
+        picker.tap()
+        let option = app.buttons["timer.picker.scope.\(scope)"]
+        XCTAssertTrue(option.waitForExistence(timeout: 5))
+        option.tap()
+    }
+
+    @MainActor
+    private func startTimerChoice(named name: String, in app: XCUIApplication) -> XCUIElement {
+        app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label == %@",
+                                         "timer.picker.task.", "Start \(name)")).firstMatch
+    }
+
+    @MainActor
+    private func assertAppearance(named color: String, icon: String, in app: XCUIApplication) {
+        let preview = app.descendants(matching: .any)
+            .matching(identifier: "work.appearance.preview").firstMatch
+        XCTAssertTrue(preview.waitForExistence(timeout: 5))
+        let value = preview.value.map { String(describing: $0) } ?? ""
+        XCTAssertEqual(value, "Color from \(color), icon from \(icon)")
+    }
+
+    @MainActor
+    private func attachScreenshot(named name: String, in app: XCUIApplication) {
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
     }
 
     @MainActor

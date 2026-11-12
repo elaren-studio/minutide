@@ -188,3 +188,22 @@ Append dated entries. Record what changed and what evidence was actually collect
 - Hosted Actions run **43141785036** completed successfully on exact artifact source `edf830598a033136028d690a2c0e167d14289a86`, using Xcode 26.6. Its log independently reports **65 unit tests and five UI tests passed, zero failures/skips**, then `TEST SUCCEEDED` at 02:47:31 UTC. This clean 70-test hosted result is the final complete-suite validation, beyond the earlier local complete/focused sequence.
 - Retained log `build/logs/hosted-ci-43141785036.log`, metadata `build/Verification/hosted-ci-43141785036.json`, and the updated release receipt. PR #2 is ready for review; neither stacked PR is merged.
 - Updated README, roadmap, active context, TestFlight runbook, and acceptance ledger to reflect the shipped internal build and green CI. App source and the verified IPA are unchanged. Physical build-2 upgrade/features remain open; no production release or legal-agreement acceptance occurred.
+
+## 2026-11-12 UTC — UI follow-up candidate
+
+- Addressed the maintainer's screenshot feedback with Color/Icon rows and visual
+  choosers, separate default/parent resets, and a single native toolbar surface
+  for scope selection. Preserved independent inheritance and existing symbols.
+- Added inline task creation/UUID selection to Create Log, preserving draft
+  date/time and avoiding the automation prompt. Added My Day Start Timer,
+  Switch Task, and Stop using the existing serialized global timer path. New
+  tasks in the chooser require an explicit start tap; tracking returns to Today.
+- Version/build is 0.2.1 (3); no stored models, dependencies, license notices,
+  bundle identifiers, or minimum deployment targets changed.
+- Build/run succeeded without warnings at 03:10 UTC on iPhone 17 / iOS 26.5.
+  The My Day screenshot shows the Start Timer control above the timeline.
+  Three new UI regressions are included. The complete dark-mode suite is
+  running; there is no pass or signed-delivery claim for this candidate yet.
+- Bounded native workers were requested as Luna/xhigh for appearance and UI
+  regressions. Spawn metadata did not expose actual model routing; cost/routing
+  is unverified. Root reviewed their diffs and owns integration and execution.
